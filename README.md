@@ -23,8 +23,8 @@ into the **native format** every supported AI coding agent expects.
 Your fork is your catalog. Click **Fork** on GitHub, then clone it:
 
 ```bash
-git clone https://github.com/<you>/ai-marketplace
-cd ai-marketplace
+git clone https://github.com/<you>/ai-agents-marketplace
+cd ai-agents-marketplace
 ```
 
 ### 2. Add your skills, rules, and plugins
@@ -38,7 +38,7 @@ exact file layout. Push when ready.
 Run the interactive picker from the root of any project, pointing at your fork:
 
 ```bash
-uvx --from git+https://github.com/<you>/ai-marketplace agents-marketplace install
+uvx --from git+https://github.com/<you>/ai-agents-marketplace agents-marketplace install
 ```
 
 The `install` TUI walks you through:
@@ -52,7 +52,7 @@ The `install` TUI walks you through:
 Or run from a local checkout while you're building your catalog:
 
 ```bash
-uvx --from /path/to/ai-marketplace agents-marketplace install
+uvx --from /path/to/ai-agents-marketplace agents-marketplace install
 ```
 
 Available commands:
@@ -74,7 +74,7 @@ Commit an `agents-marketplace.yaml` to your project root (like VS Code's
 no install required:
 
 ```bash
-uvx --from git+https://github.com/<you>/ai-marketplace agents-marketplace sync
+uvx --from git+https://github.com/<you>/ai-agents-marketplace agents-marketplace sync
 ```
 
 (If the tool is already installed via `uv tool install`, plain `agents-marketplace sync` works too.)

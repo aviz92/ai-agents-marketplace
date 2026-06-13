@@ -11,6 +11,6 @@ MANIFEST_TARGETS_KEY = "targets"
 MANIFEST_HEADER = """\
 # agents-marketplace team-sync manifest — commit this file.
 # Install everything declared below by running this from the project root:
-#   uvx --from git+https://github.com/aviz92/ai-marketplace agents-marketplace sync
+#   uvx --from git+https://github.com/aviz92/ai-agents-marketplace agents-marketplace sync
 # (once on PyPI: `uvx agents-marketplace sync`)
 """

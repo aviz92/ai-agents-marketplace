@@ -40,9 +40,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/aviz92/ai-marketplace"
-Repository = "https://github.com/aviz92/ai-marketplace"
-Issues = "https://github.com/aviz92/ai-marketplace/issues"
+Homepage = "https://github.com/aviz92/ai-agents-marketplace"
+Repository = "https://github.com/aviz92/ai-agents-marketplace"
+Issues = "https://github.com/aviz92/ai-agents-marketplace/issues"
 
 [project.scripts]
 agents-marketplace = "marketplace.cli:main"
