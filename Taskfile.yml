@@ -1,0 +1,30 @@
+# https://taskfile.dev
+# Installation on mac: brew install go-task/tap/go-task
+
+version: "3"
+
+dotenv:
+  - .env
+
+vars:
+  UV_BIN:  # Dynamically detect uv binary location
+    sh: |
+      if command -v uv >/dev/null 2>&1; then
+        command -v uv
+      elif [ -x "/root/.local/bin/uv" ]; then
+        echo "/root/.local/bin/uv"
+      elif [ -x "$HOME/.local/bin/uv" ]; then
+        echo "$HOME/.local/bin/uv"
+      else
+        echo "/root/.local/bin/uv"
+      fi
+
+tasks:
+  pre-commit:
+    desc: Pre-commit all files.
+    cmds:
+      - |
+        echo "Running pre-commit hooks on all files..."
+        set -a
+        set +a
+        "{{.UV_BIN}}" run pre-commit run --all-files

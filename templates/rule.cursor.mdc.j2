@@ -1,0 +1,10 @@
+---
+description: "{{ item.description }}"
+version: {{ item.version }}
+{% if item.globs %}
+globs: {{ item.globs | tojson }}
+{% endif %}
+alwaysApply: {{ item.always_apply | lower }}
+---
+
+{{ item.content }}

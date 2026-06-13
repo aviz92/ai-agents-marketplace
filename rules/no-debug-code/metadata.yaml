@@ -1,0 +1,7 @@
+name: No Debug Code
+description: Forbid debug artifacts (print, breakpoint, pdb) from reaching production
+tags: [quality, python]
+author: aviz92
+version: 1.0.0
+globs: ["src/**/*.py"]
+alwaysApply: true

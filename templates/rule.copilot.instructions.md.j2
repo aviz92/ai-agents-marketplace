@@ -1,0 +1,6 @@
+---
+applyTo: "{{ item.globs | join(',') if item.globs else '**' }}"
+version: {{ item.version }}
+---
+
+{{ item.content }}
