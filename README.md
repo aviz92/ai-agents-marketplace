@@ -83,19 +83,22 @@ Run `agents-marketplace sync --help` to see all options.
 
 ```yaml
 # agents-marketplace.yaml
-skills:
-  - python-code-review
-  - pre-push-checklist
-rules: all                # 'all' installs every rule in the catalog
-plugins: []
-targets:                  # optional — defaults to detected agents
-  skills: [claude, agents]
-  rules: [cursor, claude]
+claude:
+  skills: [python-code-review, pre-push-checklist]
+  rules: [no-debug-code]
+agents:
+  skills: [python-code-review]
+cursor:
+  rules: [no-debug-code]
+copilot:
+  rules: [no-debug-code]
 ```
 
-- `skills` / `rules` / `plugins` — list of artifact ids, or the string `all`.
-- `targets` — optional; when omitted, sync installs to the agents it detects
-  (and falls back to `.agents/skills` + all rule formats when nothing is detected).
+Each top-level key is an agent target. Declare `skills`, `plugins`, and/or `rules` per target:
+
+- Valid skill/plugin targets: `claude`, `agents`
+- Valid rule targets: `claude`, `cursor`, `copilot`, `codex`, `gemini`
+- Every list must be explicit artifact IDs — no wildcards.
 - Unknown ids are reported and skipped; sync still installs the rest but exits non-zero
   so CI can catch drift.
 
