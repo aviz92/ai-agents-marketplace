@@ -54,9 +54,7 @@ def run_interactive(console: Console, project_dir: Path) -> None:
         render.print_targets_panel(console)
 
         detected = {platform.id for platform in platforms if platform.detected}
-        skill_targets, rule_targets = prompts.prompt_all_targets(
-            console, selected, detected
-        )
+        skill_targets, rule_targets = prompts.prompt_all_targets(console, selected, detected)
         if not skill_targets and not rule_targets:
             console.print(display.MSG_NO_TARGETS)
             return

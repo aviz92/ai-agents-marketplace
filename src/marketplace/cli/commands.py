@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from importlib.metadata import PackageNotFoundError
-from importlib.metadata import version as _pkg_version
+from importlib.metadata import PackageNotFoundError, version as _pkg_version
 from pathlib import Path
 
 from python_base_command import BaseCommand, CommandRegistry
@@ -22,9 +21,6 @@ except PackageNotFoundError:
 class _InstallCommand(BaseCommand):
     help = "Interactively browse and install skills, rules, and plugins."
     version = _VERSION
-
-    def create_parser(self, prog_name: str, _subcommand: str, **kwargs: object) -> CommandParser:
-        return super().create_parser(prog_name, "install", **kwargs)
 
     def handle(self, **kwargs: object) -> None:
         verbosity = int(kwargs.get("verbosity", 1))
@@ -45,9 +41,6 @@ class _SyncCommand(BaseCommand):
             dest="install_all",
             help="Install for all agents in the manifest without prompting.",
         )
-
-    def create_parser(self, prog_name: str, _subcommand: str, **kwargs: object) -> CommandParser:
-        return super().create_parser(prog_name, "sync", **kwargs)
 
     def handle(self, **kwargs: object) -> None:
         verbosity = int(kwargs.get("verbosity", 1))
