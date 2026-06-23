@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from marketplace import catalog
-from marketplace.models import Rule, Skill
+from marketplace.models import Plugin, Rule, Skill
 
 
 @pytest.fixture
@@ -29,6 +29,17 @@ def sample_skill() -> Skill:
         description="A skill used in tests",
         version="1.0.0",
         content="# Sample skill body\n",
+    )
+
+
+@pytest.fixture
+def sample_plugin() -> Plugin:
+    return Plugin(
+        id="sample-plugin",
+        name="Sample Plugin",
+        description="A plugin used in tests",
+        version="1.0.0",
+        content="# Sample plugin body\n",
     )
 
 

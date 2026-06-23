@@ -1,0 +1,5 @@
+name: UV Python Package Manager
+description: Configure agents to use uv exclusively for Python dependency and environment management
+tags: [python, tooling, package-manager]
+author: aviz92
+version: 1.0.0

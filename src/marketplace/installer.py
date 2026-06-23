@@ -22,7 +22,7 @@ from marketplace.consts.agents import (
     TARGET_AGENTS,
 )
 from marketplace.consts.authoring import AUTHORING_FILES, METADATA_FILE
-from marketplace.consts.kinds import KIND_RULE, SKILL_LIKE_KINDS
+from marketplace.consts.kinds import KIND_PLUGIN, KIND_RULE, SKILL_LIKE_KINDS
 from marketplace.consts.render import (
     AGENTS_SKILLS_DIR,
     CLAUDE_MD_FALLBACK,
@@ -31,6 +31,8 @@ from marketplace.consts.render import (
     EXT_INSTRUCTIONS_MD,
     EXT_MD,
     EXT_MDC,
+    PLUGIN_OUTPUT_FILE,
+    PLUGIN_TEMPLATE,
     RULE_FILENAME_FMT,
     RULE_REFERENCE_NOTE_FMT,
     RULE_TEMPLATE_FMT,
@@ -177,7 +179,7 @@ def _write_rendered(out_file: Path, content: str, project_dir: Path, written: li
 
 
 def _copy_assets(item: CatalogItem, out_dir: Path, project_dir: Path, written: list[str]) -> None:
-    """Copy extra authored files (e.g. assets/) next to the rendered SKILL.md.
+    """Copy extra authored files (e.g. assets/) next to the rendered output file.
 
     Only authoring sources count as a real item dir; constructed items with a
     default path are skipped so we never scan the working directory.
@@ -228,14 +230,20 @@ def split_install_kinds(
 
 
 def install_to_target(target_id: str, items: list[CatalogItem], project_dir: Path) -> InstallResult:
-    """Render skills/plugins via the universal template into one shared target dir."""
+    """Render skills/plugins via their respective templates into one shared target dir."""
     target = TARGETS[target_id]
-    template = _get_template_env().get_template(SKILL_TEMPLATE)
+    skill_template = _get_template_env().get_template(SKILL_TEMPLATE)
+    plugin_template = _get_template_env().get_template(PLUGIN_TEMPLATE)
     files_written: list[str] = []
     for item in items:
         out_dir = project_dir / target.dir / item.id
-        skill_md = out_dir / SKILL_OUTPUT_FILE
-        _write_rendered(skill_md, template.render(item=item), project_dir, files_written)
+        if item.kind == KIND_PLUGIN:
+            output_file = out_dir / PLUGIN_OUTPUT_FILE
+            content = plugin_template.render(item=item)
+        else:
+            output_file = out_dir / SKILL_OUTPUT_FILE
+            content = skill_template.render(item=item)
+        _write_rendered(output_file, content, project_dir, files_written)
         _copy_assets(item, out_dir, project_dir, files_written)
     if target_id == AGENT_CLAUDE:
         claude_md = project_dir / CLAUDE_MD_PATH

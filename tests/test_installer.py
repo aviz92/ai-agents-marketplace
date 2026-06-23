@@ -11,7 +11,7 @@ from marketplace.installer import (
     install_rules_to_target,
     install_to_target,
 )
-from marketplace.models import Skill
+from marketplace.models import Plugin, Skill
 
 
 class TestInstallToTarget:
@@ -98,6 +98,33 @@ class TestInstallToTarget:
         result = install_to_target("agents", [], project_dir)
         assert result.installed == 0, "Expected zero installs for empty selection"
         assert not result.files_written, f"Unexpected files: {result.files_written}"
+
+
+class TestInstallPluginToTarget:
+    def test_install_plugin_writes_plugin_md_not_skill_md(
+        self, project_dir: Path, sample_plugin: CatalogItem
+    ) -> None:
+        result = install_to_target("agents", [sample_plugin], project_dir)
+        plugin_file = project_dir / ".agents/skills/sample-plugin/PLUGIN.md"
+        skill_file = project_dir / ".agents/skills/sample-plugin/SKILL.md"
+        assert plugin_file.is_file(), "PLUGIN.md was not written"
+        assert not skill_file.exists(), "SKILL.md must not be written for a plugin"
+        assert ".agents/skills/sample-plugin/PLUGIN.md" in result.files_written
+
+    def test_install_plugin_rendered_output_has_version_frontmatter(
+        self, project_dir: Path, sample_plugin: CatalogItem
+    ) -> None:
+        install_to_target("agents", [sample_plugin], project_dir)
+        text = (project_dir / ".agents/skills/sample-plugin/PLUGIN.md").read_text()
+        assert "version: 1.0.0" in text, f"version frontmatter missing:\n{text}"
+        assert "# Sample plugin body" in text, f"body missing:\n{text}"
+
+    def test_install_plugin_to_claude_target_writes_plugin_md_and_claude_md(
+        self, project_dir: Path, sample_plugin: CatalogItem
+    ) -> None:
+        install_to_target("claude", [sample_plugin], project_dir)
+        assert (project_dir / ".claude/skills/sample-plugin/PLUGIN.md").is_file()
+        assert (project_dir / ".claude/CLAUDE.md").is_file(), "CLAUDE.md fallback not created"
 
 
 class TestInstallRulesToTarget:

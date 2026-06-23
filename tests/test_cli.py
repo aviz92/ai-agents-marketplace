@@ -9,6 +9,7 @@ from marketplace.catalog import CatalogItem
 from marketplace.cli import (
     build_item_choices,
     collect_installed_state,
+    get_installed_plugin_versions,
     get_installed_rule_versions,
     get_installed_versions,
     get_status_and_versions,
@@ -37,6 +38,19 @@ class TestVersionDetection:
         install_rules_to_target("cursor", [sample_rule], project_dir)
         install_rules_to_target("copilot", [sample_rule], project_dir)
         versions = get_installed_rule_versions(sample_rule.id, project_dir)
+        assert versions == {"1.0.0"}, f"Expected {{'1.0.0'}}, got {versions}"
+
+    def test_get_installed_plugin_versions_nothing_installed_returns_empty_set(
+        self, project_dir: Path, sample_plugin: CatalogItem
+    ) -> None:
+        versions = get_installed_plugin_versions(sample_plugin.id, project_dir)
+        assert versions == set(), f"Expected no versions, got {versions}"
+
+    def test_get_installed_plugin_versions_after_install_returns_catalog_version(
+        self, project_dir: Path, sample_plugin: CatalogItem
+    ) -> None:
+        install_to_target("agents", [sample_plugin], project_dir)
+        versions = get_installed_plugin_versions(sample_plugin.id, project_dir)
         assert versions == {"1.0.0"}, f"Expected {{'1.0.0'}}, got {versions}"
 
 
@@ -123,3 +137,26 @@ class TestStatus:
         status, versions = get_status_and_versions(sample_skill, project_dir)
         assert status == STATUS_UPDATE, f"Wrong status: {status}"
         assert versions == {"1.0.0", "1.1.0"}, f"Versions wrong: {versions}"
+
+    def test_get_status_plugin_not_installed_reports_not_installed(
+        self, project_dir: Path, sample_plugin: CatalogItem
+    ) -> None:
+        status, versions = get_status_and_versions(sample_plugin, project_dir)
+        assert status == STATUS_NOT_INSTALLED, f"Wrong status: {status}"
+        assert versions == set()
+
+    def test_get_status_plugin_installed_matching_version_reports_installed(
+        self, project_dir: Path, sample_plugin: CatalogItem
+    ) -> None:
+        install_to_target("agents", [sample_plugin], project_dir)
+        status, _ = get_status_and_versions(sample_plugin, project_dir)
+        assert status == STATUS_INSTALLED, f"Wrong status: {status}"
+
+    def test_get_status_plugin_version_bumped_reports_update(
+        self, project_dir: Path, sample_plugin: CatalogItem
+    ) -> None:
+        install_to_target("agents", [sample_plugin], project_dir)
+        sample_plugin.version = "2.0.0"
+        status, versions = get_status_and_versions(sample_plugin, project_dir)
+        assert status == STATUS_UPDATE, f"Wrong status: {status}"
+        assert versions == {"1.0.0"}, f"Installed versions wrong: {versions}"

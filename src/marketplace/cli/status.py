@@ -6,8 +6,8 @@ from collections.abc import Callable
 from pathlib import Path
 
 from marketplace.consts import display
-from marketplace.consts.kinds import KIND_RULE, SKILL_LIKE_KINDS
-from marketplace.consts.render import SKILL_OUTPUT_FILE, VERSION_RE
+from marketplace.consts.kinds import KIND_PLUGIN, KIND_RULE, SKILL_LIKE_KINDS
+from marketplace.consts.render import PLUGIN_OUTPUT_FILE, SKILL_OUTPUT_FILE, VERSION_RE
 from marketplace.installer import RULE_TARGETS, TARGETS, RuleTargetInfo, TargetInfo
 from marketplace.models import CatalogItem
 
@@ -37,11 +37,23 @@ def _get_versions_by_target(
 def get_installed_versions_by_target(
     item_id: str, targets: dict[str, TargetInfo], project_dir: Path
 ) -> dict[str, str]:
-    """Map skill/plugin target id → installed version found in its SKILL.md."""
+    """Map skill target id → installed version found in its SKILL.md."""
     return _get_versions_by_target(
         item_id,
         targets,
         lambda iid, t: Path(t.dir) / iid / SKILL_OUTPUT_FILE,
+        project_dir,
+    )
+
+
+def get_installed_plugin_versions_by_target(
+    item_id: str, targets: dict[str, TargetInfo], project_dir: Path
+) -> dict[str, str]:
+    """Map plugin target id → installed version found in its PLUGIN.md."""
+    return _get_versions_by_target(
+        item_id,
+        targets,
+        lambda iid, t: Path(t.dir) / iid / PLUGIN_OUTPUT_FILE,
         project_dir,
     )
 
@@ -61,11 +73,19 @@ def get_installed_rule_versions_by_target(
 def _resolve_versions_by_target(item: CatalogItem, project_dir: Path) -> dict[str, str]:
     if item.kind == KIND_RULE:
         return get_installed_rule_versions_by_target(item.id, RULE_TARGETS, project_dir)
-    return get_installed_versions_by_target(item.id, TARGETS, project_dir)
+    if item.kind == KIND_PLUGIN:
+        return get_installed_plugin_versions_by_target(item.id, TARGETS, project_dir)
+    if item.kind in SKILL_LIKE_KINDS:
+        return get_installed_versions_by_target(item.id, TARGETS, project_dir)
+    raise ValueError(f"Unknown item kind: {item.kind!r}")
 
 
 def get_installed_versions(item_id: str, project_dir: Path) -> set[str]:
     return set(get_installed_versions_by_target(item_id, TARGETS, project_dir).values())
+
+
+def get_installed_plugin_versions(item_id: str, project_dir: Path) -> set[str]:
+    return set(get_installed_plugin_versions_by_target(item_id, TARGETS, project_dir).values())
 
 
 def get_installed_rule_versions(item_id: str, project_dir: Path) -> set[str]:

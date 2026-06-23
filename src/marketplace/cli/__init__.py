@@ -13,6 +13,7 @@ from marketplace.cli.generate import run_generate
 from marketplace.cli.generate.prompts import build_item_choices
 from marketplace.cli.status import (
     collect_installed_state,
+    get_installed_plugin_versions,
     get_installed_rule_versions,
     get_installed_versions,
     get_status_and_versions,
@@ -23,6 +24,7 @@ from marketplace.cli.sync.prompts import prompt_sync_agents
 __all__ = [
     "build_item_choices",
     "collect_installed_state",
+    "get_installed_plugin_versions",
     "get_installed_rule_versions",
     "get_installed_versions",
     "get_status_and_versions",

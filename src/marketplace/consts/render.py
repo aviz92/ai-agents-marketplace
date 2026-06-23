@@ -7,6 +7,8 @@ import re
 TEMPLATES_DIR_NAME = "templates"
 SKILL_TEMPLATE = "skill.md.j2"
 SKILL_OUTPUT_FILE = "SKILL.md"
+PLUGIN_TEMPLATE = "plugin.md.j2"
+PLUGIN_OUTPUT_FILE = "PLUGIN.md"
 CLAUDE_MD_FALLBACK = "Refer to ../AGENTS.md\n"
 
 CLAUDE_SKILLS_DIR = ".claude/skills"
