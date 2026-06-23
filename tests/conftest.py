@@ -4,8 +4,19 @@ from pathlib import Path
 
 import pytest
 
+import marketplace.installer as _installer
 from marketplace import catalog
 from marketplace.models import Plugin, Rule, Skill
+
+
+@pytest.fixture(autouse=True)
+def _reset_template_env() -> None:
+    """Clear the Jinja2 Environment cache before each test.
+
+    Prevents a stale Environment (pointing at a previous marketplace root)
+    from leaking into subsequent tests that monkeypatch get_marketplace_root.
+    """
+    _installer.clear_template_env_cache()
 
 
 @pytest.fixture

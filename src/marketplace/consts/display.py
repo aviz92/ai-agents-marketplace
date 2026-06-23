@@ -84,6 +84,17 @@ MSG_MISSING_REF_FMT = "[yellow]⚠ not in catalog: {reference}[/yellow]"
 MSG_MANIFEST_SAVED_FMT = "[green]Wrote {name} — commit it to sync your team.[/green]"
 PROMPT_SYNC_AGENTS = "Install for which agents? (space toggles, enter confirms):"
 MSG_NO_SYNC_AGENTS = "[yellow]No agents selected — exiting.[/yellow]"
-SYNC_SECTION_SKILLS = f"{'─' * 4} Skills {'─' * 53}"
-SYNC_SECTION_PLUGINS = f"{'─' * 4} External Plugins {'─' * 43}"
-SYNC_SECTION_RULES = f"{'─' * 4} Rules {'─' * 52}"
+
+_SEP_LEAD = "─" * 4
+_SEP_TOTAL = 65
+
+
+def _section_header(label: str) -> str:
+    """Build a fixed-total-width section separator string."""
+    fill = max(0, _SEP_TOTAL - len(_SEP_LEAD) - 1 - len(label) - 1)
+    return f"{_SEP_LEAD} {label} {'─' * fill}"
+
+
+SYNC_SECTION_SKILLS = _section_header("Skills")
+SYNC_SECTION_PLUGINS = _section_header("External Plugins")
+SYNC_SECTION_RULES = _section_header("Rules")

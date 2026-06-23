@@ -31,7 +31,9 @@ AGENTS_TARGET_COVERS: list[str] = [
 
 # Valid target IDs for manifest validation — single source of truth consumed by
 # manifest/loader.py so it doesn't need to import from the installer layer.
+# Keep in sync with the TARGETS dict keys in installer.py.
 VALID_SKILL_TARGET_IDS: frozenset[str] = frozenset({AGENT_CLAUDE, TARGET_AGENTS})
+# Keep in sync with the RULE_TARGETS dict keys in installer.py.
 VALID_RULE_TARGET_IDS: frozenset[str] = frozenset(
     {AGENT_CURSOR, AGENT_COPILOT, AGENT_CLAUDE, AGENT_CODEX, AGENT_GEMINI}
 )

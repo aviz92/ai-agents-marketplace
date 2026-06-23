@@ -9,7 +9,7 @@ from InquirerPy.base.control import Choice
 from InquirerPy.separator import Separator
 from rich.console import Console
 
-from marketplace.cli.render import _description_width, _item_row, _picker_header
+from marketplace.cli.render import description_width, item_row, picker_header
 from marketplace.consts import display
 from marketplace.consts.agents import AGENT_CLAUDE, TARGET_AGENTS
 from marketplace.consts.kinds import KIND_RULE, KIND_SECTIONS, SKILL_LIKE_KINDS
@@ -23,15 +23,15 @@ def build_item_choices(catalog: list[CatalogItem], project_dir: Path) -> list[Ch
     InquirerPy runs `dataclasses.asdict()` on every Choice, which deep-converts
     dataclass values into plain dicts — so values must never be CatalogItem itself.
     """
-    description_width = _description_width()
-    choices: list[Choice | Separator] = [Separator(f"  {_picker_header()}")]
+    desc_width = description_width()
+    choices: list[Choice | Separator] = [Separator(f"  {picker_header()}")]
     indexed_catalog = list(enumerate(catalog))
     for kind, section in KIND_SECTIONS:
         if not (kind_indexed := [(i, item) for i, item in indexed_catalog if item.kind == kind]):
             continue
         choices.append(Separator(display.SECTION_SEPARATOR_FMT.format(section=section)))
         choices.extend(
-            Choice(value=index, name=_item_row(item, project_dir, description_width))
+            Choice(value=index, name=item_row(item, project_dir, desc_width))
             for index, item in kind_indexed
         )
     return choices

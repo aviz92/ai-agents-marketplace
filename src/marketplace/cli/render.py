@@ -21,24 +21,24 @@ def _clip(text: str, width: int) -> str:
     return text if len(text) <= width else text[: width - 1] + display.ELLIPSIS
 
 
-def _description_width() -> int:
+def description_width() -> int:
     """Fit the description to the terminal so rows never wrap (wrapping breaks the list)."""
     available = shutil.get_terminal_size().columns - display.FIXED_ROW_COLUMNS
     return max(display.DESCRIPTION_MIN_WIDTH, min(display.DESCRIPTION_MAX_WIDTH, available))
 
 
-def _item_row(item: CatalogItem, project_dir: Path, description_width: int) -> str:
+def item_row(item: CatalogItem, project_dir: Path, desc_width: int) -> str:
     nw, sw, vw = display.NAME_COL_WIDTH, display.STATUS_COL_WIDTH, display.VERSION_COL_WIDTH
     status, versions = get_status_and_versions(item, project_dir)
     installed = ",".join(sorted(versions)) if versions else display.EMPTY_VALUE
     return (
         f"{_clip(item.name, nw):<{nw}} │ {status:<{sw}} │ "
         f"{_clip(installed, vw):<{vw}} "
-        f"│ {item.version:<{vw}} │ {_clip(item.description, description_width)}"
+        f"│ {item.version:<{vw}} │ {_clip(item.description, desc_width)}"
     )
 
 
-def _picker_header() -> str:
+def picker_header() -> str:
     nw, sw, vw = display.NAME_COL_WIDTH, display.STATUS_COL_WIDTH, display.VERSION_COL_WIDTH
     return (
         f"{display.COL_NAME:<{nw}} │ {display.COL_STATUS:<{sw}} │ "
