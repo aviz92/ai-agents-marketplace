@@ -13,7 +13,7 @@ from marketplace.cli import (
     get_installed_rule_versions,
     get_installed_versions,
 )
-from marketplace.display import STATUS_INSTALLED, STATUS_NOT_INSTALLED, STATUS_UPDATE
+from marketplace.consts.display import STATUS_INSTALLED, STATUS_NOT_INSTALLED, STATUS_UPDATE
 from marketplace.installer import install_rules_to_target, install_to_target
 
 
@@ -65,29 +65,29 @@ class TestBuildItemChoices:
 
 
 class TestCollectInstalledState:
-    def test_collect_installed_state_reflects_disk_across_targets(
+    def test_collect_installed_state_reflects_disk_per_target(
         self, project_dir: Path, sample_skill: CatalogItem, sample_rule: CatalogItem
     ) -> None:
         install_to_target("agents", [sample_skill], project_dir)
         install_rules_to_target("cursor", [sample_rule], project_dir)
         install_rules_to_target("claude", [sample_rule], project_dir)
         catalog = [sample_skill, sample_rule]
-        items, skill_targets, rule_targets = _collect_installed_state(catalog, project_dir)
-        assert [item.id for item in items] == [
-            "sample-skill",
-            "sample-rule",
-        ], f"Installed items not detected: {[item.id for item in items]}"
-        assert skill_targets == ["agents"], f"Wrong skill targets: {skill_targets}"
-        assert rule_targets == ["cursor", "claude"], f"Wrong rule targets: {rule_targets}"
+        per_target = _collect_installed_state(catalog, project_dir)
+        assert [item.id for item in per_target.get("agents", [])] == [
+            "sample-skill"
+        ], f"agents: {[i.id for i in per_target.get('agents', [])]}"
+        assert [item.id for item in per_target.get("cursor", [])] == [
+            "sample-rule"
+        ], f"cursor: {[i.id for i in per_target.get('cursor', [])]}"
+        assert [item.id for item in per_target.get("claude", [])] == [
+            "sample-rule"
+        ], f"claude: {[i.id for i in per_target.get('claude', [])]}"
 
-    def test_collect_installed_state_empty_project_returns_nothing(
+    def test_collect_installed_state_empty_project_returns_empty(
         self, project_dir: Path, sample_skill: CatalogItem
     ) -> None:
-        items, skill_targets, rule_targets = _collect_installed_state([sample_skill], project_dir)
-        assert not items, f"Nothing is installed, got {[item.id for item in items]}"
-        assert (
-            not skill_targets and not rule_targets
-        ), f"No targets expected, got {skill_targets} / {rule_targets}"
+        per_target = _collect_installed_state([sample_skill], project_dir)
+        assert not per_target, f"Nothing installed, got {per_target}"
 
 
 class TestStatus:
