@@ -9,7 +9,7 @@ from python_base_command import BaseCommand, CommandRegistry
 from python_base_command.base import CommandParser
 from rich.console import Console
 
-from marketplace.cli.install import run_interactive
+from marketplace.cli.generate import run_generate
 from marketplace.cli.sync import run_sync
 
 try:
@@ -18,13 +18,13 @@ except PackageNotFoundError:
     _VERSION = "dev"
 
 
-class _InstallCommand(BaseCommand):
-    help = "Interactively browse and install skills, rules, and plugins."
+class _GenerateCommand(BaseCommand):
+    help = "Interactively select artifacts and generate agents-marketplace.yaml."
     version = _VERSION
 
     def handle(self, **kwargs: object) -> None:
         verbosity = int(str(kwargs.get("verbosity", 1)))
-        run_interactive(Console(quiet=verbosity == 0), Path.cwd())
+        run_generate(Console(quiet=verbosity == 0), Path.cwd())
 
 
 class _SyncCommand(BaseCommand):
@@ -49,7 +49,7 @@ class _SyncCommand(BaseCommand):
 
 
 _registry = CommandRegistry()
-_registry.add("install", _InstallCommand)
+_registry.add("generate", _GenerateCommand)
 _registry.add("sync", _SyncCommand)
 
 

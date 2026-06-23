@@ -1,4 +1,4 @@
-"""Prompts for the interactive install flow — pick items, pick targets, confirm, save."""
+"""Prompts for the interactive generate flow — pick items, pick targets, confirm."""
 
 from __future__ import annotations
 
@@ -10,12 +10,10 @@ from InquirerPy.separator import Separator
 from rich.console import Console
 
 from marketplace.cli.render import _description_width, _item_row, _picker_header
-from marketplace.cli.status import collect_installed_state
 from marketplace.consts import display
 from marketplace.consts.agents import AGENT_CLAUDE, TARGET_AGENTS
 from marketplace.consts.kinds import KIND_RULE, KIND_SECTIONS, SKILL_LIKE_KINDS
 from marketplace.installer import RULE_TARGETS, TARGETS
-from marketplace.manifest import MANIFEST_NAME, save_manifest
 from marketplace.models import CatalogItem
 
 
@@ -104,20 +102,5 @@ def prompt_all_targets(
     return skill_targets, rule_targets
 
 
-def confirm_install() -> bool:
-    return inquirer.confirm(message=display.PROMPT_CONFIRM_INSTALL, default=True).execute()
-
-
-def offer_manifest_save(console: Console, project_dir: Path, catalog: list[CatalogItem]) -> None:
-    try:
-        save = inquirer.confirm(
-            message=display.PROMPT_SAVE_MANIFEST_FMT.format(manifest=MANIFEST_NAME),
-            default=True,
-        ).execute()
-    except (KeyboardInterrupt, EOFError):
-        return
-    if not save:
-        return
-    per_target = collect_installed_state(catalog, project_dir)
-    path = save_manifest(project_dir, per_target)
-    console.print(display.MSG_MANIFEST_SAVED_FMT.format(name=path.name))
+def confirm_generate() -> bool:
+    return inquirer.confirm(message=display.PROMPT_CONFIRM_GENERATE, default=True).execute()

@@ -47,7 +47,7 @@ SUMMARY_TABLE_COLUMNS = ("Artifact", "Kind", "Version", "Action")
 
 TITLE_DETECTED_TOOLS = "Detected AI Tools"
 TITLE_INSTALL_TARGETS = "Install Targets"
-TITLE_SUMMARY = "Installation Summary"
+TITLE_SUMMARY = "Manifest Preview"
 TITLE_TARGET_DIRS = "Target directories"
 TITLE_FILES_WRITTEN = "Files written"
 
@@ -58,15 +58,14 @@ TARGET_PANEL_LINE_FMT = "[bold]{label}[/bold] → {covers}"
 
 # ── Prompts ───────────────────────────────────────────────────────────────────
 LOADING_CATALOG = "Loading catalog..."
-PROMPT_SELECT_ITEMS = "Select artifacts to install (space toggles, enter confirms):"
-PROMPT_SKILL_TARGETS = "Install skills/plugins to:"
-PROMPT_RULE_TARGETS = "Install rules to (one native format per agent):"
-PROMPT_CONFIRM_INSTALL = "Proceed with installation?"
-PROMPT_SAVE_MANIFEST_FMT = "Save installed state to {manifest}? (for `agents-marketplace sync`)"
+PROMPT_SELECT_ITEMS = "Select artifacts to add (space toggles, enter confirms):"
+PROMPT_SKILL_TARGETS = "Add skills/plugins for:"
+PROMPT_RULE_TARGETS = "Add rules for (one native format per agent):"
+PROMPT_CONFIRM_GENERATE = "Generate agents-marketplace.yaml?"
 SELECTED_COUNT_FMT = "{count} selected"
 
 # ── Messages ──────────────────────────────────────────────────────────────────
-MSG_INSTALLING_INTO_FMT = "Installing into: [bold]{project_dir}[/bold]"
+MSG_INSTALLING_INTO_FMT = "Generating manifest in: [bold]{project_dir}[/bold]"
 MSG_CATALOG_COUNTS_FMT = (
     "Catalog: [bold]{skills}[/bold] skills · "
     "[bold]{rules}[/bold] rules · [bold]{plugins}[/bold] plugins\n"

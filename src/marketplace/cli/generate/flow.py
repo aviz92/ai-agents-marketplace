@@ -1,4 +1,4 @@
-"""Interactive install flow: pick artifacts and targets, render, write, offer to save."""
+"""Interactive generate flow: pick artifacts and targets, generate agents-marketplace.yaml."""
 
 from __future__ import annotations
 
@@ -8,33 +8,29 @@ from rich.console import Console
 
 from marketplace.catalog import load_catalog
 from marketplace.cli import render
-from marketplace.cli.install import prompts
+from marketplace.cli.generate import prompts
 from marketplace.consts import display
 from marketplace.detect import detect_platforms
-from marketplace.installer import (
-    InstallResult,
-    install_rules_to_target,
-    install_to_target,
-    split_install_kinds,
-)
+from marketplace.installer import split_install_kinds
+from marketplace.manifest import save_manifest
 from marketplace.models import CatalogItem
 
 
-def _run_install(
+def _build_per_target(
     selected: list[CatalogItem],
-    project_dir: Path,
     skill_targets: list[str],
     rule_targets: list[str],
-) -> list[InstallResult]:
+) -> dict[str, list[CatalogItem]]:
     skills, rules = split_install_kinds(selected)
-    results = [install_to_target(target_id, skills, project_dir) for target_id in skill_targets]
-    results += [
-        install_rules_to_target(target_id, rules, project_dir) for target_id in rule_targets
-    ]
-    return results
+    per_target: dict[str, list[CatalogItem]] = {}
+    for target_id in skill_targets:
+        per_target.setdefault(target_id, []).extend(skills)
+    for target_id in rule_targets:
+        per_target.setdefault(target_id, []).extend(rules)
+    return per_target
 
 
-def run_interactive(console: Console, project_dir: Path) -> None:
+def run_generate(console: Console, project_dir: Path) -> None:
     render.print_banner(console, project_dir)
 
     with console.status(display.LOADING_CATALOG):
@@ -60,13 +56,13 @@ def run_interactive(console: Console, project_dir: Path) -> None:
             return
 
         render.print_summary(console, selected, project_dir, skill_targets, rule_targets)
-        if not prompts.confirm_install():
+        if not prompts.confirm_generate():
             console.print(display.MSG_ABORTED)
             return
     except (KeyboardInterrupt, EOFError):
         console.print(display.MSG_CANCELLED)
         return
 
-    results = _run_install(selected, project_dir, skill_targets, rule_targets)
-    render.print_results(console, results)
-    prompts.offer_manifest_save(console, project_dir, catalog)
+    per_target = _build_per_target(selected, skill_targets, rule_targets)
+    path = save_manifest(project_dir, per_target)
+    console.print(display.MSG_MANIFEST_SAVED_FMT.format(name=path.name))
