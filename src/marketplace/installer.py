@@ -9,7 +9,6 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
-from marketplace.catalog import get_marketplace_root
 from marketplace.consts.agents import (
     AGENT_CLAUDE,
     AGENT_CODEX,
@@ -41,6 +40,7 @@ from marketplace.consts.render import (
     TEMPLATES_DIR_NAME,
 )
 from marketplace.models import CatalogItem
+from marketplace.utils import get_marketplace_root
 
 
 @dataclass

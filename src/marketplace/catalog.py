@@ -8,29 +8,11 @@ from pathlib import Path
 import yaml
 
 from marketplace.consts.authoring import METADATA_FILE
-from marketplace.consts.kinds import BODY_FILES, KIND_DIRS, KIND_PLUGIN, KIND_SKILL
-from marketplace.models import KIND_CLASSES, CatalogItem, Kind, Plugin, Rule, Skill
-
-# Re-exported so existing `from marketplace.catalog import CatalogItem` keeps working.
-__all__ = ["CatalogItem", "Kind", "Plugin", "Rule", "Skill", "get_marketplace_root", "load_catalog"]
+from marketplace.consts.kinds import BODY_FILES, KIND_DIRS
+from marketplace.models import KIND_CLASSES, CatalogItem, Kind
+from marketplace.utils import get_marketplace_root
 
 _log = logging.getLogger(__name__)
-
-
-def get_marketplace_root() -> Path:
-    """Resolve the directory holding skills/, plugins/, rules/ and templates/.
-
-    Dual-mode: prefer the source repo layout (content dirs next to src/);
-    otherwise assume an installed wheel where content was force-included
-    next to the package itself.
-    """
-    package_dir = Path(__file__).resolve().parent
-    repo_root = package_dir.parent.parent
-    skills_dir = repo_root / KIND_DIRS[KIND_SKILL]
-    plugins_dir = repo_root / KIND_DIRS[KIND_PLUGIN]
-    if skills_dir.is_dir() or plugins_dir.is_dir():
-        return repo_root
-    return package_dir
 
 
 def _load_item(item_dir: Path, kind: Kind) -> CatalogItem | None:
