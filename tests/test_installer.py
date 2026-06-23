@@ -9,16 +9,16 @@ from marketplace.installer import (
     RULE_TARGETS,
     TARGETS,
     install_rules_to_target,
-    install_to_target,
+    install_skills_to_target,
 )
 from marketplace.models import Plugin, Skill
 
 
-class TestInstallToTarget:
-    def test_install_to_target_claude_writes_skill_md_and_creates_claude_md(
+class TestInstallSkillsToTarget:
+    def test_install_skills_to_target_claude_writes_skill_md_and_creates_claude_md(
         self, project_dir: Path, sample_skill: CatalogItem
     ) -> None:
-        result = install_to_target("claude", [sample_skill], project_dir)
+        result = install_skills_to_target("claude", [sample_skill], project_dir)
         skill_file = project_dir / ".claude/skills/sample-skill/SKILL.md"
         claude_md = project_dir / ".claude/CLAUDE.md"
         assert skill_file.is_file(), "SKILL.md was not written"
@@ -28,19 +28,19 @@ class TestInstallToTarget:
             ".claude/skills/sample-skill/SKILL.md" in result.files_written
         ), f"files_written missing skill file: {result.files_written}"
 
-    def test_install_to_target_claude_existing_claude_md_is_not_overwritten(
+    def test_install_skills_to_target_claude_existing_claude_md_is_not_overwritten(
         self, project_dir: Path, sample_skill: CatalogItem
     ) -> None:
         claude_md = project_dir / ".claude/CLAUDE.md"
         claude_md.parent.mkdir(parents=True)
         claude_md.write_text("custom content\n", encoding="utf-8")
-        install_to_target("claude", [sample_skill], project_dir)
+        install_skills_to_target("claude", [sample_skill], project_dir)
         assert claude_md.read_text() == "custom content\n", "Existing CLAUDE.md was overwritten"
 
-    def test_install_to_target_agents_writes_skill_md_without_claude_md(
+    def test_install_skills_to_target_agents_writes_skill_md_without_claude_md(
         self, project_dir: Path, sample_skill: CatalogItem
     ) -> None:
-        install_to_target("agents", [sample_skill], project_dir)
+        install_skills_to_target("agents", [sample_skill], project_dir)
         assert (
             project_dir / ".agents/skills/sample-skill/SKILL.md"
         ).is_file(), "SKILL.md missing under .agents/skills"
@@ -48,15 +48,15 @@ class TestInstallToTarget:
             project_dir / ".claude/CLAUDE.md"
         ).exists(), "agents target must not create CLAUDE.md"
 
-    def test_install_to_target_rendered_skill_has_version_frontmatter(
+    def test_install_skills_to_target_rendered_skill_has_version_frontmatter(
         self, project_dir: Path, sample_skill: CatalogItem
     ) -> None:
-        install_to_target("agents", [sample_skill], project_dir)
+        install_skills_to_target("agents", [sample_skill], project_dir)
         text = (project_dir / ".agents/skills/sample-skill/SKILL.md").read_text()
         assert "version: 1.0.0" in text, f"version frontmatter missing:\n{text}"
         assert "# Sample skill body" in text, f"body missing:\n{text}"
 
-    def test_install_to_target_skill_with_assets_copies_them_alongside_skill_md(
+    def test_install_skills_to_target_skill_with_assets_copies_them_alongside_skill_md(
         self, project_dir: Path, tmp_path: Path
     ) -> None:
         authored = tmp_path / "authored" / "with-assets"
@@ -71,31 +71,31 @@ class TestInstallToTarget:
             content="# Body\n",
             path=authored,
         )
-        result = install_to_target("agents", [item], project_dir)
+        result = install_skills_to_target("agents", [item], project_dir)
         asset = project_dir / ".agents/skills/with-assets/assets/template.md"
         assert asset.read_text() == "# Template\n", "asset not copied next to SKILL.md"
         assert (
             ".agents/skills/with-assets/assets/template.md" in result.files_written
         ), f"asset missing from files_written: {result.files_written}"
 
-    def test_install_to_target_item_without_authored_path_copies_no_assets(
+    def test_install_skills_to_target_item_without_authored_path_copies_no_assets(
         self, project_dir: Path, sample_skill: CatalogItem
     ) -> None:
-        result = install_to_target("agents", [sample_skill], project_dir)
+        result = install_skills_to_target("agents", [sample_skill], project_dir)
         assert result.files_written == [
             ".agents/skills/sample-skill/SKILL.md"
         ], f"constructed item must write only SKILL.md, got {result.files_written}"
 
-    def test_install_to_target_unknown_target_raises_key_error(
+    def test_install_skills_to_target_unknown_target_raises_key_error(
         self, project_dir: Path, sample_skill: CatalogItem
     ) -> None:
         with pytest.raises(KeyError, match="nope"):
-            install_to_target("nope", [sample_skill], project_dir)
+            install_skills_to_target("nope", [sample_skill], project_dir)
 
-    def test_install_to_target_no_items_writes_nothing_but_succeeds(
+    def test_install_skills_to_target_no_items_writes_nothing_but_succeeds(
         self, project_dir: Path
     ) -> None:
-        result = install_to_target("agents", [], project_dir)
+        result = install_skills_to_target("agents", [], project_dir)
         assert result.installed == 0, "Expected zero installs for empty selection"
         assert not result.files_written, f"Unexpected files: {result.files_written}"
 
@@ -104,7 +104,7 @@ class TestInstallPluginToTarget:
     def test_install_plugin_writes_plugin_md_not_skill_md(
         self, project_dir: Path, sample_plugin: CatalogItem
     ) -> None:
-        result = install_to_target("agents", [sample_plugin], project_dir)
+        result = install_skills_to_target("agents", [sample_plugin], project_dir)
         plugin_file = project_dir / ".agents/skills/sample-plugin/PLUGIN.md"
         skill_file = project_dir / ".agents/skills/sample-plugin/SKILL.md"
         assert plugin_file.is_file(), "PLUGIN.md was not written"
@@ -114,7 +114,7 @@ class TestInstallPluginToTarget:
     def test_install_plugin_rendered_output_has_version_frontmatter(
         self, project_dir: Path, sample_plugin: CatalogItem
     ) -> None:
-        install_to_target("agents", [sample_plugin], project_dir)
+        install_skills_to_target("agents", [sample_plugin], project_dir)
         text = (project_dir / ".agents/skills/sample-plugin/PLUGIN.md").read_text()
         assert "version: 1.0.0" in text, f"version frontmatter missing:\n{text}"
         assert "# Sample plugin body" in text, f"body missing:\n{text}"
@@ -122,7 +122,7 @@ class TestInstallPluginToTarget:
     def test_install_plugin_to_claude_target_writes_plugin_md_and_claude_md(
         self, project_dir: Path, sample_plugin: CatalogItem
     ) -> None:
-        install_to_target("claude", [sample_plugin], project_dir)
+        install_skills_to_target("claude", [sample_plugin], project_dir)
         assert (project_dir / ".claude/skills/sample-plugin/PLUGIN.md").is_file()
         assert (project_dir / ".claude/CLAUDE.md").is_file(), "CLAUDE.md fallback not created"
 

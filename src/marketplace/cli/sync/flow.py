@@ -16,7 +16,7 @@ from marketplace.installer import (
     TARGETS,
     InstallResult,
     install_rules_to_target,
-    install_to_target,
+    install_skills_to_target,
     split_install_kinds,
 )
 from marketplace.manifest import (
@@ -38,7 +38,7 @@ def _install_per_target(
     for target_id, items in per_target.items():
         skills, rules = split_install_kinds(items)
         if target_id in TARGETS and skills:
-            results.append(install_to_target(target_id, skills, project_dir))
+            results.append(install_skills_to_target(target_id, skills, project_dir))
         if target_id in RULE_TARGETS and rules:
             results.append(install_rules_to_target(target_id, rules, project_dir))
     return results
