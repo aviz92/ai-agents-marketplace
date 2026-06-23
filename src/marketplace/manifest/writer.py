@@ -28,4 +28,3 @@ def save_manifest(
     path = manifest_path(project_dir)
     path.write_text(MANIFEST_HEADER + yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
     return path
-

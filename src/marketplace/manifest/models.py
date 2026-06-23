@@ -18,4 +18,3 @@ class Manifest:
     """
 
     per_agent: dict[str, dict[str, list[str]]] = field(default_factory=dict)
-

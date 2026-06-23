@@ -59,4 +59,3 @@ def load_manifest(project_dir: Path) -> Manifest | None:
         }
     _validate_per_agent(per_agent)
     return Manifest(per_agent=per_agent)
-

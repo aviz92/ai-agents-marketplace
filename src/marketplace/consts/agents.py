@@ -42,20 +42,3 @@ AGENT_PROJECT_SIGNALS: dict[str, list[str]] = {
 }
 
 SOURCE_PROJECT = "project"
-SOURCE_SYSTEM = "system"
-
-# ── System-level detection helpers ───────────────────────────────────────────
-PATH_INDICATOR_FMT = "{command} in PATH"
-VSCODE_COPILOT_INDICATOR = "VS Code extension"
-GH_COPILOT_INDICATOR = "gh copilot extension"
-VSCODE_EXTENSIONS_DIR = "~/.vscode/extensions"
-VSCODE_COPILOT_EXTENSION_GLOB = "github.copilot-*"
-GH_EXTENSION_LIST_CMD = ("gh", "extension", "list")
-GH_TIMEOUT_SECONDS = 5
-
-CURSOR_APP_PATHS = (
-    "/Applications/Cursor.app",
-    "~/Applications/Cursor.app",
-    "/mnt/c/Program Files/Cursor",
-    "~/.cursor",
-)

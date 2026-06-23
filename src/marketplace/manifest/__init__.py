@@ -22,4 +22,3 @@ __all__ = [
     "resolve_per_agent",
     "save_manifest",
 ]
-

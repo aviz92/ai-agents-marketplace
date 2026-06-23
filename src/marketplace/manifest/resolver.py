@@ -33,4 +33,3 @@ def resolve_per_agent(
                     missing.append(f"{kind}:{item_id}")
         per_target[target_id] = items
     return per_target, missing
-
