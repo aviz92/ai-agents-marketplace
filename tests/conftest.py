@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from marketplace import catalog
-from marketplace.catalog import CatalogItem
+from marketplace.models import Rule, Skill
 
 
 @pytest.fixture
@@ -22,24 +22,22 @@ def fake_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 @pytest.fixture
-def sample_skill() -> CatalogItem:
-    return CatalogItem(
+def sample_skill() -> Skill:
+    return Skill(
         id="sample-skill",
         name="Sample Skill",
         description="A skill used in tests",
-        kind="skill",
         version="1.0.0",
         content="# Sample skill body\n",
     )
 
 
 @pytest.fixture
-def sample_rule() -> CatalogItem:
-    return CatalogItem(
+def sample_rule() -> Rule:
+    return Rule(
         id="sample-rule",
         name="Sample Rule",
         description="A rule used in tests",
-        kind="rule",
         version="1.0.0",
         globs=["src/**/*.py"],
         always_apply=True,

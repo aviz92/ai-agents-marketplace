@@ -11,7 +11,6 @@ from pathlib import Path
 
 import yaml
 
-from marketplace.catalog import CatalogItem
 from marketplace.consts.kinds import KIND_DIRS, KIND_PLUGIN, KIND_RULE, KIND_SKILL
 from marketplace.consts.manifest import (
     MANIFEST_HEADER,
@@ -19,6 +18,7 @@ from marketplace.consts.manifest import (
     MANIFEST_NAME,
 )
 from marketplace.installer import RULE_TARGETS, TARGETS
+from marketplace.models import CatalogItem
 
 
 class ManifestError(ValueError):

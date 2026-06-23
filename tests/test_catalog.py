@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from marketplace.catalog import CatalogItem, load_catalog
+from marketplace.catalog import load_catalog
+from marketplace.models import CatalogItem, Plugin, Rule, Skill
 
 
 def _write_item(root: Path, kind_dir: str, item_id: str, metadata: str, body_file: str) -> None:
@@ -61,17 +62,23 @@ class TestLoadCatalog:
     def test_load_catalog_minimal_metadata_applies_defaults(self, fake_root: Path) -> None:
         _write_item(fake_root, "plugins", "min", "name: Min\n", "plugin.md")
         item = load_catalog()[0]
+        assert isinstance(item, Plugin), f"Expected a Plugin, got {type(item).__name__}"
         assert item.version == "1.0.0", f"Default version wrong: {item.version}"
         assert item.author == "unknown", f"Default author wrong: {item.author}"
+
+    def test_load_catalog_minimal_rule_applies_rule_field_defaults(self, fake_root: Path) -> None:
+        _write_item(fake_root, "rules", "min", "name: Min\n", "rule.md")
+        item = load_catalog()[0]
+        assert isinstance(item, Rule), f"Expected a Rule, got {type(item).__name__}"
         assert item.globs == [], f"Default globs wrong: {item.globs}"
         assert item.always_apply is False, "Default always_apply must be False"
 
 
 class TestCatalogItemLabel:
     @pytest.mark.parametrize(
-        ("kind", "icon"),
-        [("skill", "🧠"), ("plugin", "🔌"), ("rule", "📏")],
+        ("cls", "icon"),
+        [(Skill, "🧠"), (Plugin, "🔌"), (Rule, "📏")],
     )
-    def test_label_per_kind_uses_matching_icon(self, kind: str, icon: str) -> None:
-        item = CatalogItem(id="x", name="X", description="", kind=kind)  # type: ignore[arg-type]
-        assert item.label == f"{icon} X", f"Wrong label for {kind}: {item.label}"
+    def test_label_per_kind_uses_matching_icon(self, cls: type[CatalogItem], icon: str) -> None:
+        item = cls(id="x", name="X", description="")
+        assert item.label == f"{icon} X", f"Wrong label for {cls.kind}: {item.label}"

@@ -9,7 +9,7 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
-from marketplace.catalog import CatalogItem, get_marketplace_root
+from marketplace.catalog import get_marketplace_root
 from marketplace.consts.agents import (
     AGENT_CLAUDE,
     AGENT_CODEX,
@@ -23,6 +23,7 @@ from marketplace.consts.agents import (
     TARGET_AGENTS,
 )
 from marketplace.consts.authoring import AUTHORING_FILES, METADATA_FILE
+from marketplace.consts.kinds import KIND_RULE, SKILL_LIKE_KINDS
 from marketplace.consts.render import (
     AGENTS_SKILLS_DIR,
     CLAUDE_MD_FALLBACK,
@@ -39,6 +40,7 @@ from marketplace.consts.render import (
     SKILL_TEMPLATE,
     TEMPLATES_DIR_NAME,
 )
+from marketplace.models import CatalogItem
 
 
 @dataclass
@@ -214,6 +216,15 @@ def _ensure_reference(
     header = f"{reference.fallback_header}\n\n" if reference.fallback_header else ""
     fallback_file = project_dir / reference.fallback
     _write_rendered(fallback_file, f"{header}{note}\n", project_dir, files_written)
+
+
+def split_install_kinds(
+    items: list[CatalogItem],
+) -> tuple[list[CatalogItem], list[CatalogItem]]:
+    """Partition items into the two install paths: (skills-and-plugins, rules)."""
+    skills = [item for item in items if item.kind in SKILL_LIKE_KINDS]
+    rules = [item for item in items if item.kind == KIND_RULE]
+    return skills, rules
 
 
 def install_to_target(target_id: str, items: list[CatalogItem], project_dir: Path) -> InstallResult:

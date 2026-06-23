@@ -7,11 +7,11 @@ from InquirerPy.base.control import Choice
 
 from marketplace.catalog import CatalogItem
 from marketplace.cli import (
-    _build_item_choices,
-    _collect_installed_state,
-    _get_status_and_versions,
+    build_item_choices,
+    collect_installed_state,
     get_installed_rule_versions,
     get_installed_versions,
+    get_status_and_versions,
 )
 from marketplace.consts.display import STATUS_INSTALLED, STATUS_NOT_INSTALLED, STATUS_UPDATE
 from marketplace.installer import install_rules_to_target, install_to_target
@@ -50,7 +50,7 @@ class TestBuildItemChoices:
         runtime (AttributeError: 'dict' object has no attribute 'kind').
         """
         catalog = [sample_skill, sample_rule]
-        choices = [c for c in _build_item_choices(catalog, project_dir) if isinstance(c, Choice)]
+        choices = [c for c in build_item_choices(catalog, project_dir) if isinstance(c, Choice)]
         assert len(choices) == 2, f"Expected one choice per item, got {len(choices)}"
         for choice in choices:
             survived = asdict(choice)["value"]
@@ -72,7 +72,7 @@ class TestCollectInstalledState:
         install_rules_to_target("cursor", [sample_rule], project_dir)
         install_rules_to_target("claude", [sample_rule], project_dir)
         catalog = [sample_skill, sample_rule]
-        per_target = _collect_installed_state(catalog, project_dir)
+        per_target = collect_installed_state(catalog, project_dir)
         assert [item.id for item in per_target.get("agents", [])] == [
             "sample-skill"
         ], f"agents: {[i.id for i in per_target.get('agents', [])]}"
@@ -86,7 +86,7 @@ class TestCollectInstalledState:
     def test_collect_installed_state_empty_project_returns_empty(
         self, project_dir: Path, sample_skill: CatalogItem
     ) -> None:
-        per_target = _collect_installed_state([sample_skill], project_dir)
+        per_target = collect_installed_state([sample_skill], project_dir)
         assert not per_target, f"Nothing installed, got {per_target}"
 
 
@@ -94,7 +94,7 @@ class TestStatus:
     def test_get_status_not_installed_item_reports_not_installed(
         self, project_dir: Path, sample_skill: CatalogItem
     ) -> None:
-        status, versions = _get_status_and_versions(sample_skill, project_dir)
+        status, versions = get_status_and_versions(sample_skill, project_dir)
         assert status == STATUS_NOT_INSTALLED, f"Wrong status: {status}"
         assert versions == set(), f"Expected no versions, got {versions}"
 
@@ -102,7 +102,7 @@ class TestStatus:
         self, project_dir: Path, sample_skill: CatalogItem
     ) -> None:
         install_to_target("claude", [sample_skill], project_dir)
-        status, _ = _get_status_and_versions(sample_skill, project_dir)
+        status, _ = get_status_and_versions(sample_skill, project_dir)
         assert status == STATUS_INSTALLED, f"Wrong status: {status}"
 
     def test_get_status_catalog_version_bumped_reports_update(
@@ -110,7 +110,7 @@ class TestStatus:
     ) -> None:
         install_rules_to_target("claude", [sample_rule], project_dir)
         sample_rule.version = "2.0.0"
-        status, versions = _get_status_and_versions(sample_rule, project_dir)
+        status, versions = get_status_and_versions(sample_rule, project_dir)
         assert status == STATUS_UPDATE, f"Wrong status: {status}"
         assert versions == {"1.0.0"}, f"Installed versions wrong: {versions}"
 
@@ -120,6 +120,6 @@ class TestStatus:
         install_to_target("claude", [sample_skill], project_dir)
         sample_skill.version = "1.1.0"
         install_to_target("agents", [sample_skill], project_dir)
-        status, versions = _get_status_and_versions(sample_skill, project_dir)
+        status, versions = get_status_and_versions(sample_skill, project_dir)
         assert status == STATUS_UPDATE, f"Wrong status: {status}"
         assert versions == {"1.0.0", "1.1.0"}, f"Versions wrong: {versions}"

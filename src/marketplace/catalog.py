@@ -3,49 +3,18 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal
 
 import yaml
 
-from marketplace.consts.authoring import DEFAULT_AUTHOR, DEFAULT_VERSION, METADATA_FILE
-from marketplace.consts.kinds import (
-    BODY_FILES,
-    DEFAULT_ICON,
-    KIND_DIRS,
-    KIND_ICONS,
-    KIND_PLUGIN,
-    KIND_SKILL,
-)
+from marketplace.consts.authoring import METADATA_FILE
+from marketplace.consts.kinds import BODY_FILES, KIND_DIRS, KIND_PLUGIN, KIND_SKILL
+from marketplace.models import KIND_CLASSES, CatalogItem, Kind, Plugin, Rule, Skill
 
-# typing.Literal only accepts inline string literals (constants are a syntax error
-# here) — keep in sync with KIND_SKILL / KIND_PLUGIN / KIND_RULE in kinds.py.
-Kind = Literal["skill", "plugin", "rule"]
+# Re-exported so existing `from marketplace.catalog import CatalogItem` keeps working.
+__all__ = ["CatalogItem", "Kind", "Plugin", "Rule", "Skill", "get_marketplace_root", "load_catalog"]
 
 _log = logging.getLogger(__name__)
-
-
-@dataclass
-class CatalogItem:
-    """A single authored artifact loaded from the marketplace."""
-
-    id: str
-    name: str
-    description: str
-    kind: Kind
-    tags: list[str] = field(default_factory=list)
-    author: str = DEFAULT_AUTHOR
-    version: str = DEFAULT_VERSION
-    globs: list[str] = field(default_factory=list)
-    always_apply: bool = False
-    content: str = ""
-    path: Path = field(default_factory=Path)
-
-    @property
-    def label(self) -> str:
-        icon = KIND_ICONS.get(self.kind, DEFAULT_ICON)
-        return f"{icon} {self.name}"
 
 
 def get_marketplace_root() -> Path:
@@ -70,19 +39,8 @@ def _load_item(item_dir: Path, kind: Kind) -> CatalogItem | None:
     if not metadata_file.is_file() or not body_file.is_file():
         return None
     metadata = yaml.safe_load(metadata_file.read_text(encoding="utf-8")) or {}
-    return CatalogItem(
-        id=item_dir.name,
-        name=str(metadata.get("name", item_dir.name)),
-        description=str(metadata.get("description", "")),
-        kind=kind,
-        tags=list(metadata.get("tags") or []),
-        author=str(metadata.get("author", DEFAULT_AUTHOR)),
-        version=str(metadata.get("version", DEFAULT_VERSION)),
-        globs=list(metadata.get("globs") or []),
-        always_apply=bool(metadata.get("alwaysApply", False)),
-        content=body_file.read_text(encoding="utf-8").strip() + "\n",
-        path=item_dir,
-    )
+    content = body_file.read_text(encoding="utf-8").strip() + "\n"
+    return KIND_CLASSES[kind].from_metadata(item_dir.name, metadata, content, item_dir)
 
 
 def _load_kind(root: Path, kind: Kind) -> list[CatalogItem]:

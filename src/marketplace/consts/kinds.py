@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-KIND_SKILL = "skill"
-KIND_PLUGIN = "plugin"
-KIND_RULE = "rule"
+from typing import Final, Literal
+
+KIND_SKILL: Final[Literal["skill"]] = "skill"
+KIND_PLUGIN: Final[Literal["plugin"]] = "plugin"
+KIND_RULE: Final[Literal["rule"]] = "rule"
 SKILL_LIKE_KINDS = frozenset({KIND_SKILL, KIND_PLUGIN})
 
 KIND_DIRS: dict[str, str] = {KIND_SKILL: "skills", KIND_PLUGIN: "plugins", KIND_RULE: "rules"}

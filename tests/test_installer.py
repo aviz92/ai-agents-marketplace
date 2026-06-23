@@ -11,6 +11,7 @@ from marketplace.installer import (
     install_rules_to_target,
     install_to_target,
 )
+from marketplace.models import Skill
 
 
 class TestInstallToTarget:
@@ -63,11 +64,10 @@ class TestInstallToTarget:
         (authored / "metadata.yaml").write_text("name: With Assets\n", encoding="utf-8")
         (authored / "skill.md").write_text("# Body\n", encoding="utf-8")
         (authored / "assets" / "template.md").write_text("# Template\n", encoding="utf-8")
-        item = CatalogItem(
+        item = Skill(
             id="with-assets",
             name="With Assets",
             description="",
-            kind="skill",
             content="# Body\n",
             path=authored,
         )
