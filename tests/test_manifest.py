@@ -170,7 +170,7 @@ class TestRunSync:
             "claude:\n  skills: [create-skill]\n  rules: [no-debug-code]\n"
             "cursor:\n  rules: [no-debug-code]\n",
         )
-        run_sync(_quiet_console(), project_dir)
+        run_sync(_quiet_console(), project_dir, install_all=True)
         assert (project_dir / ".claude/skills/create-skill/SKILL.md").is_file()
         assert (project_dir / ".claude/rules/no-debug-code.md").is_file()
         assert (project_dir / ".cursor/rules/no-debug-code.mdc").is_file()
@@ -178,13 +178,13 @@ class TestRunSync:
 
     def test_run_sync_agents_target_installs_to_agents_dir(self, project_dir: Path) -> None:
         _write_manifest(project_dir, "agents:\n  skills: [create-skill]\n")
-        run_sync(_quiet_console(), project_dir)
+        run_sync(_quiet_console(), project_dir, install_all=True)
         assert (project_dir / ".agents/skills/create-skill/SKILL.md").is_file()
         assert not (project_dir / ".claude").exists(), "claude not in manifest must not be written"
 
     def test_run_sync_missing_manifest_exits_with_error(self, project_dir: Path) -> None:
         with pytest.raises(SystemExit, match="1"):
-            run_sync(_quiet_console(), project_dir)
+            run_sync(_quiet_console(), project_dir, install_all=True)
 
     def test_run_sync_unknown_id_installs_rest_but_exits_nonzero(self, project_dir: Path) -> None:
         _write_manifest(
@@ -192,7 +192,7 @@ class TestRunSync:
             "agents:\n  skills: [ghost-skill, create-skill]\n",
         )
         with pytest.raises(SystemExit, match="1"):
-            run_sync(_quiet_console(), project_dir)
+            run_sync(_quiet_console(), project_dir, install_all=True)
         assert (
             project_dir / ".agents/skills/create-skill/SKILL.md"
         ).is_file(), "known items must still install when others are missing"
@@ -200,4 +200,4 @@ class TestRunSync:
     def test_run_sync_invalid_manifest_exits_with_error(self, project_dir: Path) -> None:
         _write_manifest(project_dir, "claude:\n  skills: 42\n")
         with pytest.raises(SystemExit, match="1"):
-            run_sync(_quiet_console(), project_dir)
+            run_sync(_quiet_console(), project_dir, install_all=True)
