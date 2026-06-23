@@ -11,7 +11,12 @@ from rich.table import Table
 
 from marketplace.cli.status import get_status_and_versions
 from marketplace.consts import display
-from marketplace.consts.kinds import KIND_PLUGIN, KIND_RULE, KIND_SECTIONS, KIND_SKILL
+from marketplace.consts.kinds import (
+    KIND_PLUGIN,
+    KIND_RULE,
+    KIND_SECTIONS,
+    KIND_SKILL,
+)
 from marketplace.detect import Platform
 from marketplace.installer import RULE_TARGETS, TARGETS, InstallResult
 from marketplace.models import CatalogItem
@@ -45,6 +50,15 @@ def picker_header() -> str:
         f"{display.COL_INSTALLED:<{vw}} │ {display.COL_AVAILABLE:<{vw}} "
         f"│ {display.COL_DESCRIPTION}"
     )
+
+
+# Rich markup styles per kind — avoids emoji in table cells (emoji display width
+# is terminal-dependent and causes column misalignment across environments).
+_KIND_STYLE: dict[str, str] = {
+    KIND_SKILL: "green",
+    KIND_PLUGIN: "blue",
+    KIND_RULE: "yellow",
+}
 
 
 def print_banner(console: Console, project_dir: Path) -> None:
@@ -94,7 +108,9 @@ def print_summary(
         table.add_column(column)
     for item in items:
         status, _ = get_status_and_versions(item, project_dir)
-        table.add_row(item.label, item.kind, item.version, display.ACTION_BY_STATUS[status])
+        style = _KIND_STYLE.get(item.kind, "")
+        kind_cell = f"[{style}]{item.kind}[/]" if style else item.kind
+        table.add_row(item.name, kind_cell, item.version, display.ACTION_BY_STATUS[status])
     console.print(table)
     dirs = [TARGETS[target_id].dir for target_id in skill_targets]
     dirs += [RULE_TARGETS[target_id].dir for target_id in rule_targets]

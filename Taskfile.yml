@@ -21,10 +21,26 @@ vars:
 
 tasks:
   pre-commit:
-    desc: Pre-commit all files.
+    desc: Run pre-commit hooks on all files.
     cmds:
       - |
         echo "Running pre-commit hooks on all files..."
         set -a
         set +a
         "{{.UV_BIN}}" run pre-commit run --all-files
+
+  test:
+    desc: Run the full test suite.
+    cmds:
+      - "{{.UV_BIN}} run pytest tests/ -v"
+
+  lint:
+    desc: Run ruff and pylint linters.
+    cmds:
+      - "{{.UV_BIN}} run ruff check src/ tests/"
+      - "{{.UV_BIN}} run pylint src/"
+
+  run:
+    desc: Launch the interactive generate TUI in the current directory.
+    cmds:
+      - "{{.UV_BIN}} run agents-marketplace generate"

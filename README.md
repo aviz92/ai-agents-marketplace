@@ -38,10 +38,10 @@ exact file layout. Push when ready.
 Run the interactive picker from the root of any project, pointing at your fork:
 
 ```bash
-uvx --from git+https://github.com/<you>/ai-agents-marketplace agents-marketplace install
+uvx --from git+https://github.com/<you>/ai-agents-marketplace agents-marketplace generate
 ```
 
-The `install` TUI walks you through:
+The `generate` TUI walks you through:
 
 1. Pick artifacts from the catalog (shows installed status and available updates).
 2. Review which AI tools were detected in your project / on your system.
@@ -52,16 +52,16 @@ The `install` TUI walks you through:
 Or run from a local checkout while you're building your catalog:
 
 ```bash
-uvx --from /path/to/ai-agents-marketplace agents-marketplace install
+uvx --from /path/to/ai-agents-marketplace agents-marketplace generate
 ```
 
 Available commands:
 
 ```
 agents-marketplace --help              # list commands
-agents-marketplace install             # interactive TUI
-agents-marketplace install --help      # install command options
-agents-marketplace install --version   # print version
+agents-marketplace generate            # interactive TUI
+agents-marketplace generate --help     # generate command options
+agents-marketplace generate --version  # print version
 agents-marketplace sync                # non-interactive team sync
 agents-marketplace sync --help         # sync command options
 ```
@@ -102,7 +102,7 @@ Each top-level key is an agent target. Declare `skills`, `plugins`, and/or `rule
 - Unknown ids are reported and skipped; sync still installs the rest but exits non-zero
   so CI can catch drift.
 
-The easiest way to create the file: run `agents-marketplace install` once and answer **yes**
+The easiest way to create the file: run `agents-marketplace generate` once and answer **yes**
 to "Save installed state to agents-marketplace.yaml?" at the end. The saved manifest
 is a **snapshot of everything currently installed in the project** (all targets, not
 just the latest selection), so re-saving never drops previously installed artifacts.
@@ -113,7 +113,7 @@ just the latest selection), so re-saving never drops previously installed artifa
 | Target dir | Format | Written file | Agents covered |
 |---|---|---|---|
 | `.claude/skills/` | Universal skill | `<id>/SKILL.md` | Claude Code, GitHub Copilot |
-| `.agents/skills/` | Universal skill | `<id>/SKILL.md` | Cursor, GitHub Copilot, Codex CLI, Gemini CLI, Windsurf, Cline, OpenCode, OpenClaw, Amp, Letta Code, Antigravity IDE |
+| `.agents/skills/` | Universal skill | `<id>/SKILL.md` | Cursor, GitHub Copilot, Codex CLI, Gemini CLI |
 | `.cursor/rules/` | Cursor MDC (`globs`, `alwaysApply`) | `<id>.mdc` | Cursor |
 | `.github/instructions/` | Copilot instructions (`applyTo`) | `<id>.instructions.md` | GitHub Copilot |
 | `.claude/rules/` | Markdown + frontmatter | `<id>.md` | Claude Code |

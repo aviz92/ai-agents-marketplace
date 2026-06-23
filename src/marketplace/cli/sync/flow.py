@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from rich.console import Console
 
@@ -20,12 +21,14 @@ from marketplace.installer import (
 )
 from marketplace.manifest import (
     MANIFEST_NAME,
-    Manifest,
     ManifestError,
     load_manifest,
     resolve_per_agent,
 )
 from marketplace.models import CatalogItem
+
+if TYPE_CHECKING:
+    from marketplace.manifest import Manifest
 
 
 def _install_per_target(
