@@ -23,7 +23,7 @@ class _InstallCommand(BaseCommand):
     version = _VERSION
 
     def handle(self, **kwargs: object) -> None:
-        verbosity = int(kwargs.get("verbosity", 1))
+        verbosity = int(str(kwargs.get("verbosity", 1)))
         run_interactive(Console(quiet=verbosity == 0), Path.cwd())
 
 
@@ -43,7 +43,7 @@ class _SyncCommand(BaseCommand):
         )
 
     def handle(self, **kwargs: object) -> None:
-        verbosity = int(kwargs.get("verbosity", 1))
+        verbosity = int(str(kwargs.get("verbosity", 1)))
         install_all = bool(kwargs.get("install_all", False))
         run_sync(Console(quiet=verbosity == 0), Path.cwd(), install_all=install_all)
 
