@@ -40,7 +40,7 @@ class CatalogItem:
     author: str = DEFAULT_AUTHOR
     version: str = DEFAULT_VERSION
     content: str = ""
-    path: Path = field(default_factory=Path)
+    path: Path | None = None
 
     kind: ClassVar[Kind]
 

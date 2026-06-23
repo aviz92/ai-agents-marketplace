@@ -17,6 +17,7 @@ from marketplace.consts.agents import (
     AGENT_GEMINI,
     AGENT_NAMES,
     AGENTS_MD,
+    AGENTS_TARGET_COVERS,
     CLAUDE_MD_PATH,
     GEMINI_MD,
     TARGET_AGENTS,
@@ -103,19 +104,7 @@ TARGETS: dict[str, TargetInfo] = {
     ),
     TARGET_AGENTS: TargetInfo(
         dir=AGENTS_SKILLS_DIR,
-        covers=[
-            AGENT_NAMES[AGENT_CURSOR],
-            AGENT_NAMES[AGENT_COPILOT],
-            AGENT_NAMES[AGENT_CODEX],
-            AGENT_NAMES[AGENT_GEMINI],
-            "Windsurf",
-            "Cline",
-            "OpenCode",
-            "OpenClaw",
-            "Amp",
-            "Letta Code",
-            "Antigravity IDE",
-        ],
+        covers=AGENTS_TARGET_COVERS,
     ),
 }
 
@@ -182,9 +171,9 @@ def _copy_assets(item: CatalogItem, out_dir: Path, project_dir: Path, written: l
     """Copy extra authored files (e.g. assets/) next to the rendered output file.
 
     Only authoring sources count as a real item dir; constructed items with a
-    default path are skipped so we never scan the working directory.
+    None path are skipped so we never scan the working directory.
     """
-    if not (item.path / METADATA_FILE).is_file():
+    if item.path is None or not (item.path / METADATA_FILE).is_file():
         return
     for source in sorted(item.path.rglob("*")):
         if source.is_dir() or source.name in AUTHORING_FILES:

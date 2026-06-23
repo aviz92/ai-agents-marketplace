@@ -6,9 +6,9 @@ from pathlib import Path
 
 import yaml
 
+from marketplace.consts.agents import VALID_RULE_TARGET_IDS, VALID_SKILL_TARGET_IDS
 from marketplace.consts.kinds import KIND_DIRS, KIND_PLUGIN, KIND_RULE, KIND_SKILL
 from marketplace.consts.manifest import MANIFEST_KIND_KEYS, MANIFEST_NAME
-from marketplace.installer import RULE_TARGETS, TARGETS
 from marketplace.manifest.models import Manifest, ManifestError
 
 
@@ -27,15 +27,15 @@ def _validate_per_agent(per_agent: dict[str, dict[str, list[str]]]) -> None:
     skill_keys = {KIND_DIRS[KIND_SKILL], KIND_DIRS[KIND_PLUGIN]}
     rule_key = KIND_DIRS[KIND_RULE]
     for target_id, entry in per_agent.items():
-        if skill_keys & set(entry) and target_id not in TARGETS:
+        if skill_keys & set(entry) and target_id not in VALID_SKILL_TARGET_IDS:
             raise ManifestError(
                 f"Target '{target_id}' does not support skills/plugins"
-                f" — valid skill targets: {sorted(TARGETS)}"
+                f" — valid skill targets: {sorted(VALID_SKILL_TARGET_IDS)}"
             )
-        if rule_key in entry and target_id not in RULE_TARGETS:
+        if rule_key in entry and target_id not in VALID_RULE_TARGET_IDS:
             raise ManifestError(
                 f"Target '{target_id}' does not support rules"
-                f" — valid rule targets: {sorted(RULE_TARGETS)}"
+                f" — valid rule targets: {sorted(VALID_RULE_TARGET_IDS)}"
             )
 
 
@@ -47,7 +47,7 @@ def load_manifest(project_dir: Path) -> Manifest | None:
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     if not isinstance(data, dict):
         raise ManifestError(f"{MANIFEST_NAME} must contain a YAML mapping")
-    valid_targets = set(TARGETS) | set(RULE_TARGETS)
+    valid_targets = VALID_SKILL_TARGET_IDS | VALID_RULE_TARGET_IDS
     per_agent: dict[str, dict[str, list[str]]] = {}
     for target_id, entry in data.items():
         if target_id not in valid_targets:
