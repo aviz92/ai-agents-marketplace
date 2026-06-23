@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 from marketplace.consts import display
-from marketplace.consts.kinds import KIND_RULE
+from marketplace.consts.kinds import KIND_RULE, SKILL_LIKE_KINDS
 from marketplace.consts.render import SKILL_OUTPUT_FILE, VERSION_RE
 from marketplace.installer import RULE_TARGETS, TARGETS, RuleTargetInfo, TargetInfo
 from marketplace.models import CatalogItem
@@ -19,28 +20,48 @@ def _read_installed_version(file_path: Path) -> str | None:
     return match.group(1) if match else None
 
 
+def _get_versions_by_target(
+    item_id: str,
+    targets: dict[str, TargetInfo] | dict[str, RuleTargetInfo],
+    path_resolver: Callable[[str, TargetInfo | RuleTargetInfo], Path],
+    project_dir: Path,
+) -> dict[str, str]:
+    versions: dict[str, str] = {}
+    for target_id, target in targets.items():
+        file_path = project_dir / path_resolver(item_id, target)
+        if version := _read_installed_version(file_path):
+            versions[target_id] = version
+    return versions
+
+
 def get_installed_versions_by_target(
     item_id: str, targets: dict[str, TargetInfo], project_dir: Path
 ) -> dict[str, str]:
     """Map skill/plugin target id → installed version found in its SKILL.md."""
-    versions: dict[str, str] = {}
-    for target_id, target in targets.items():
-        skill_file = project_dir / target.dir / item_id / SKILL_OUTPUT_FILE
-        if version := _read_installed_version(skill_file):
-            versions[target_id] = version
-    return versions
+    return _get_versions_by_target(
+        item_id,
+        targets,
+        lambda iid, t: Path(t.dir) / iid / SKILL_OUTPUT_FILE,
+        project_dir,
+    )
 
 
 def get_installed_rule_versions_by_target(
     item_id: str, rule_targets: dict[str, RuleTargetInfo], project_dir: Path
 ) -> dict[str, str]:
     """Map rule target id → installed version found in its rendered rule file."""
-    versions: dict[str, str] = {}
-    for target_id, target in rule_targets.items():
-        rule_file = project_dir / target.dir / target.filename_pattern.format(id=item_id)
-        if version := _read_installed_version(rule_file):
-            versions[target_id] = version
-    return versions
+    return _get_versions_by_target(
+        item_id,
+        rule_targets,
+        lambda iid, t: Path(t.dir) / t.filename_pattern.format(id=iid),
+        project_dir,
+    )
+
+
+def _resolve_versions_by_target(item: CatalogItem, project_dir: Path) -> dict[str, str]:
+    if item.kind == KIND_RULE:
+        return get_installed_rule_versions_by_target(item.id, RULE_TARGETS, project_dir)
+    return get_installed_versions_by_target(item.id, TARGETS, project_dir)
 
 
 def get_installed_versions(item_id: str, project_dir: Path) -> set[str]:
@@ -52,12 +73,7 @@ def get_installed_rule_versions(item_id: str, project_dir: Path) -> set[str]:
 
 
 def get_status_and_versions(item: CatalogItem, project_dir: Path) -> tuple[str, set[str]]:
-    versions = (
-        get_installed_rule_versions(item.id, project_dir)
-        if item.kind == KIND_RULE
-        else get_installed_versions(item.id, project_dir)
-    )
-    if not versions:
+    if not (versions := set(_resolve_versions_by_target(item, project_dir).values())):
         return display.STATUS_NOT_INSTALLED, versions
     if versions == {item.version}:
         return display.STATUS_INSTALLED, versions
@@ -70,11 +86,6 @@ def collect_installed_state(
     """Snapshot what is installed on disk, grouped by target."""
     per_target: dict[str, list[CatalogItem]] = {}
     for item in catalog:
-        by_target = (
-            get_installed_rule_versions_by_target(item.id, RULE_TARGETS, project_dir)
-            if item.kind == KIND_RULE
-            else get_installed_versions_by_target(item.id, TARGETS, project_dir)
-        )
-        for target_id in by_target:
+        for target_id in _resolve_versions_by_target(item, project_dir):
             per_target.setdefault(target_id, []).append(item)
     return per_target
