@@ -29,7 +29,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 *.manifest
-!src/marketplace/manifest/
 *.spec
 
 # ============================================================
@@ -210,5 +209,6 @@ results_output/
 # Project-specific
 # ============================================================
 internal_assets/
+!src/marketplace/manifest/
 
 # git restore --staged .
