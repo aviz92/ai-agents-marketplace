@@ -9,7 +9,7 @@ from marketplace.consts import display
 from marketplace.consts.kinds import InstallGroup
 from marketplace.consts.render import PLUGIN_OUTPUT_FILE, SKILL_OUTPUT_FILE, VERSION_RE
 from marketplace.installer import RULE_TARGETS, TARGETS, RuleTargetInfo, TargetInfo
-from marketplace.models import CatalogItem
+from marketplace.kind_catalog.models import CatalogItem
 
 _StatusFn = Callable[["CatalogItem", Path], dict[str, str]]
 

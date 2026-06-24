@@ -1,5 +1,3 @@
-"""Kind configuration — KindConfig schema, named instances, and lookup registry."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

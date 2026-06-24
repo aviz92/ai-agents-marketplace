@@ -7,7 +7,7 @@ import functools
 from jinja2 import Environment, FileSystemLoader
 
 from marketplace.consts.render import TEMPLATES_DIR_NAME
-from marketplace.utils import get_marketplace_root
+from utils import get_marketplace_root
 
 
 @functools.lru_cache(maxsize=1)

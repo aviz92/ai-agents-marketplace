@@ -5,7 +5,7 @@ from __future__ import annotations
 from marketplace.consts.kinds import ManifestMode
 from marketplace.consts.manifest import MANIFEST_FLAT_KINDS, MANIFEST_PER_AGENT_KINDS
 from marketplace.manifest.models import Manifest
-from marketplace.models import CatalogItem
+from marketplace.kind_catalog.models import CatalogItem
 
 
 def resolve_per_agent(

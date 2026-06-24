@@ -12,9 +12,9 @@ from rich.console import Console
 from marketplace.cli.render import description_width, item_row, picker_header
 from marketplace.consts import display
 from marketplace.consts.agents import AGENT_CLAUDE, TARGET_AGENTS
-from marketplace.kinds import ALL_KINDS
+from marketplace.kind_catalog.config import ALL_KINDS
 from marketplace.installer import RULE_TARGET_GROUPS, RULE_TARGETS, SKILLS_TARGET_GROUPS, TARGETS
-from marketplace.models import CatalogItem
+from marketplace.kind_catalog.models import CatalogItem
 
 
 def build_item_choices(catalog: list[CatalogItem], project_dir: Path) -> list[Choice | Separator]:

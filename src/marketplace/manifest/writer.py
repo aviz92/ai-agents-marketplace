@@ -12,7 +12,7 @@ from marketplace.consts.manifest import (
     MANIFEST_PER_AGENT_KINDS,
 )
 from marketplace.manifest.loader import manifest_path
-from marketplace.models import CatalogItem
+from marketplace.kind_catalog.models import CatalogItem
 
 
 def save_manifest(

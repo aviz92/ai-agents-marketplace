@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from marketplace.kinds import ALL_KINDS
+from marketplace.kind_catalog.config import ALL_KINDS
 
 METADATA_FILE = "metadata.yaml"
 AUTHORING_FILES = frozenset({METADATA_FILE, *(cfg.body_filename for cfg in ALL_KINDS if cfg.body_filename)})

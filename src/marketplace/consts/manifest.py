@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from marketplace.kinds import KindConfig, ManifestMode
-from marketplace.kinds import ALL_KINDS
+from marketplace.kind_catalog.config import ALL_KINDS, KindConfig, ManifestMode
 
 MANIFEST_NAME = "agents-marketplace.yaml"
 MANIFEST_EXTERNAL_KEY = "external-plugins"

@@ -1,5 +1,3 @@
-"""Load authored artifacts (skills, plugins, rules) from disk into a catalog."""
-
 from __future__ import annotations
 
 import logging
@@ -8,10 +6,9 @@ from pathlib import Path
 import yaml
 
 from marketplace.consts.authoring import METADATA_FILE
-from marketplace.kinds import KindConfig
-from marketplace.kinds import ALL_KINDS
-from marketplace.models import KIND_CLASSES, CatalogItem
-from marketplace.utils import get_marketplace_root
+from marketplace.kind_catalog.config import KindConfig, ALL_KINDS
+from marketplace.kind_catalog.models import KIND_CLASSES, CatalogItem
+from utils import get_marketplace_root
 
 _log = logging.getLogger(__name__)
 

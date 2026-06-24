@@ -14,10 +14,9 @@ from InquirerPy.separator import Separator
 
 from marketplace.consts import display
 from marketplace.consts.agents import AGENT_NAMES, TARGET_AGENTS
-from marketplace.kinds import KindConfig
-from marketplace.kinds import PLUGIN, RULE, SKILL
+from marketplace.kind_catalog.config import KindConfig, PLUGIN, RULE, SKILL
 from marketplace.installer import RULE_TARGETS, TARGETS, RuleTargetInfo, TargetInfo
-from marketplace.models import CatalogItem
+from marketplace.kind_catalog.models import CatalogItem
 
 _NAME_W = 26
 _KIND_W = 11

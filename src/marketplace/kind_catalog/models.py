@@ -1,10 +1,3 @@
-"""Core data model for marketplace artifacts — no IO, safe to import anywhere.
-
-`CatalogItem` is an ABC; every artifact kind is a concrete subclass that declares
-its own `kind` and implements `from_metadata`. Build instances via
-`KIND_CLASSES[kind].from_metadata(...)`.
-"""
-
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -13,8 +6,8 @@ from pathlib import Path
 from typing import Any, ClassVar, Literal, Self
 
 from marketplace.consts.authoring import DEFAULT_AUTHOR, DEFAULT_VERSION
-from marketplace.kinds import KindConfig
-from marketplace.kinds import (
+from marketplace.kind_catalog.config import KindConfig
+from marketplace.kind_catalog.config import (
     EXTERNAL_PLUGIN as EXTERNAL_PLUGIN_KIND,
     PLUGIN as PLUGIN_KIND,
     RULE as RULE_KIND,

@@ -8,7 +8,7 @@ from pathlib import Path
 from marketplace.consts.agents import AGENT_CLAUDE, CLAUDE_MD_PATH
 from marketplace.consts.kinds import InstallGroup
 from marketplace.consts.render import CLAUDE_MD_FALLBACK
-from marketplace.models import CatalogItem
+from marketplace.kind_catalog.models import CatalogItem
 
 from .models import _RULE_REFERENCES, RULE_TARGETS, TARGETS, InstallResult
 from .templates import _get_template_env

@@ -6,7 +6,7 @@ from pathlib import Path
 
 from rich.console import Console
 
-from marketplace.catalog import load_catalog
+from marketplace.kind_catalog.loader import load_catalog
 from marketplace.cli import render
 from marketplace.cli.generate import prompts
 from marketplace.consts import display
@@ -14,7 +14,7 @@ from marketplace.consts.kinds import InstallGroup
 from marketplace.detect import detect_platforms
 from marketplace.installer import RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS
 from marketplace.manifest import save_manifest
-from marketplace.models import CatalogItem
+from marketplace.kind_catalog.models import CatalogItem
 
 
 def _build_per_target(

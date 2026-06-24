@@ -7,7 +7,7 @@ from pathlib import Path
 
 from marketplace.consts.authoring import AUTHORING_FILES, METADATA_FILE
 from marketplace.consts.render import RULE_REFERENCE_NOTE_FMT
-from marketplace.models import CatalogItem
+from marketplace.kind_catalog.models import CatalogItem
 
 from .models import ReferenceSpec
 
