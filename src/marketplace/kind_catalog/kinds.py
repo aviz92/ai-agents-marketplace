@@ -14,8 +14,6 @@ from marketplace.consts.render import (
 
 @dataclass(frozen=True)
 class KindConfig:
-    """Complete specification for one artifact kind."""
-
     kind_name: str
     dir_name: str
     icon: str

@@ -7,10 +7,10 @@ from pathlib import Path
 from marketplace.consts.kinds import KindCategory
 from marketplace.kind_catalog.models import CatalogItem
 
-from .models import InstallResult, rule_targets, targets
-from .plugins import install_plugin
-from .rules import install_rule
-from .skills import install_skill
+from marketplace.installer.models import InstallResult, rule_targets, targets
+from marketplace.installer.plugins import install_plugin
+from marketplace.installer.rules import install_rule
+from marketplace.installer.skills import install_skill
 
 
 def install_skills_to_target(

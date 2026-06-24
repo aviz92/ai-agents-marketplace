@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from .install import install_rules_to_target, install_skills_to_target, install_to_target
-from .models import (
+from marketplace.installer.install import install_rules_to_target, install_skills_to_target, install_to_target
+from marketplace.installer.models import (
     InstallResult,
     ReferenceSpec,
     RuleTargetInfo,
@@ -9,7 +9,7 @@ from .models import (
     rule_targets,
     targets,
 )
-from .templates import clear_template_env_cache
+from marketplace.installer.templates import clear_template_env_cache
 
 __all__ = [
     "rule_targets",

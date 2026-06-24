@@ -48,7 +48,6 @@ def _load_kind(root: Path, cfg: KindConfig) -> list[CatalogItem]:
 
 
 def load_catalog() -> list[CatalogItem]:
-    """Load every artifact from the marketplace root, sorted by (kind, name)."""
     root = get_marketplace_root()
     items: list[CatalogItem] = []
     for cfg in all_kinds():
