@@ -20,11 +20,6 @@ def save_manifest(
     """Write the manifest describing what is installed per target."""
     data: dict = {}
 
-    if external_items:
-        for cfg in flat_kinds():
-            if ids := sorted(item.id for item in external_items if item.kind == cfg.kind_name):
-                data[cfg.dir_name] = ids
-
     for target_id, items in per_target.items():
         entry: dict = {
             cfg.dir_name: sorted(item.id for item in items if item.kind == cfg.kind_name)
@@ -33,6 +28,11 @@ def save_manifest(
         }
         if entry:
             data[target_id] = entry
+
+    if external_items:
+        for cfg in flat_kinds():
+            if ids := sorted(item.id for item in external_items if item.kind == cfg.kind_name):
+                data[cfg.dir_name] = ids
 
     path = manifest_path(project_dir)
     path.write_text(MANIFEST_HEADER + yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
