@@ -12,7 +12,7 @@ from marketplace.cli.generate import prompts
 from marketplace.consts import display
 from marketplace.consts.kinds import KindCategory
 from marketplace.detect import detect_platforms
-from marketplace.installer import RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS
+from marketplace.consts.kinds import RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS
 from marketplace.manifest import save_manifest
 from marketplace.kind_catalog.models import CatalogItem
 

@@ -5,11 +5,19 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
+from marketplace.consts.agents import AGENT_CLAUDE, CLAUDE_MD_PATH
 from marketplace.consts.authoring import AUTHORING_FILES, METADATA_FILE
-from marketplace.consts.render import RULE_REFERENCE_NOTE_FMT
+from marketplace.consts.render import CLAUDE_MD_FALLBACK, RULE_REFERENCE_NOTE_FMT
 from marketplace.kind_catalog.models import CatalogItem
 
 from .models import ReferenceSpec
+
+
+def _ensure_claude_md(target_id: str, project_dir: Path, files_written: list[str]) -> None:
+    if target_id == AGENT_CLAUDE:
+        claude_md = project_dir / CLAUDE_MD_PATH
+        if not claude_md.exists():
+            _write_rendered(claude_md, CLAUDE_MD_FALLBACK, project_dir, files_written)
 
 
 def _write_rendered(out_file: Path, content: str, project_dir: Path, written: list[str]) -> None:
