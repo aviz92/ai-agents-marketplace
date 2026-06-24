@@ -1,7 +1,0 @@
-name: Context7
-description: Context7 pulls up-to-date, version-specific documentation and code examples straight from the source — and places them directly into your prompt
-source: https://github.com/upstash/context7
-install: "npx ctx7 setup"
-author: upstash
-version: 0.5.3
-tags: [documentation, context, rag, mcp, developer-tools]

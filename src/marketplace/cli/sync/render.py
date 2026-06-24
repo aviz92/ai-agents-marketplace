@@ -6,8 +6,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from marketplace.consts import display
-from marketplace.installer import InstallResult
-from marketplace.kind_catalog.models import CatalogItem, ExternalPlugin
+from marketplace.installer import ExternalInstallResult, InstallResult
 
 
 def print_results(console: Console, results: list[InstallResult]) -> None:
@@ -18,18 +17,13 @@ def print_results(console: Console, results: list[InstallResult]) -> None:
     console.print(Panel("\n".join(lines), title=display.TITLE_FILES_WRITTEN, style="green"))
 
 
-def print_external_plugins(console: Console, items: list[CatalogItem]) -> None:
-    """Display each external plugin's source and install command. Never executes the command."""
+def print_external_results(console: Console, results: list[ExternalInstallResult]) -> None:
     lines: list[str] = []
-    for item in items:
-        if not isinstance(item, ExternalPlugin):
-            continue
-        lines.append(f"[bold]{item.label}[/bold]  v{item.version}")
-        lines.append(f"  {item.description}")
-        lines.append(f"  Source:  [cyan]{item.source}[/cyan]")
-        lines.append(f"  Install: [dim]{item.install}[/dim]")
-        lines.append("")
-    if lines:
-        console.print(
-            Panel("\n".join(lines).rstrip(), title=display.TITLE_EXTERNAL_PLUGINS, style="blue")
-        )
+    all_ok = all(r.success for r in results)
+    for result in results:
+        icon = "[green]✓[/green]" if result.success else "[red]✗[/red]"
+        lines.append(f"{icon} [bold]{result.name}[/bold]  [dim]{result.command}[/dim]")
+    style = "green" if all_ok else "red"
+    console.print(
+        Panel("\n".join(lines), title=display.TITLE_EXTERNAL_PLUGINS, style=style)
+    )

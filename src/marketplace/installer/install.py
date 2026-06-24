@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 from marketplace.consts.kinds import KindCategory
-from marketplace.kind_catalog.models import CatalogItem
-
-from marketplace.installer.models import InstallResult, rule_targets, targets
+from marketplace.kind_catalog.models import CatalogItem, ExternalPlugin
+from marketplace.installer.models import ExternalInstallResult, InstallResult, rule_targets, targets
 from marketplace.installer.handlers.plugins import install_plugin
 from marketplace.installer.handlers.rules import install_rule
 from marketplace.installer.handlers.skills import install_skill
@@ -27,6 +27,26 @@ def install_rules_to_target(
     target_id: str, items: list[CatalogItem], project_dir: Path
 ) -> InstallResult:
     return install_rule(target_id, items, project_dir)
+
+
+def install_external_plugin(item: ExternalPlugin) -> ExternalInstallResult:
+    """Run item.install and stream output to the terminal.
+
+    shell=True is required: install commands may contain pipes (e.g. curl | bash).
+    item.install comes from repo-controlled catalog metadata.yaml — callers must
+    confirm with the user before calling this function.
+    """
+    try:
+        proc = subprocess.run(item.install, shell=True)  # noqa: S602
+        success = proc.returncode == 0
+    except Exception as exc:
+        success = False
+        return ExternalInstallResult(
+            plugin_id=item.id, name=item.name, command=item.install, success=False, output=str(exc)
+        )
+    return ExternalInstallResult(
+        plugin_id=item.id, name=item.name, command=item.install, success=success
+    )
 
 
 def install_to_target(

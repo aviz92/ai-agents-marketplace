@@ -16,7 +16,7 @@ from marketplace.consts import display
 from marketplace.consts.agents import AGENT_NAMES, TARGET_AGENTS
 from marketplace.installer import RuleTargetInfo, TargetInfo, rule_targets, targets
 from marketplace.kind_catalog.kinds import PLUGIN, RULE, SKILL, KindConfig
-from marketplace.kind_catalog.models import CatalogItem
+from marketplace.kind_catalog.models import CatalogItem, ExternalPlugin
 
 _NAME_W = 26
 _KIND_W = 11
@@ -81,6 +81,14 @@ def _choice(target_id: str, columns: list[tuple[int, str, str]]) -> Choice:
         prefix += f"  {_count_label(count, singular, plural):<{_KIND_W}}"
     label = prefix + _ARROW + _covers(target_id, len(prefix))
     return Choice(value=target_id, name=label, enabled=True)
+
+
+def prompt_confirm_external_plugin(plugin: ExternalPlugin) -> bool:
+    """Ask user to confirm before running a third-party install command."""
+    return inquirer.confirm(
+        message=f"Run install command for {plugin.name}?\n  [dim]{plugin.install}[/dim]",
+        default=True,
+    ).execute()
 
 
 def prompt_sync_agents(per_target: dict[str, list[CatalogItem]]) -> list[str]:

@@ -10,3 +10,12 @@ class InstallResult:
     files_written: list[str] = field(default_factory=list)
     output_dir: str = ""
     covers: list[str] = field(default_factory=list)
+
+
+@dataclass
+class ExternalInstallResult:
+    plugin_id: str
+    name: str
+    command: str
+    success: bool
+    output: str = ""

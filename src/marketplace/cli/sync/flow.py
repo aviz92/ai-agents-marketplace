@@ -8,12 +8,15 @@ from typing import TYPE_CHECKING
 from rich.console import Console
 
 from marketplace.cli.sync import render
-from marketplace.cli.sync.prompts import prompt_sync_agents
+from marketplace.cli.sync.prompts import prompt_confirm_external_plugin, prompt_sync_agents
 from marketplace.consts import display
 from marketplace.installer import (
+    ExternalInstallResult,
     InstallResult,
+    install_external_plugin,
     install_to_target,
 )
+from marketplace.kind_catalog.models import ExternalPlugin
 from marketplace.kind_catalog.loader import load_catalog
 from marketplace.kind_catalog.models import CatalogItem
 from marketplace.manifest import (
@@ -93,8 +96,22 @@ def run_sync(console: Console, project_dir: Path, *, install_all: bool = False) 
             installable = _select_sync_targets(console, installable)
         render.print_results(console, _install_per_target(installable, project_dir))
 
+    ext_failed = False
     if external_items:
-        render.print_external_plugins(console, external_items)
+        ext_results: list[ExternalInstallResult] = []
+        for item in external_items:
+            if not isinstance(item, ExternalPlugin):
+                continue
+            try:
+                confirmed = install_all or prompt_confirm_external_plugin(item)
+            except (KeyboardInterrupt, EOFError):
+                console.print(display.MSG_CANCELLED)
+                raise SystemExit(0)
+            if confirmed:
+                ext_results.append(install_external_plugin(item))
+        if ext_results:
+            render.print_external_results(console, ext_results)
+            ext_failed = any(not r.success for r in ext_results)
 
-    if missing:
+    if missing or ext_failed:
         raise SystemExit(1)
