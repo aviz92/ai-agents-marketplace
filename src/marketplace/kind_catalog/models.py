@@ -7,13 +7,13 @@ from typing import Any, ClassVar, Literal, Self
 
 from marketplace.consts.authoring import DEFAULT_AUTHOR, DEFAULT_VERSION
 from marketplace.kind_catalog.config import KindConfig
-from marketplace.kind_catalog.config import (
+from marketplace.kind_catalog.kinds import (
     EXTERNAL_PLUGIN as EXTERNAL_PLUGIN_KIND,
     PLUGIN as PLUGIN_KIND,
     RULE as RULE_KIND,
     SKILL as SKILL_KIND,
-    get_kind,
 )
+from marketplace.kind_catalog.registry import get_kind
 
 Kind = Literal["skill", "plugin", "rule", "external-plugin"]
 

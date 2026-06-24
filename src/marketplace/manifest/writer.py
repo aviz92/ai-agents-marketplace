@@ -7,7 +7,7 @@ from pathlib import Path
 import yaml
 
 from marketplace.consts.manifest import MANIFEST_HEADER
-from marketplace.kind_catalog.config import FLAT_KINDS, PER_AGENT_KINDS
+from marketplace.kind_catalog.registry import FLAT_KINDS, PER_AGENT_KINDS
 from marketplace.manifest.loader import manifest_path
 from marketplace.kind_catalog.models import CatalogItem
 

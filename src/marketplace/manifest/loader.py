@@ -7,7 +7,8 @@ from pathlib import Path
 import yaml
 
 from marketplace.consts.agents import VALID_RULE_TARGET_IDS, VALID_SKILL_TARGET_IDS
-from marketplace.kind_catalog.config import FLAT_KINDS, PER_AGENT_KINDS, PLUGIN, RULE, SKILL
+from marketplace.kind_catalog.kinds import PLUGIN, RULE, SKILL
+from marketplace.kind_catalog.registry import FLAT_KINDS, PER_AGENT_KINDS
 from marketplace.consts.manifest import MANIFEST_NAME
 from marketplace.manifest.models import Manifest, ManifestError
 

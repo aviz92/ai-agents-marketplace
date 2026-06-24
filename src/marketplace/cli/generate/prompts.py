@@ -12,7 +12,7 @@ from rich.console import Console
 from marketplace.cli.render import description_width, item_row, picker_header
 from marketplace.consts import display
 from marketplace.consts.agents import AGENT_CLAUDE, TARGET_AGENTS
-from marketplace.kind_catalog.config import ALL_KINDS
+from marketplace.kind_catalog.registry import ALL_KINDS
 from marketplace.consts.kinds import RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS
 from marketplace.installer import RULE_TARGETS, TARGETS
 from marketplace.kind_catalog.models import CatalogItem

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from marketplace.kind_catalog.config import PLUGIN, SKILL
+from marketplace.kind_catalog.kinds import PLUGIN, SKILL
 
 
 def get_marketplace_root() -> Path:

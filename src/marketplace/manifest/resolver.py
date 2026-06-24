@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from marketplace.consts.manifest import ManifestMode
-from marketplace.kind_catalog.config import FLAT_KINDS, PER_AGENT_KINDS
+from marketplace.kind_catalog.registry import FLAT_KINDS, PER_AGENT_KINDS
 from marketplace.manifest.models import Manifest
 from marketplace.kind_catalog.models import CatalogItem
 

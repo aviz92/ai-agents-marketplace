@@ -11,7 +11,8 @@ from rich.table import Table
 
 from marketplace.cli.status import get_status_and_versions
 from marketplace.consts import display
-from marketplace.kind_catalog.config import ALL_KINDS, EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL
+from marketplace.kind_catalog.kinds import EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL
+from marketplace.kind_catalog.registry import ALL_KINDS
 from marketplace.detect import Platform
 from marketplace.installer import RULE_TARGETS, TARGETS, InstallResult
 from marketplace.kind_catalog.models import CatalogItem, ExternalPlugin
