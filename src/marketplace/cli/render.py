@@ -11,11 +11,11 @@ from rich.table import Table
 
 from marketplace.cli.status import get_status_and_versions
 from marketplace.consts import display
-from marketplace.kind_catalog.kinds import EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL
-from marketplace.kind_catalog.registry import ALL_KINDS
 from marketplace.detect import Platform
 from marketplace.installer import RULE_TARGETS, TARGETS, InstallResult
+from marketplace.kind_catalog.kinds import EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL
 from marketplace.kind_catalog.models import CatalogItem, ExternalPlugin
+from marketplace.kind_catalog.registry import ALL_KINDS
 
 
 def _clip(text: str, width: int) -> str:
@@ -48,7 +48,6 @@ def picker_header() -> str:
     )
 
 
-
 def print_banner(console: Console, project_dir: Path) -> None:
     console.print(f"[bold cyan]{display.BANNER}[/bold cyan]")
     msg = display.MSG_INSTALLING_INTO_FMT.format(project_dir=project_dir)
@@ -56,7 +55,9 @@ def print_banner(console: Console, project_dir: Path) -> None:
 
 
 def print_catalog_counts(console: Console, catalog: list[CatalogItem]) -> None:
-    counts = {cfg.kind_name: sum(1 for item in catalog if item.kind == cfg.kind_name) for cfg in ALL_KINDS}
+    counts = {
+        cfg.kind_name: sum(1 for item in catalog if item.kind == cfg.kind_name) for cfg in ALL_KINDS
+    }
     console.print(
         display.MSG_CATALOG_COUNTS_FMT.format(
             skills=counts[SKILL.kind_name],

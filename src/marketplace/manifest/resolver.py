@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from marketplace.consts.manifest import ManifestMode
+from marketplace.kind_catalog.models import CatalogItem
 from marketplace.kind_catalog.registry import FLAT_KINDS, PER_AGENT_KINDS
 from marketplace.manifest.models import Manifest
-from marketplace.kind_catalog.models import CatalogItem
 
 
 def resolve_per_agent(
@@ -45,11 +45,7 @@ def resolve_flat(
     Returns (items, missing_refs).
     """
     flat_dir_to_cfg = {cfg.dir_name: cfg for cfg in FLAT_KINDS}
-    index = {
-        item.id: item
-        for item in catalog
-        if item.config.manifest_mode == ManifestMode.FLAT
-    }
+    index = {item.id: item for item in catalog if item.config.manifest_mode == ManifestMode.FLAT}
     items: list[CatalogItem] = []
     missing: list[str] = []
     for key, ids in manifest.flat.items():

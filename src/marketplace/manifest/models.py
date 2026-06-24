@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from marketplace.consts.manifest import MANIFEST_EXTERNAL_KEY
-
 
 class ManifestError(ValueError):
     """Raised when the manifest file is malformed or references unknown targets."""
@@ -23,4 +21,3 @@ class Manifest:
 
     per_agent: dict[str, dict[str, list[str]]] = field(default_factory=dict)
     flat: dict[str, list[str]] = field(default_factory=dict)
-

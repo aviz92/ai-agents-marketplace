@@ -12,10 +12,10 @@ from rich.console import Console
 from marketplace.cli.render import description_width, item_row, picker_header
 from marketplace.consts import display
 from marketplace.consts.agents import AGENT_CLAUDE, TARGET_AGENTS
-from marketplace.kind_catalog.registry import ALL_KINDS
 from marketplace.consts.kinds import RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS
 from marketplace.installer import RULE_TARGETS, TARGETS
 from marketplace.kind_catalog.models import CatalogItem
+from marketplace.kind_catalog.registry import ALL_KINDS
 
 
 def build_item_choices(catalog: list[CatalogItem], project_dir: Path) -> list[Choice | Separator]:
@@ -28,7 +28,9 @@ def build_item_choices(catalog: list[CatalogItem], project_dir: Path) -> list[Ch
     choices: list[Choice | Separator] = [Separator(f"  {picker_header()}")]
     indexed_catalog = list(enumerate(catalog))
     for cfg in ALL_KINDS:
-        if not (kind_indexed := [(i, item) for i, item in indexed_catalog if item.kind == cfg.kind_name]):
+        if not (
+            kind_indexed := [(i, item) for i, item in indexed_catalog if item.kind == cfg.kind_name]
+        ):
             continue
         section = f"{cfg.icon} {cfg.display_name}"
         choices.append(Separator(display.SECTION_SEPARATOR_FMT.format(section=section)))

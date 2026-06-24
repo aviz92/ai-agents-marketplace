@@ -16,7 +16,12 @@ def install_plugin(target_id: str, items: list[CatalogItem], project_dir: Path) 
     for item in items:
         cfg = item.config
         out_dir = project_dir / target.dir / item.id
-        _write_rendered(out_dir / cfg.output_file, env.get_template(cfg.template).render(item=item), project_dir, files_written)
+        _write_rendered(
+            out_dir / cfg.output_file,
+            env.get_template(cfg.template).render(item=item),
+            project_dir,
+            files_written,
+        )
         _copy_assets(item, out_dir, project_dir, files_written)
     _ensure_claude_md(target_id, project_dir, files_written)
     return InstallResult(

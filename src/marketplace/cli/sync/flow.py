@@ -7,16 +7,15 @@ from typing import TYPE_CHECKING
 
 from rich.console import Console
 
-from marketplace.kind_catalog.loader import load_catalog
 from marketplace.cli import render
 from marketplace.cli.sync.prompts import prompt_sync_agents
 from marketplace.consts import display
 from marketplace.installer import (
-    RULE_TARGETS,
-    TARGETS,
     InstallResult,
     install_to_target,
 )
+from marketplace.kind_catalog.loader import load_catalog
+from marketplace.kind_catalog.models import CatalogItem
 from marketplace.manifest import (
     MANIFEST_NAME,
     ManifestError,
@@ -24,7 +23,6 @@ from marketplace.manifest import (
     resolve_flat,
     resolve_per_agent,
 )
-from marketplace.kind_catalog.models import CatalogItem
 
 if TYPE_CHECKING:
     from marketplace.manifest import Manifest

@@ -7,9 +7,9 @@ from pathlib import Path
 import yaml
 
 from marketplace.consts.agents import VALID_RULE_TARGET_IDS, VALID_SKILL_TARGET_IDS
+from marketplace.consts.manifest import MANIFEST_NAME
 from marketplace.kind_catalog.kinds import PLUGIN, RULE, SKILL
 from marketplace.kind_catalog.registry import FLAT_KINDS, PER_AGENT_KINDS
-from marketplace.consts.manifest import MANIFEST_NAME
 from marketplace.manifest.models import Manifest, ManifestError
 
 
@@ -50,9 +50,7 @@ def _read_manifest_data(path: Path) -> dict:
 def _parse_flat(data: dict) -> tuple[dict[str, list[str]], set[str]]:
     flat_keys = {cfg.dir_name for cfg in FLAT_KINDS}
     flat = {
-        cfg.dir_name: _parse_kind(data, cfg.dir_name)
-        for cfg in FLAT_KINDS
-        if cfg.dir_name in data
+        cfg.dir_name: _parse_kind(data, cfg.dir_name) for cfg in FLAT_KINDS if cfg.dir_name in data
     }
     return flat, flat_keys
 

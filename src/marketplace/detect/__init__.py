@@ -1,30 +1,4 @@
-from __future__ import annotations
+from marketplace.detect.base import Platform
+from marketplace.detect.runner import detect_platforms
 
-from pathlib import Path
-
-from marketplace.detect.base import Platform, PlatformDetector
-from marketplace.detect.claude import ClaudeDetector
-from marketplace.detect.codex import CodexDetector
-from marketplace.detect.copilot import CopilotDetector
-from marketplace.detect.cursor import CursorDetector
-from marketplace.detect.gemini import GeminiDetector
-
-_DETECTORS: tuple[type[PlatformDetector], ...] = (
-    ClaudeDetector,
-    CursorDetector,
-    CopilotDetector,
-    CodexDetector,
-    GeminiDetector,
-)
-
-
-def detect_platforms(project_dir: Path) -> list[Platform]:
-    """Detect every registered agent; detection must never crash the CLI."""
-    platforms: list[Platform] = []
-    for detector_cls in _DETECTORS:
-        detector = detector_cls(project_dir)
-        try:
-            platforms.append(detector.detect())
-        except (OSError, ValueError):
-            platforms.append(detector.not_found())
-    return platforms
+__all__ = ["Platform", "detect_platforms"]
