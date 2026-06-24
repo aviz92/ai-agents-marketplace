@@ -8,7 +8,7 @@ from pathlib import Path
 import yaml
 
 from marketplace.consts.authoring import METADATA_FILE
-from marketplace.consts.kinds import KindConfig
+from marketplace.kinds import KindConfig
 from marketplace.kinds import ALL_KINDS
 from marketplace.models import KIND_CLASSES, CatalogItem
 from marketplace.utils import get_marketplace_root

@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, ClassVar, Literal, Self
 
 from marketplace.consts.authoring import DEFAULT_AUTHOR, DEFAULT_VERSION
-from marketplace.consts.kinds import KindConfig
+from marketplace.kinds import KindConfig
 from marketplace.kinds import (
     EXTERNAL_PLUGIN as EXTERNAL_PLUGIN_KIND,
     PLUGIN as PLUGIN_KIND,

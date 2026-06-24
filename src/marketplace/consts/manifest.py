@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from marketplace.consts.kinds import KindConfig, ManifestMode
+from marketplace.kinds import KindConfig, ManifestMode
 from marketplace.kinds import ALL_KINDS
 
 MANIFEST_NAME = "agents-marketplace.yaml"
