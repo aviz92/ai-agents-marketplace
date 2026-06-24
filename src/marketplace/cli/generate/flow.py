@@ -10,9 +10,9 @@ from marketplace.catalog import load_catalog
 from marketplace.cli import render
 from marketplace.cli.generate import prompts
 from marketplace.consts import display
-from marketplace.consts.kinds import KIND_EXTERNAL_PLUGIN
+from marketplace.consts.kinds import InstallGroup
 from marketplace.detect import detect_platforms
-from marketplace.installer import split_install_kinds
+from marketplace.installer import RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS
 from marketplace.manifest import save_manifest
 from marketplace.models import CatalogItem
 
@@ -22,12 +22,15 @@ def _build_per_target(
     skill_targets: list[str],
     rule_targets: list[str],
 ) -> dict[str, list[CatalogItem]]:
-    skills, rules = split_install_kinds(selected)
     per_target: dict[str, list[CatalogItem]] = {}
     for target_id in skill_targets:
-        per_target.setdefault(target_id, []).extend(skills)
+        per_target.setdefault(target_id, []).extend(
+            item for item in selected if item.config.install_group in SKILLS_TARGET_GROUPS
+        )
     for target_id in rule_targets:
-        per_target.setdefault(target_id, []).extend(rules)
+        per_target.setdefault(target_id, []).extend(
+            item for item in selected if item.config.install_group in RULE_TARGET_GROUPS
+        )
     return per_target
 
 
@@ -46,8 +49,12 @@ def run_generate(console: Console, project_dir: Path) -> None:
             console.print(display.MSG_NOTHING_SELECTED)
             return
 
-        external_selected = [item for item in selected if item.kind == KIND_EXTERNAL_PLUGIN]
-        regular_selected = [item for item in selected if item.kind != KIND_EXTERNAL_PLUGIN]
+        external_selected = [
+            item for item in selected if item.config.install_group == InstallGroup.EXTERNAL_PLUGIN
+        ]
+        regular_selected = [
+            item for item in selected if item.config.install_group != InstallGroup.EXTERNAL_PLUGIN
+        ]
 
         skill_targets: list[str] = []
         rule_targets: list[str] = []

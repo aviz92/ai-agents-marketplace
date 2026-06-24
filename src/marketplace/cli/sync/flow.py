@@ -15,15 +15,13 @@ from marketplace.installer import (
     RULE_TARGETS,
     TARGETS,
     InstallResult,
-    install_rules_to_target,
-    install_skills_to_target,
-    split_install_kinds,
+    install_to_target,
 )
 from marketplace.manifest import (
     MANIFEST_NAME,
     ManifestError,
     load_manifest,
-    resolve_external,
+    resolve_flat,
     resolve_per_agent,
 )
 from marketplace.models import CatalogItem
@@ -37,11 +35,7 @@ def _install_per_target(
 ) -> list[InstallResult]:
     results: list[InstallResult] = []
     for target_id, items in per_target.items():
-        skills, rules = split_install_kinds(items)
-        if target_id in TARGETS and skills:
-            results.append(install_skills_to_target(target_id, skills, project_dir))
-        if target_id in RULE_TARGETS and rules:
-            results.append(install_rules_to_target(target_id, rules, project_dir))
+        results.extend(install_to_target(target_id, items, project_dir))
     return results
 
 
@@ -86,7 +80,7 @@ def run_sync(console: Console, project_dir: Path, *, install_all: bool = False) 
     with console.status(display.LOADING_CATALOG):
         catalog = load_catalog()
     per_target, missing = resolve_per_agent(manifest, catalog)
-    external_items, missing_ext = resolve_external(manifest, catalog)
+    external_items, missing_ext = resolve_flat(manifest, catalog)
     missing = missing + missing_ext
     for reference in missing:
         err.print(display.MSG_MISSING_REF_FMT.format(reference=reference))

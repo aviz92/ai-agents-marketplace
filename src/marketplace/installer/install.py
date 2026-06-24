@@ -2,50 +2,41 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 from marketplace.consts.agents import AGENT_CLAUDE, CLAUDE_MD_PATH
-from marketplace.consts.kinds import KIND_PLUGIN, KIND_RULE, SKILL_LIKE_KINDS
-from marketplace.consts.render import (
-    CLAUDE_MD_FALLBACK,
-    PLUGIN_OUTPUT_FILE,
-    PLUGIN_TEMPLATE,
-    SKILL_OUTPUT_FILE,
-    SKILL_TEMPLATE,
-)
+from marketplace.consts.kinds import InstallGroup
+from marketplace.consts.render import CLAUDE_MD_FALLBACK
 from marketplace.models import CatalogItem
 
 from .models import _RULE_REFERENCES, RULE_TARGETS, TARGETS, InstallResult
 from .templates import _get_template_env
 from .writer import _copy_assets, _ensure_reference, _write_rendered
 
-
-def split_install_kinds(
-    items: list[CatalogItem],
-) -> tuple[list[CatalogItem], list[CatalogItem]]:
-    """Partition items into the two install paths: (skills-and-plugins, rules)."""
-    skills = [item for item in items if item.kind in SKILL_LIKE_KINDS]
-    rules = [item for item in items if item.kind == KIND_RULE]
-    return skills, rules
+_InstallFn = Callable[[str, list[CatalogItem], Path], InstallResult]
 
 
-def install_skills_to_target(
+def _install_skill(target_id: str, items: list[CatalogItem], project_dir: Path) -> InstallResult:
+    return _install_into_targets_dir(target_id, items, project_dir)
+
+
+def _install_plugin(target_id: str, items: list[CatalogItem], project_dir: Path) -> InstallResult:
+    return _install_into_targets_dir(target_id, items, project_dir)
+
+
+def _install_into_targets_dir(
     target_id: str, items: list[CatalogItem], project_dir: Path
 ) -> InstallResult:
-    """Render skills/plugins via their respective templates into one shared target dir."""
     target = TARGETS[target_id]
-    skill_template = _get_template_env().get_template(SKILL_TEMPLATE)
-    plugin_template = _get_template_env().get_template(PLUGIN_TEMPLATE)
+    env = _get_template_env()
     files_written: list[str] = []
     for item in items:
+        cfg = item.config
+        template = env.get_template(cfg.template)
         out_dir = project_dir / target.dir / item.id
-        if item.kind == KIND_PLUGIN:
-            output_file = out_dir / PLUGIN_OUTPUT_FILE
-            content = plugin_template.render(item=item)
-        else:
-            output_file = out_dir / SKILL_OUTPUT_FILE
-            content = skill_template.render(item=item)
-        _write_rendered(output_file, content, project_dir, files_written)
+        output_file = out_dir / cfg.output_file
+        _write_rendered(output_file, template.render(item=item), project_dir, files_written)
         _copy_assets(item, out_dir, project_dir, files_written)
     if target_id == AGENT_CLAUDE:
         claude_md = project_dir / CLAUDE_MD_PATH
@@ -60,22 +51,55 @@ def install_skills_to_target(
     )
 
 
-def install_rules_to_target(
-    rule_target_id: str, items: list[CatalogItem], project_dir: Path
-) -> InstallResult:
-    """Render rules into one agent's native format, plus its reference file if needed."""
-    target = RULE_TARGETS[rule_target_id]
+def _install_rule(target_id: str, items: list[CatalogItem], project_dir: Path) -> InstallResult:
+    target = RULE_TARGETS[target_id]
     template = _get_template_env().get_template(target.template)
     files_written: list[str] = []
     for item in items:
         out_file = project_dir / target.dir / target.filename_pattern.format(id=item.id)
         _write_rendered(out_file, template.render(item=item), project_dir, files_written)
-    if (reference := _RULE_REFERENCES.get(rule_target_id)) is not None:
+    if (reference := _RULE_REFERENCES.get(target_id)) is not None:
         _ensure_reference(project_dir, files_written, reference, rules_dir=target.dir)
     return InstallResult(
-        target=rule_target_id,
+        target=target_id,
         installed=len(items),
         files_written=files_written,
         output_dir=target.dir,
         covers=target.covers,
     )
+
+
+# Handlers per registry — defines which kinds each registry installs.
+# Derive group sets and dispatch from these; don't define groups elsewhere.
+_TARGETS_HANDLERS: list[tuple[InstallGroup, _InstallFn]] = [
+    (InstallGroup.SKILL, _install_skill),
+    (InstallGroup.PLUGIN, _install_plugin),
+]
+_RULE_TARGETS_HANDLERS: list[tuple[InstallGroup, _InstallFn]] = [
+    (InstallGroup.RULES, _install_rule),
+]
+
+SKILLS_TARGET_GROUPS: frozenset[InstallGroup] = frozenset(g for g, _ in _TARGETS_HANDLERS)
+RULE_TARGET_GROUPS: frozenset[InstallGroup] = frozenset(g for g, _ in _RULE_TARGETS_HANDLERS)
+
+# Per-target dispatch: target_id → [(InstallGroup, install_fn), ...]
+_TARGET_DISPATCH: dict[str, list[tuple[InstallGroup, _InstallFn]]] = {}
+for _tid in TARGETS:
+    _TARGET_DISPATCH.setdefault(_tid, []).extend(_TARGETS_HANDLERS)
+for _tid in RULE_TARGETS:
+    _TARGET_DISPATCH.setdefault(_tid, []).extend(_RULE_TARGETS_HANDLERS)
+
+
+def install_to_target(
+    target_id: str, items: list[CatalogItem], project_dir: Path
+) -> list[InstallResult]:
+    """Install items into target_id, dispatching each kind to its registered function."""
+    by_group: dict[InstallGroup, list[CatalogItem]] = {}
+    for item in items:
+        by_group.setdefault(item.config.install_group, []).append(item)
+
+    results: list[InstallResult] = []
+    for group, install_fn in _TARGET_DISPATCH.get(target_id, []):
+        if group_items := by_group.get(group):
+            results.append(install_fn(target_id, group_items, project_dir))
+    return results

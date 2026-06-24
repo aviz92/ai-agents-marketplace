@@ -1,38 +1,38 @@
-"""Artifact kind identifiers and per-kind metadata."""
+"""Artifact kind type definitions — enums and the KindConfig dataclass."""
 
 from __future__ import annotations
 
-from typing import Final, Literal
+from dataclasses import dataclass
+from enum import Enum
 
-KIND_SKILL: Final[Literal["skill"]] = "skill"
-KIND_PLUGIN: Final[Literal["plugin"]] = "plugin"
-KIND_RULE: Final[Literal["rule"]] = "rule"
-KIND_EXTERNAL_PLUGIN: Final[Literal["external-plugin"]] = "external-plugin"
-SKILL_LIKE_KINDS = frozenset({KIND_SKILL, KIND_PLUGIN})
 
-KIND_DIRS: dict[str, str] = {
-    KIND_SKILL: "skills",
-    KIND_PLUGIN: "plugins",
-    KIND_RULE: "rules",
-    KIND_EXTERNAL_PLUGIN: "external-plugins",
-}
-BODY_FILES: dict[str, str] = {
-    KIND_SKILL: "skill.md",
-    KIND_PLUGIN: "plugin.md",
-    KIND_RULE: "rule.md",
-    # KIND_EXTERNAL_PLUGIN intentionally absent — metadata-only, no body file
-}
-KIND_ICONS: dict[str, str] = {
-    KIND_SKILL: "🧠",
-    KIND_PLUGIN: "🔌",
-    KIND_RULE: "📏",
-    KIND_EXTERNAL_PLUGIN: "🌐",
-}
-DEFAULT_ICON = "📄"
+class InstallGroup(str, Enum):
+    """How an artifact kind is installed into a project."""
 
-KIND_SECTIONS: list[tuple[str, str]] = [
-    (KIND_SKILL, f"{KIND_ICONS[KIND_SKILL]} Skills"),
-    (KIND_PLUGIN, f"{KIND_ICONS[KIND_PLUGIN]} Plugins"),
-    (KIND_RULE, f"{KIND_ICONS[KIND_RULE]} Rules"),
-    (KIND_EXTERNAL_PLUGIN, f"{KIND_ICONS[KIND_EXTERNAL_PLUGIN]} External Plugins"),
-]
+    SKILL = "skill"
+    PLUGIN = "plugin"
+    RULES = "rules"
+    EXTERNAL_PLUGIN = "external_plugin"
+
+
+class ManifestMode(str, Enum):
+    """How a kind appears in agents-marketplace.yaml."""
+
+    PER_AGENT = "per_agent"
+    FLAT = "flat"
+
+
+@dataclass(frozen=True)
+class KindConfig:
+    """Complete specification for one artifact kind."""
+
+    kind_name: str
+    dir_name: str
+    icon: str
+    display_name: str
+    table_style: str           # Rich markup color for summary table ("" = default)
+    body_filename: str | None  # None = metadata-only (no body file on disk)
+    manifest_mode: ManifestMode
+    install_group: InstallGroup
+    template: str | None = None     # Jinja2 template filename (None for display-only)
+    output_file: str | None = None  # rendered output filename (None for display-only)

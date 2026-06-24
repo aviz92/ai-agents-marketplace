@@ -6,10 +6,12 @@ from collections.abc import Callable
 from pathlib import Path
 
 from marketplace.consts import display
-from marketplace.consts.kinds import KIND_EXTERNAL_PLUGIN, KIND_PLUGIN, KIND_RULE, SKILL_LIKE_KINDS
+from marketplace.consts.kinds import InstallGroup
 from marketplace.consts.render import PLUGIN_OUTPUT_FILE, SKILL_OUTPUT_FILE, VERSION_RE
 from marketplace.installer import RULE_TARGETS, TARGETS, RuleTargetInfo, TargetInfo
 from marketplace.models import CatalogItem
+
+_StatusFn = Callable[["CatalogItem", Path], dict[str, str]]
 
 
 def _read_installed_version(file_path: Path) -> str | None:
@@ -70,16 +72,32 @@ def get_installed_rule_versions_by_target(
     )
 
 
+def _status_skill(item: CatalogItem, project_dir: Path) -> dict[str, str]:
+    return _get_versions_by_target(
+        item.id, TARGETS, lambda iid, t: Path(t.dir) / iid / item.config.output_file, project_dir
+    )
+
+
+def _status_plugin(item: CatalogItem, project_dir: Path) -> dict[str, str]:
+    return _get_versions_by_target(
+        item.id, TARGETS, lambda iid, t: Path(t.dir) / iid / item.config.output_file, project_dir
+    )
+
+
+def _status_rule(item: CatalogItem, project_dir: Path) -> dict[str, str]:
+    return get_installed_rule_versions_by_target(item.id, RULE_TARGETS, project_dir)
+
+
+_STATUS_DISPATCH: dict[InstallGroup, _StatusFn] = {
+    InstallGroup.SKILL: _status_skill,
+    InstallGroup.PLUGIN: _status_plugin,
+    InstallGroup.RULES: _status_rule,
+}
+
+
 def _resolve_versions_by_target(item: CatalogItem, project_dir: Path) -> dict[str, str]:
-    if item.kind == KIND_RULE:
-        return get_installed_rule_versions_by_target(item.id, RULE_TARGETS, project_dir)
-    if item.kind == KIND_PLUGIN:
-        return get_installed_plugin_versions_by_target(item.id, TARGETS, project_dir)
-    if item.kind in SKILL_LIKE_KINDS:
-        return get_installed_versions_by_target(item.id, TARGETS, project_dir)
-    if item.kind == KIND_EXTERNAL_PLUGIN:
-        return {}  # never written to disk — no installed version to track
-    raise ValueError(f"Unknown item kind: {item.kind!r}")
+    fn = _STATUS_DISPATCH.get(item.config.install_group)
+    return fn(item, project_dir) if fn else {}
 
 
 def get_installed_versions(item_id: str, project_dir: Path) -> set[str]:

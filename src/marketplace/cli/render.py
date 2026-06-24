@@ -11,13 +11,7 @@ from rich.table import Table
 
 from marketplace.cli.status import get_status_and_versions
 from marketplace.consts import display
-from marketplace.consts.kinds import (
-    KIND_EXTERNAL_PLUGIN,
-    KIND_PLUGIN,
-    KIND_RULE,
-    KIND_SECTIONS,
-    KIND_SKILL,
-)
+from marketplace.kinds import ALL_KINDS, EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL
 from marketplace.detect import Platform
 from marketplace.installer import RULE_TARGETS, TARGETS, InstallResult
 from marketplace.models import CatalogItem, ExternalPlugin
@@ -53,14 +47,6 @@ def picker_header() -> str:
     )
 
 
-# Rich markup styles per kind — avoids emoji in table cells (emoji display width
-# is terminal-dependent and causes column misalignment across environments).
-_KIND_STYLE: dict[str, str] = {
-    KIND_SKILL: "green",
-    KIND_PLUGIN: "blue",
-    KIND_RULE: "yellow",
-}
-
 
 def print_banner(console: Console, project_dir: Path) -> None:
     console.print(f"[bold cyan]{display.BANNER}[/bold cyan]")
@@ -69,13 +55,13 @@ def print_banner(console: Console, project_dir: Path) -> None:
 
 
 def print_catalog_counts(console: Console, catalog: list[CatalogItem]) -> None:
-    counts = {kind: sum(1 for item in catalog if item.kind == kind) for kind, _ in KIND_SECTIONS}
+    counts = {cfg.kind_name: sum(1 for item in catalog if item.kind == cfg.kind_name) for cfg in ALL_KINDS}
     console.print(
         display.MSG_CATALOG_COUNTS_FMT.format(
-            skills=counts[KIND_SKILL],
-            rules=counts[KIND_RULE],
-            plugins=counts[KIND_PLUGIN],
-            external=counts[KIND_EXTERNAL_PLUGIN],
+            skills=counts[SKILL.kind_name],
+            rules=counts[RULE.kind_name],
+            plugins=counts[PLUGIN.kind_name],
+            external=counts[EXTERNAL_PLUGIN.kind_name],
         )
     )
 
@@ -112,7 +98,7 @@ def print_summary(
         table.add_column(column)
     for item in items:
         status, _ = get_status_and_versions(item, project_dir)
-        style = _KIND_STYLE.get(item.kind, "")
+        style = item.config.table_style
         kind_cell = f"[{style}]{item.kind}[/]" if style else item.kind
         table.add_row(item.name, kind_cell, item.version, display.ACTION_BY_STATUS[status])
     console.print(table)
