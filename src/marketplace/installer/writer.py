@@ -48,8 +48,8 @@ def _ensure_reference(
 ) -> None:
     """Append the reference note to the first existing candidate file, or create the fallback.
 
-    Skips the append when the file already mentions `rules_dir`, so re-running
-    an install never duplicates the reference.
+    Skips to append when the file already mentions `rules_dir`, so re-running
+    an installation never duplicates the reference.
     """
     note = RULE_REFERENCE_NOTE_FMT.format(rules_dir=rules_dir)
     for candidate in reference.candidates:
