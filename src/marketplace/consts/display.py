@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 BANNER = r"""
      _    ____ _____ _   _ _____ ____
     / \  / ___| ____| \ | |_   _/ ___|
@@ -33,7 +35,7 @@ DESCRIPTION_MAX_WIDTH = 150
 ELLIPSIS = "…"
 EMPTY_VALUE = "—"
 SECTION_SEPARATOR_FMT = f"{'─' * 4} {{section}} {'─' * 60}"
-TABLE_TITLE_JUSTIFY = "left"
+TABLE_TITLE_JUSTIFY: Literal["default", "left", "center", "right", "full"] = "left"
 
 COL_NAME = "Name"
 COL_STATUS = "Status"

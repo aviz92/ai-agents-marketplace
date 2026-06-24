@@ -6,7 +6,7 @@ from pathlib import Path
 
 from rich.console import Console
 
-from marketplace.cli import render
+from marketplace.cli.generate import render
 from marketplace.cli.generate import prompts
 from marketplace.consts import display
 from marketplace.consts.kinds import RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS, KindCategory

@@ -9,7 +9,7 @@ from InquirerPy.base.control import Choice
 from InquirerPy.separator import Separator
 from rich.console import Console
 
-from marketplace.cli.render import description_width, item_row, picker_header
+from marketplace.cli.generate.render import description_width, item_row, picker_header
 from marketplace.consts import display
 from marketplace.consts.agents import AGENT_CLAUDE, TARGET_AGENTS
 from marketplace.consts.kinds import RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS

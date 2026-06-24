@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from rich.console import Console
 
-from marketplace.cli import render
+from marketplace.cli.sync import render
 from marketplace.cli.sync.prompts import prompt_sync_agents
 from marketplace.consts import display
 from marketplace.installer import (
