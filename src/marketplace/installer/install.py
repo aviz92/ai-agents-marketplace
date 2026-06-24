@@ -81,12 +81,16 @@ _RULE_TARGETS_HANDLERS: list[tuple[KindCategory, _InstallFn]] = [
 SKILLS_TARGET_GROUPS: frozenset[KindCategory] = frozenset(g for g, _ in _TARGETS_HANDLERS)
 RULE_TARGET_GROUPS: frozenset[KindCategory] = frozenset(g for g, _ in _RULE_TARGETS_HANDLERS)
 
-# Per-target dispatch: target_id → [(KindCategory, install_fn), ...]
-_TARGET_DISPATCH: dict[str, list[tuple[KindCategory, _InstallFn]]] = {}
-for _tid in TARGETS:
-    _TARGET_DISPATCH.setdefault(_tid, []).extend(_TARGETS_HANDLERS)
-for _tid in RULE_TARGETS:
-    _TARGET_DISPATCH.setdefault(_tid, []).extend(_RULE_TARGETS_HANDLERS)
+def _build_target_dispatch() -> dict[str, list[tuple[KindCategory, _InstallFn]]]:
+    dispatch: dict[str, list[tuple[KindCategory, _InstallFn]]] = {}
+    for tid in TARGETS:
+        dispatch.setdefault(tid, []).extend(_TARGETS_HANDLERS)
+    for tid in RULE_TARGETS:
+        dispatch.setdefault(tid, []).extend(_RULE_TARGETS_HANDLERS)
+    return dispatch
+
+
+_TARGET_DISPATCH = _build_target_dispatch()
 
 
 def install_to_target(

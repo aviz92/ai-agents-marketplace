@@ -1,13 +1,12 @@
-"""Agent identifiers, display names, and detection signals."""
+"""Shared cross-agent constants built from per-agent modules."""
 
 from __future__ import annotations
 
-# ── Agent identifiers ────────────────────────────────────────────────────────
-AGENT_CLAUDE = "claude"
-AGENT_CURSOR = "cursor"
-AGENT_COPILOT = "copilot"
-AGENT_CODEX = "codex"
-AGENT_GEMINI = "gemini"
+from .agent_claude import AGENT_CLAUDE, CLAUDE_MD, CLAUDE_MD_PATH
+from .agent_codex import AGENT_CODEX
+from .agent_copilot import AGENT_COPILOT
+from .agent_cursor import AGENT_CURSOR
+from .agent_gemini import AGENT_GEMINI, GEMINI_MD
 
 AGENT_NAMES: dict[str, str] = {
     AGENT_CLAUDE: "Claude Code",
@@ -17,11 +16,13 @@ AGENT_NAMES: dict[str, str] = {
     AGENT_GEMINI: "Gemini CLI",
 }
 
-# The shared .agents/ skill dir serves many agents — not itself an agent id.
 TARGET_AGENTS = "agents"
+AGENTS_MD = "AGENTS.md"
+AGENTS_SKILLS_DIR = ".agents/skills"
+RULES_DIR_FMT = ".{agent}/rules"
 
 # Display names of all agents covered by the shared .agents/ target.
-# Keep this list updated as new open-standard agents adopt the .agents/ layout.
+# Keep updated as new open-standard agents adopt the .agents/ layout.
 AGENTS_TARGET_COVERS: list[str] = [
     AGENT_NAMES[AGENT_CURSOR],
     AGENT_NAMES[AGENT_COPILOT],
@@ -38,13 +39,6 @@ VALID_RULE_TARGET_IDS: frozenset[str] = frozenset(
     {AGENT_CURSOR, AGENT_COPILOT, AGENT_CLAUDE, AGENT_CODEX, AGENT_GEMINI}
 )
 
-# ── Well-known instruction files ─────────────────────────────────────────────
-AGENTS_MD = "AGENTS.md"
-CLAUDE_MD = "CLAUDE.md"
-GEMINI_MD = "GEMINI.md"
-CLAUDE_MD_PATH = ".claude/CLAUDE.md"
-
-# ── Project-level detection signals ─────────────────────────────────────────
 AGENT_PROJECT_SIGNALS: dict[str, list[str]] = {
     AGENT_CLAUDE: [CLAUDE_MD, ".claude"],
     AGENT_CURSOR: [".cursor", ".cursorrules"],

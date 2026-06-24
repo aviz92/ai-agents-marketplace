@@ -12,21 +12,20 @@ from marketplace.consts.agents import (
     AGENT_GEMINI,
     AGENT_NAMES,
     AGENTS_MD,
+    AGENTS_SKILLS_DIR,
     AGENTS_TARGET_COVERS,
     CLAUDE_MD_PATH,
-    GEMINI_MD,
-    TARGET_AGENTS,
-)
-from marketplace.consts.render import (
-    AGENTS_SKILLS_DIR,
     CLAUDE_SKILLS_DIR,
     COPILOT_INSTRUCTIONS_DIR,
     EXT_INSTRUCTIONS_MD,
-    EXT_MD,
     EXT_MDC,
+    GEMINI_MD,
+    RULES_DIR_FMT,
+    TARGET_AGENTS,
+)
+from marketplace.consts.render import (
     RULE_FILENAME_FMT,
     RULE_TEMPLATE_FMT,
-    RULES_DIR_FMT,
 )
 
 
@@ -97,9 +96,9 @@ RULE_TARGETS: dict[str, RuleTargetInfo] = {
     AGENT_COPILOT: RuleTargetInfo.for_agent(
         AGENT_COPILOT, EXT_INSTRUCTIONS_MD, rules_dir=COPILOT_INSTRUCTIONS_DIR
     ),
-    AGENT_CLAUDE: RuleTargetInfo.for_agent(AGENT_CLAUDE, EXT_MD),
-    AGENT_CODEX: RuleTargetInfo.for_agent(AGENT_CODEX, EXT_MD),
-    AGENT_GEMINI: RuleTargetInfo.for_agent(AGENT_GEMINI, EXT_MD),
+    AGENT_CLAUDE: RuleTargetInfo.for_agent(AGENT_CLAUDE, "md"),
+    AGENT_CODEX: RuleTargetInfo.for_agent(AGENT_CODEX, "md"),
+    AGENT_GEMINI: RuleTargetInfo.for_agent(AGENT_GEMINI, "md"),
 }
 
 
