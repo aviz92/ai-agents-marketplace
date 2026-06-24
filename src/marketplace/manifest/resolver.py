@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from marketplace.consts.kinds import ManifestMode
-from marketplace.consts.manifest import MANIFEST_FLAT_KINDS, MANIFEST_PER_AGENT_KINDS
+from marketplace.consts.manifest import ManifestMode
+from marketplace.kind_catalog.config import FLAT_KINDS, PER_AGENT_KINDS
 from marketplace.manifest.models import Manifest
 from marketplace.kind_catalog.models import CatalogItem
 
@@ -17,13 +17,13 @@ def resolve_per_agent(
     """
     kind_index: dict[str, dict[str, CatalogItem]] = {
         cfg.kind_name: {item.id: item for item in catalog if item.kind == cfg.kind_name}
-        for cfg in MANIFEST_PER_AGENT_KINDS
+        for cfg in PER_AGENT_KINDS
     }
     per_target: dict[str, list[CatalogItem]] = {}
     missing: list[str] = []
     for target_id, entry in manifest.per_agent.items():
         items: list[CatalogItem] = []
-        for cfg in MANIFEST_PER_AGENT_KINDS:
+        for cfg in PER_AGENT_KINDS:
             if cfg.dir_name not in entry:
                 continue
             kind_items = kind_index[cfg.kind_name]
@@ -44,7 +44,7 @@ def resolve_flat(
     Works for any ManifestMode.FLAT kind (e.g. external-plugins).
     Returns (items, missing_refs).
     """
-    flat_dir_to_cfg = {cfg.dir_name: cfg for cfg in MANIFEST_FLAT_KINDS}
+    flat_dir_to_cfg = {cfg.dir_name: cfg for cfg in FLAT_KINDS}
     index = {
         item.id: item
         for item in catalog

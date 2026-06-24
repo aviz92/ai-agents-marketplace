@@ -10,7 +10,7 @@ from marketplace.kind_catalog.loader import load_catalog
 from marketplace.cli import render
 from marketplace.cli.generate import prompts
 from marketplace.consts import display
-from marketplace.consts.kinds import InstallGroup
+from marketplace.consts.kinds import KindCategory
 from marketplace.detect import detect_platforms
 from marketplace.installer import RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS
 from marketplace.manifest import save_manifest
@@ -25,11 +25,11 @@ def _build_per_target(
     per_target: dict[str, list[CatalogItem]] = {}
     for target_id in skill_targets:
         per_target.setdefault(target_id, []).extend(
-            item for item in selected if item.config.install_group in SKILLS_TARGET_GROUPS
+            item for item in selected if item.config.kind_category in SKILLS_TARGET_GROUPS
         )
     for target_id in rule_targets:
         per_target.setdefault(target_id, []).extend(
-            item for item in selected if item.config.install_group in RULE_TARGET_GROUPS
+            item for item in selected if item.config.kind_category in RULE_TARGET_GROUPS
         )
     return per_target
 
@@ -50,10 +50,10 @@ def run_generate(console: Console, project_dir: Path) -> None:
             return
 
         external_selected = [
-            item for item in selected if item.config.install_group == InstallGroup.EXTERNAL_PLUGIN
+            item for item in selected if item.config.kind_category == KindCategory.EXTERNAL_PLUGIN
         ]
         regular_selected = [
-            item for item in selected if item.config.install_group != InstallGroup.EXTERNAL_PLUGIN
+            item for item in selected if item.config.kind_category != KindCategory.EXTERNAL_PLUGIN
         ]
 
         skill_targets: list[str] = []

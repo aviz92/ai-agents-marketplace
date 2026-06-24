@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
-from marketplace.kind_catalog.config import ALL_KINDS, KindConfig, ManifestMode
+from enum import Enum
+
+
+class ManifestMode(str, Enum):
+    """How a kind appears in agents-marketplace.yaml."""
+
+    PER_AGENT = "per_agent"
+    FLAT = "flat"
+
 
 MANIFEST_NAME = "agents-marketplace.yaml"
 MANIFEST_EXTERNAL_KEY = "external-plugins"
-
-MANIFEST_PER_AGENT_KINDS: tuple[KindConfig, ...] = tuple(
-    cfg for cfg in ALL_KINDS if cfg.manifest_mode == ManifestMode.PER_AGENT
-)
-MANIFEST_FLAT_KINDS: tuple[KindConfig, ...] = tuple(
-    cfg for cfg in ALL_KINDS if cfg.manifest_mode == ManifestMode.FLAT
-)
 
 MANIFEST_HEADER = """\
 # agents-marketplace team-sync manifest — commit this file.

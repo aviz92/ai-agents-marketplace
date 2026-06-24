@@ -92,8 +92,8 @@ def _prompt_rule_targets(detected: set[str]) -> list[str]:
 def prompt_all_targets(
     console: Console, selected: list[CatalogItem], detected: set[str]
 ) -> tuple[list[str], list[str]]:
-    has_skills = any(item.config.install_group in SKILLS_TARGET_GROUPS for item in selected)
-    has_rules = any(item.config.install_group in RULE_TARGET_GROUPS for item in selected)
+    has_skills = any(item.config.kind_category in SKILLS_TARGET_GROUPS for item in selected)
+    has_rules = any(item.config.kind_category in RULE_TARGET_GROUPS for item in selected)
     skill_targets = _prompt_targets(detected) if has_skills else []
     rule_targets = _prompt_rule_targets(detected) if has_rules else []
     if has_skills and not skill_targets:

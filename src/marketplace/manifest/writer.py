@@ -6,11 +6,8 @@ from pathlib import Path
 
 import yaml
 
-from marketplace.consts.manifest import (
-    MANIFEST_FLAT_KINDS,
-    MANIFEST_HEADER,
-    MANIFEST_PER_AGENT_KINDS,
-)
+from marketplace.consts.manifest import MANIFEST_HEADER
+from marketplace.kind_catalog.config import FLAT_KINDS, PER_AGENT_KINDS
 from marketplace.manifest.loader import manifest_path
 from marketplace.kind_catalog.models import CatalogItem
 
@@ -24,7 +21,7 @@ def save_manifest(
     data: dict = {}
 
     if external_items:
-        for cfg in MANIFEST_FLAT_KINDS:
+        for cfg in FLAT_KINDS:
             ids = sorted(item.id for item in external_items if item.kind == cfg.kind_name)
             if ids:
                 data[cfg.dir_name] = ids
@@ -32,7 +29,7 @@ def save_manifest(
     for target_id, items in per_target.items():
         entry: dict = {
             cfg.dir_name: sorted(item.id for item in items if item.kind == cfg.kind_name)
-            for cfg in MANIFEST_PER_AGENT_KINDS
+            for cfg in PER_AGENT_KINDS
             if any(item.kind == cfg.kind_name for item in items)
         }
         if entry:

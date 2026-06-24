@@ -7,8 +7,8 @@ from pathlib import Path
 import yaml
 
 from marketplace.consts.agents import VALID_RULE_TARGET_IDS, VALID_SKILL_TARGET_IDS
-from marketplace.kind_catalog.config import PLUGIN, RULE, SKILL
-from marketplace.consts.manifest import MANIFEST_FLAT_KINDS, MANIFEST_NAME, MANIFEST_PER_AGENT_KINDS
+from marketplace.kind_catalog.config import FLAT_KINDS, PER_AGENT_KINDS, PLUGIN, RULE, SKILL
+from marketplace.consts.manifest import MANIFEST_NAME
 from marketplace.manifest.models import Manifest, ManifestError
 
 
@@ -50,7 +50,7 @@ def load_manifest(project_dir: Path) -> Manifest | None:
 
     flat_keys: set[str] = set()
     flat: dict[str, list[str]] = {}
-    for cfg in MANIFEST_FLAT_KINDS:
+    for cfg in FLAT_KINDS:
         flat_keys.add(cfg.dir_name)
         if cfg.dir_name in data:
             flat[cfg.dir_name] = _parse_kind(data, cfg.dir_name)
@@ -66,7 +66,7 @@ def load_manifest(project_dir: Path) -> Manifest | None:
             raise ManifestError(f"Entry for '{target_id}' must be a mapping")
         per_agent[target_id] = {
             cfg.dir_name: _parse_kind(entry, cfg.dir_name)
-            for cfg in MANIFEST_PER_AGENT_KINDS
+            for cfg in PER_AGENT_KINDS
             if cfg.dir_name in entry
         }
     _validate_per_agent(per_agent)

@@ -6,7 +6,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from marketplace.consts.agents import AGENT_CLAUDE, CLAUDE_MD_PATH
-from marketplace.consts.kinds import InstallGroup
+from marketplace.consts.kinds import KindCategory
 from marketplace.consts.render import CLAUDE_MD_FALLBACK
 from marketplace.kind_catalog.models import CatalogItem
 
@@ -70,19 +70,19 @@ def _install_into_targets_dir(
 
 # Handlers per registry — defines which kinds each registry installs.
 # Derive group sets and dispatch from these; don't define groups elsewhere.
-_TARGETS_HANDLERS: list[tuple[InstallGroup, _InstallFn]] = [
-    (InstallGroup.SKILL, _install_skill),
-    (InstallGroup.PLUGIN, _install_plugin),
+_TARGETS_HANDLERS: list[tuple[KindCategory, _InstallFn]] = [
+    (KindCategory.SKILL, _install_skill),
+    (KindCategory.PLUGIN, _install_plugin),
 ]
-_RULE_TARGETS_HANDLERS: list[tuple[InstallGroup, _InstallFn]] = [
-    (InstallGroup.RULES, _install_rule),
+_RULE_TARGETS_HANDLERS: list[tuple[KindCategory, _InstallFn]] = [
+    (KindCategory.RULES, _install_rule),
 ]
 
-SKILLS_TARGET_GROUPS: frozenset[InstallGroup] = frozenset(g for g, _ in _TARGETS_HANDLERS)
-RULE_TARGET_GROUPS: frozenset[InstallGroup] = frozenset(g for g, _ in _RULE_TARGETS_HANDLERS)
+SKILLS_TARGET_GROUPS: frozenset[KindCategory] = frozenset(g for g, _ in _TARGETS_HANDLERS)
+RULE_TARGET_GROUPS: frozenset[KindCategory] = frozenset(g for g, _ in _RULE_TARGETS_HANDLERS)
 
-# Per-target dispatch: target_id → [(InstallGroup, install_fn), ...]
-_TARGET_DISPATCH: dict[str, list[tuple[InstallGroup, _InstallFn]]] = {}
+# Per-target dispatch: target_id → [(KindCategory, install_fn), ...]
+_TARGET_DISPATCH: dict[str, list[tuple[KindCategory, _InstallFn]]] = {}
 for _tid in TARGETS:
     _TARGET_DISPATCH.setdefault(_tid, []).extend(_TARGETS_HANDLERS)
 for _tid in RULE_TARGETS:
@@ -93,9 +93,9 @@ def install_to_target(
     target_id: str, items: list[CatalogItem], project_dir: Path
 ) -> list[InstallResult]:
     """Install items into target_id, dispatching each kind to its registered function."""
-    by_group: dict[InstallGroup, list[CatalogItem]] = {}
+    by_group: dict[KindCategory, list[CatalogItem]] = {}
     for item in items:
-        by_group.setdefault(item.config.install_group, []).append(item)
+        by_group.setdefault(item.config.kind_category, []).append(item)
 
     results: list[InstallResult] = []
     for group, install_fn in _TARGET_DISPATCH.get(target_id, []):

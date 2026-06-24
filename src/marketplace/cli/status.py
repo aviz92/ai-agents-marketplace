@@ -6,7 +6,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from marketplace.consts import display
-from marketplace.consts.kinds import InstallGroup
+from marketplace.consts.kinds import KindCategory
 from marketplace.consts.render import PLUGIN_OUTPUT_FILE, SKILL_OUTPUT_FILE, VERSION_RE
 from marketplace.installer import RULE_TARGETS, TARGETS, RuleTargetInfo, TargetInfo
 from marketplace.kind_catalog.models import CatalogItem
@@ -88,15 +88,15 @@ def _status_rule(item: CatalogItem, project_dir: Path) -> dict[str, str]:
     return get_installed_rule_versions_by_target(item.id, RULE_TARGETS, project_dir)
 
 
-_STATUS_DISPATCH: dict[InstallGroup, _StatusFn] = {
-    InstallGroup.SKILL: _status_skill,
-    InstallGroup.PLUGIN: _status_plugin,
-    InstallGroup.RULES: _status_rule,
+_STATUS_DISPATCH: dict[KindCategory, _StatusFn] = {
+    KindCategory.SKILL: _status_skill,
+    KindCategory.PLUGIN: _status_plugin,
+    KindCategory.RULES: _status_rule,
 }
 
 
 def _resolve_versions_by_target(item: CatalogItem, project_dir: Path) -> dict[str, str]:
-    fn = _STATUS_DISPATCH.get(item.config.install_group)
+    fn = _STATUS_DISPATCH.get(item.config.kind_category)
     return fn(item, project_dir) if fn else {}
 
 
