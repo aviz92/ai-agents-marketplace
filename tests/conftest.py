@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 
 import marketplace.installer as _installer
-from marketplace import catalog
-from marketplace.models import Plugin, Rule, Skill
+from marketplace.kind_catalog import loader as catalog
+from marketplace.kind_catalog.models import Plugin, Rule, Skill
 
 
 @pytest.fixture(autouse=True)

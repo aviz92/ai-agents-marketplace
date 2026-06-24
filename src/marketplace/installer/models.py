@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from functools import cache
 
 from marketplace.consts.agents import (
     AGENT_CLAUDE,
@@ -31,8 +32,6 @@ from marketplace.consts.render import (
 
 @dataclass
 class TargetInfo:
-    """A universal skill/plugin install target (shared open-standard directory)."""
-
     dir: str
     covers: list[str]
 
@@ -43,8 +42,6 @@ class TargetInfo:
 
 @dataclass
 class RuleTargetInfo:
-    """A per-agent rule install target with its native filename and template."""
-
     dir: str
     filename_pattern: str
     template: str
@@ -71,8 +68,6 @@ class RuleTargetInfo:
 
 @dataclass
 class InstallResult:
-    """Outcome of one install operation against one target."""
-
     target: str
     installed: int
     files_written: list[str] = field(default_factory=list)
@@ -80,26 +75,31 @@ class InstallResult:
     covers: list[str] = field(default_factory=list)
 
 
-TARGETS: dict[str, TargetInfo] = {
-    AGENT_CLAUDE: TargetInfo(
-        dir=CLAUDE_SKILLS_DIR,
-        covers=[AGENT_NAMES[AGENT_CLAUDE], AGENT_NAMES[AGENT_COPILOT]],
-    ),
-    TARGET_AGENTS: TargetInfo(
-        dir=AGENTS_SKILLS_DIR,
-        covers=AGENTS_TARGET_COVERS,
-    ),
-}
+@cache
+def targets() -> dict[str, TargetInfo]:
+    return {
+        AGENT_CLAUDE: TargetInfo(
+            dir=CLAUDE_SKILLS_DIR,
+            covers=[AGENT_NAMES[AGENT_CLAUDE], AGENT_NAMES[AGENT_COPILOT]],
+        ),
+        TARGET_AGENTS: TargetInfo(
+            dir=AGENTS_SKILLS_DIR,
+            covers=AGENTS_TARGET_COVERS,
+        ),
+    }
 
-RULE_TARGETS: dict[str, RuleTargetInfo] = {
-    AGENT_CURSOR: RuleTargetInfo.for_agent(AGENT_CURSOR, EXT_MDC),
-    AGENT_COPILOT: RuleTargetInfo.for_agent(
-        AGENT_COPILOT, EXT_INSTRUCTIONS_MD, rules_dir=COPILOT_INSTRUCTIONS_DIR
-    ),
-    AGENT_CLAUDE: RuleTargetInfo.for_agent(AGENT_CLAUDE, "md"),
-    AGENT_CODEX: RuleTargetInfo.for_agent(AGENT_CODEX, "md"),
-    AGENT_GEMINI: RuleTargetInfo.for_agent(AGENT_GEMINI, "md"),
-}
+
+@cache
+def rule_targets() -> dict[str, RuleTargetInfo]:
+    return {
+        AGENT_CURSOR: RuleTargetInfo.for_agent(AGENT_CURSOR, EXT_MDC),
+        AGENT_COPILOT: RuleTargetInfo.for_agent(
+            AGENT_COPILOT, EXT_INSTRUCTIONS_MD, rules_dir=COPILOT_INSTRUCTIONS_DIR
+        ),
+        AGENT_CLAUDE: RuleTargetInfo.for_agent(AGENT_CLAUDE, "md"),
+        AGENT_CODEX: RuleTargetInfo.for_agent(AGENT_CODEX, "md"),
+        AGENT_GEMINI: RuleTargetInfo.for_agent(AGENT_GEMINI, "md"),
+    }
 
 
 @dataclass
@@ -115,19 +115,21 @@ class ReferenceSpec:
     fallback_header: str = ""
 
 
-_RULE_REFERENCES: dict[str, ReferenceSpec] = {
-    AGENT_CLAUDE: ReferenceSpec(
-        candidates=[CLAUDE_MD_PATH, AGENTS_MD],
-        fallback=CLAUDE_MD_PATH,
-    ),
-    AGENT_CODEX: ReferenceSpec(
-        candidates=[AGENTS_MD, f".{AGENT_CODEX}/{AGENTS_MD}"],
-        fallback=AGENTS_MD,
-        fallback_header="# Agent Instructions",
-    ),
-    AGENT_GEMINI: ReferenceSpec(
-        candidates=[GEMINI_MD, f".{AGENT_GEMINI}/{GEMINI_MD}"],
-        fallback=GEMINI_MD,
-        fallback_header="# Gemini Instructions",
-    ),
-}
+@cache
+def _rule_references() -> dict[str, ReferenceSpec]:
+    return {
+        AGENT_CLAUDE: ReferenceSpec(
+            candidates=[CLAUDE_MD_PATH, AGENTS_MD],
+            fallback=CLAUDE_MD_PATH,
+        ),
+        AGENT_CODEX: ReferenceSpec(
+            candidates=[AGENTS_MD, f".{AGENT_CODEX}/{AGENTS_MD}"],
+            fallback=AGENTS_MD,
+            fallback_header="# Agent Instructions",
+        ),
+        AGENT_GEMINI: ReferenceSpec(
+            candidates=[GEMINI_MD, f".{AGENT_GEMINI}/{GEMINI_MD}"],
+            fallback=GEMINI_MD,
+            fallback_header="# Gemini Instructions",
+        ),
+    }

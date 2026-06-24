@@ -5,7 +5,6 @@ from pathlib import Path
 
 from InquirerPy.base.control import Choice
 
-from marketplace.catalog import CatalogItem
 from marketplace.cli import (
     build_item_choices,
     collect_installed_state,
@@ -16,6 +15,7 @@ from marketplace.cli import (
 )
 from marketplace.consts.display import STATUS_INSTALLED, STATUS_NOT_INSTALLED, STATUS_UPDATE
 from marketplace.installer import install_rules_to_target, install_skills_to_target
+from marketplace.kind_catalog.models import CatalogItem
 
 
 class TestVersionDetection:

@@ -4,13 +4,13 @@ from pathlib import Path
 
 from marketplace.kind_catalog.models import CatalogItem
 
-from .models import TARGETS, InstallResult
+from .models import InstallResult, targets
 from .templates import _get_template_env
 from .writer import _copy_assets, _ensure_claude_md, _write_rendered
 
 
 def install_plugin(target_id: str, items: list[CatalogItem], project_dir: Path) -> InstallResult:
-    target = TARGETS[target_id]
+    target = targets()[target_id]
     env = _get_template_env()
     files_written: list[str] = []
     for item in items:

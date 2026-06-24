@@ -12,10 +12,10 @@ from rich.table import Table
 from marketplace.cli.status import get_status_and_versions
 from marketplace.consts import display
 from marketplace.detect import Platform
-from marketplace.installer import RULE_TARGETS, TARGETS, InstallResult
+from marketplace.installer import InstallResult, rule_targets, targets
 from marketplace.kind_catalog.kinds import EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL
 from marketplace.kind_catalog.models import CatalogItem, ExternalPlugin
-from marketplace.kind_catalog.registry import ALL_KINDS
+from marketplace.kind_catalog.registry import all_kinds
 
 
 def _clip(text: str, width: int) -> str:
@@ -56,7 +56,8 @@ def print_banner(console: Console, project_dir: Path) -> None:
 
 def print_catalog_counts(console: Console, catalog: list[CatalogItem]) -> None:
     counts = {
-        cfg.kind_name: sum(1 for item in catalog if item.kind == cfg.kind_name) for cfg in ALL_KINDS
+        cfg.kind_name: sum(1 for item in catalog if item.kind == cfg.kind_name)
+        for cfg in all_kinds()
     }
     console.print(
         display.MSG_CATALOG_COUNTS_FMT.format(
@@ -80,7 +81,7 @@ def print_platforms(console: Console, platforms: list[Platform]) -> None:
 
 
 def print_targets_panel(console: Console) -> None:
-    all_targets = list(TARGETS.values()) + list(RULE_TARGETS.values())
+    all_targets = list(targets().values()) + list(rule_targets().values())
     lines = [
         display.TARGET_PANEL_LINE_FMT.format(label=target.label, covers=", ".join(target.covers))
         for target in all_targets
@@ -93,7 +94,7 @@ def print_summary(
     items: list[CatalogItem],
     project_dir: Path,
     skill_targets: list[str],
-    rule_targets: list[str],
+    rule_target_ids: list[str],
 ) -> None:
     table = Table(title=display.TITLE_SUMMARY, title_justify=display.TABLE_TITLE_JUSTIFY)
     for column in display.SUMMARY_TABLE_COLUMNS:
@@ -104,8 +105,8 @@ def print_summary(
         kind_cell = f"[{style}]{item.kind}[/]" if style else item.kind
         table.add_row(item.name, kind_cell, item.version, display.ACTION_BY_STATUS[status])
     console.print(table)
-    dirs = [TARGETS[target_id].dir for target_id in skill_targets]
-    dirs += [RULE_TARGETS[target_id].dir for target_id in rule_targets]
+    dirs = [targets()[target_id].dir for target_id in skill_targets]
+    dirs += [rule_targets()[target_id].dir for target_id in rule_target_ids]
     if dirs:
         console.print(Panel("\n".join(dirs), title=display.TITLE_TARGET_DIRS, title_align="left"))
 

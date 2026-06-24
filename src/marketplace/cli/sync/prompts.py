@@ -14,16 +14,20 @@ from InquirerPy.separator import Separator
 
 from marketplace.consts import display
 from marketplace.consts.agents import AGENT_NAMES, TARGET_AGENTS
-from marketplace.installer import RULE_TARGETS, TARGETS, RuleTargetInfo, TargetInfo
-from marketplace.kind_catalog.config import KindConfig
-from marketplace.kind_catalog.kinds import PLUGIN, RULE, SKILL
+from marketplace.installer import RuleTargetInfo, TargetInfo, rule_targets, targets
+from marketplace.kind_catalog.kinds import PLUGIN, RULE, SKILL, KindConfig
 from marketplace.kind_catalog.models import CatalogItem
 
 _NAME_W = 26
 _KIND_W = 11
 _GUTTER = 4  # "  ◉ " prefix InquirerPy adds to every choice row
 _ARROW = "  →  "
-_TARGET_INFO: dict[str, TargetInfo | RuleTargetInfo] = {**TARGETS, **RULE_TARGETS}
+
+
+def _target_info() -> dict[str, TargetInfo | RuleTargetInfo]:
+    return {**targets(), **rule_targets()}
+
+
 _DISPLAY_NAMES = {**AGENT_NAMES, TARGET_AGENTS: "agents/ (multi-agent)"}
 
 # Each kind's section title and the singular/plural noun for its count column, in display order.
@@ -60,7 +64,7 @@ def _primary_kind(items: list[CatalogItem]) -> KindConfig:
 
 
 def _covers(target_id: str, prefix_len: int) -> str:
-    if not (target := _TARGET_INFO.get(target_id)):
+    if not (target := _target_info().get(target_id)):
         return ""
     joined = ", ".join(target.covers)
     available = max(

@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from marketplace.catalog import load_catalog
-from marketplace.models import CatalogItem, Plugin, Rule, Skill
+from marketplace.kind_catalog.loader import load_catalog
+from marketplace.kind_catalog.models import CatalogItem, Plugin, Rule, Skill
 
 
 def _write_item(root: Path, kind_dir: str, item_id: str, metadata: str, body_file: str) -> None:

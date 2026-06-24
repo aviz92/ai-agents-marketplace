@@ -9,7 +9,7 @@ import yaml
 from marketplace.consts.agents import VALID_RULE_TARGET_IDS, VALID_SKILL_TARGET_IDS
 from marketplace.consts.manifest import MANIFEST_NAME
 from marketplace.kind_catalog.kinds import PLUGIN, RULE, SKILL
-from marketplace.kind_catalog.registry import FLAT_KINDS, PER_AGENT_KINDS
+from marketplace.kind_catalog.registry import flat_kinds, per_agent_kinds
 from marketplace.manifest.models import Manifest, ManifestError
 
 
@@ -48,9 +48,11 @@ def _read_manifest_data(path: Path) -> dict:
 
 
 def _parse_flat(data: dict) -> tuple[dict[str, list[str]], set[str]]:
-    flat_keys = {cfg.dir_name for cfg in FLAT_KINDS}
+    flat_keys = {cfg.dir_name for cfg in flat_kinds()}
     flat = {
-        cfg.dir_name: _parse_kind(data, cfg.dir_name) for cfg in FLAT_KINDS if cfg.dir_name in data
+        cfg.dir_name: _parse_kind(data, cfg.dir_name)
+        for cfg in flat_kinds()
+        if cfg.dir_name in data
     }
     return flat, flat_keys
 
@@ -67,7 +69,7 @@ def _parse_per_agent(data: dict, flat_keys: set[str]) -> dict[str, dict[str, lis
             raise ManifestError(f"Entry for '{target_id}' must be a mapping")
         per_agent[target_id] = {
             cfg.dir_name: _parse_kind(entry, cfg.dir_name)
-            for cfg in PER_AGENT_KINDS
+            for cfg in per_agent_kinds()
             if cfg.dir_name in entry
         }
     return per_agent

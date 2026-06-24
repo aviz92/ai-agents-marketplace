@@ -1,23 +1,25 @@
 from __future__ import annotations
 
-from .install import install_to_target
+from .install import install_rules_to_target, install_skills_to_target, install_to_target
 from .models import (
-    RULE_TARGETS,
-    TARGETS,
     InstallResult,
     ReferenceSpec,
     RuleTargetInfo,
     TargetInfo,
+    rule_targets,
+    targets,
 )
 from .templates import clear_template_env_cache
 
 __all__ = [
-    "RULE_TARGETS",
-    "TARGETS",
+    "rule_targets",
+    "targets",
     "InstallResult",
     "ReferenceSpec",
     "RuleTargetInfo",
     "TargetInfo",
     "clear_template_env_cache",
+    "install_rules_to_target",
+    "install_skills_to_target",
     "install_to_target",
 ]

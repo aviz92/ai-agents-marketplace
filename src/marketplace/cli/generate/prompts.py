@@ -13,9 +13,9 @@ from marketplace.cli.render import description_width, item_row, picker_header
 from marketplace.consts import display
 from marketplace.consts.agents import AGENT_CLAUDE, TARGET_AGENTS
 from marketplace.consts.kinds import RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS
-from marketplace.installer import RULE_TARGETS, TARGETS
+from marketplace.installer import rule_targets, targets
 from marketplace.kind_catalog.models import CatalogItem
-from marketplace.kind_catalog.registry import ALL_KINDS
+from marketplace.kind_catalog.registry import all_kinds
 
 
 def build_item_choices(catalog: list[CatalogItem], project_dir: Path) -> list[Choice | Separator]:
@@ -27,7 +27,7 @@ def build_item_choices(catalog: list[CatalogItem], project_dir: Path) -> list[Ch
     desc_width = description_width()
     choices: list[Choice | Separator] = [Separator(f"  {picker_header()}")]
     indexed_catalog = list(enumerate(catalog))
-    for cfg in ALL_KINDS:
+    for cfg in all_kinds():
         if not (
             kind_indexed := [(i, item) for i, item in indexed_catalog if item.kind == cfg.kind_name]
         ):
@@ -52,7 +52,7 @@ def prompt_items(catalog: list[CatalogItem], project_dir: Path) -> list[CatalogI
 
 
 def _target_choice_name(target_id: str) -> str:
-    target = TARGETS[target_id]
+    target = targets()[target_id]
     return display.TARGET_CHOICE_FMT.format(label=target.label, covers=", ".join(target.covers))
 
 
@@ -76,7 +76,7 @@ def _prompt_targets(detected: set[str]) -> list[str]:
 
 
 def _prompt_rule_targets(detected: set[str]) -> list[str]:
-    any_detected = bool(detected & set(RULE_TARGETS))
+    any_detected = bool(detected & set(rule_targets()))
     choices = [
         Choice(
             value=target_id,
@@ -85,7 +85,7 @@ def _prompt_rule_targets(detected: set[str]) -> list[str]:
             ),
             enabled=target_id in detected or not any_detected,
         )
-        for target_id, target in RULE_TARGETS.items()
+        for target_id, target in rule_targets().items()
     ]
     return inquirer.checkbox(
         message=display.PROMPT_RULE_TARGETS, choices=choices, cycle=True
@@ -98,12 +98,12 @@ def prompt_all_targets(
     has_skills = any(item.config.kind_category in SKILLS_TARGET_GROUPS for item in selected)
     has_rules = any(item.config.kind_category in RULE_TARGET_GROUPS for item in selected)
     skill_targets = _prompt_targets(detected) if has_skills else []
-    rule_targets = _prompt_rule_targets(detected) if has_rules else []
+    rule_target_ids = _prompt_rule_targets(detected) if has_rules else []
     if has_skills and not skill_targets:
         console.print(display.MSG_NO_SKILL_TARGETS)
-    if has_rules and not rule_targets:
+    if has_rules and not rule_target_ids:
         console.print(display.MSG_NO_RULE_TARGETS)
-    return skill_targets, rule_targets
+    return skill_targets, rule_target_ids
 
 
 def confirm_generate() -> bool:

@@ -4,14 +4,16 @@ from pathlib import Path
 
 import pytest
 
-from marketplace.catalog import CatalogItem
 from marketplace.installer import (
-    RULE_TARGETS,
-    TARGETS,
     install_rules_to_target,
     install_skills_to_target,
+    rule_targets,
+    targets,
 )
-from marketplace.models import Plugin, Skill
+from marketplace.kind_catalog.models import CatalogItem, Skill
+
+TARGETS = targets()
+RULE_TARGETS = rule_targets()
 
 
 class TestInstallSkillsToTarget:

@@ -6,9 +6,9 @@ from pathlib import Path
 import yaml
 
 from marketplace.consts.authoring import METADATA_FILE
-from marketplace.kind_catalog.config import KindConfig
+from marketplace.kind_catalog.kinds import KindConfig
 from marketplace.kind_catalog.models import KIND_CLASSES, CatalogItem
-from marketplace.kind_catalog.registry import ALL_KINDS
+from marketplace.kind_catalog.registry import all_kinds
 from utils import get_marketplace_root
 
 _log = logging.getLogger(__name__)
@@ -51,6 +51,6 @@ def load_catalog() -> list[CatalogItem]:
     """Load every artifact from the marketplace root, sorted by (kind, name)."""
     root = get_marketplace_root()
     items: list[CatalogItem] = []
-    for cfg in ALL_KINDS:
+    for cfg in all_kinds():
         items.extend(_load_kind(root, cfg))
     return sorted(items, key=lambda item: (item.kind, item.name.lower()))

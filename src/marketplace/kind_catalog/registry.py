@@ -1,23 +1,33 @@
 from __future__ import annotations
 
+from functools import cache
+
 from marketplace.consts.manifest import ManifestMode
-from marketplace.kind_catalog.config import KindConfig
-from marketplace.kind_catalog.kinds import EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL
+from marketplace.kind_catalog.kinds import EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL, KindConfig
 
-ALL_KINDS: tuple[KindConfig, ...] = (SKILL, PLUGIN, RULE, EXTERNAL_PLUGIN)
 
-PER_AGENT_KINDS: tuple[KindConfig, ...] = tuple(
-    cfg for cfg in ALL_KINDS if cfg.manifest_mode == ManifestMode.PER_AGENT
-)
-FLAT_KINDS: tuple[KindConfig, ...] = tuple(
-    cfg for cfg in ALL_KINDS if cfg.manifest_mode == ManifestMode.FLAT
-)
+@cache
+def all_kinds() -> tuple[KindConfig, ...]:
+    return SKILL, PLUGIN, RULE, EXTERNAL_PLUGIN
 
-_REGISTRY: dict[str, KindConfig] = {cfg.kind_name: cfg for cfg in ALL_KINDS}
+
+@cache
+def per_agent_kinds() -> tuple[KindConfig, ...]:
+    return tuple(cfg for cfg in all_kinds() if cfg.manifest_mode == ManifestMode.PER_AGENT)
+
+
+@cache
+def flat_kinds() -> tuple[KindConfig, ...]:
+    return tuple(cfg for cfg in all_kinds() if cfg.manifest_mode == ManifestMode.FLAT)
+
+
+@cache
+def _registry() -> dict[str, KindConfig]:
+    return {cfg.kind_name: cfg for cfg in all_kinds()}
 
 
 def get_kind(kind: str) -> KindConfig:
     try:
-        return _REGISTRY[kind]
+        return _registry()[kind]
     except KeyError:
         raise ValueError(f"Unknown artifact kind: {kind!r}") from None

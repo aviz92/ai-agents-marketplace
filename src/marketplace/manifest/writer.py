@@ -8,7 +8,7 @@ import yaml
 
 from marketplace.consts.manifest import MANIFEST_HEADER
 from marketplace.kind_catalog.models import CatalogItem
-from marketplace.kind_catalog.registry import FLAT_KINDS, PER_AGENT_KINDS
+from marketplace.kind_catalog.registry import flat_kinds, per_agent_kinds
 from marketplace.manifest.loader import manifest_path
 
 
@@ -21,14 +21,14 @@ def save_manifest(
     data: dict = {}
 
     if external_items:
-        for cfg in FLAT_KINDS:
+        for cfg in flat_kinds():
             if ids := sorted(item.id for item in external_items if item.kind == cfg.kind_name):
                 data[cfg.dir_name] = ids
 
     for target_id, items in per_target.items():
         entry: dict = {
             cfg.dir_name: sorted(item.id for item in items if item.kind == cfg.kind_name)
-            for cfg in PER_AGENT_KINDS
+            for cfg in per_agent_kinds()
             if any(item.kind == cfg.kind_name for item in items)
         }
         if entry:
