@@ -9,7 +9,7 @@ from marketplace.installer.models import (
     rule_targets,
     targets,
 )
-from marketplace.installer.templates import clear_template_env_cache
+from marketplace.installer.rendering.templates import clear_template_env_cache
 
 __all__ = [
     "rule_targets",

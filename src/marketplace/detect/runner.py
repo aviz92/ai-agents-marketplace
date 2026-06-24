@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from marketplace.detect.agents.claude import ClaudeDetector
+from marketplace.detect.agents.codex import CodexDetector
+from marketplace.detect.agents.copilot import CopilotDetector
+from marketplace.detect.agents.cursor import CursorDetector
+from marketplace.detect.agents.gemini import GeminiDetector
 from marketplace.detect.base import Platform, PlatformDetector
-from marketplace.detect.claude import ClaudeDetector
-from marketplace.detect.codex import CodexDetector
-from marketplace.detect.copilot import CopilotDetector
-from marketplace.detect.cursor import CursorDetector
-from marketplace.detect.gemini import GeminiDetector
 
 _DETECTORS: tuple[type[PlatformDetector], ...] = (
     ClaudeDetector,

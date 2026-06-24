@@ -5,11 +5,11 @@ from pathlib import Path
 from marketplace.kind_catalog.models import CatalogItem
 
 from marketplace.installer.models import InstallResult, targets
-from marketplace.installer.templates import _get_template_env
-from marketplace.installer.writer import _copy_assets, _ensure_claude_md, _write_rendered
+from marketplace.installer.rendering.templates import _get_template_env
+from marketplace.installer.rendering.writer import _copy_assets, _ensure_claude_md, _write_rendered
 
 
-def install_skill(target_id: str, items: list[CatalogItem], project_dir: Path) -> InstallResult:
+def install_plugin(target_id: str, items: list[CatalogItem], project_dir: Path) -> InstallResult:
     target = targets()[target_id]
     env = _get_template_env()
     files_written: list[str] = []
