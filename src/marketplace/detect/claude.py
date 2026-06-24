@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from marketplace.consts.agents import AGENT_CLAUDE, CLAUDE_MD
+from marketplace.consts.agents import AGENT_CLAUDE, CLAUDE_DIR, CLAUDE_MD
 from marketplace.detect.base import Platform, PlatformDetector
 
 
@@ -10,6 +10,6 @@ class ClaudeDetector(PlatformDetector):
         return AGENT_CLAUDE
 
     def detect(self) -> Platform:
-        if signal := self._signal([CLAUDE_MD, ".claude"]):
+        if signal := self._signal([CLAUDE_MD, CLAUDE_DIR]):
             return self.found(signal)
         return self.not_found()

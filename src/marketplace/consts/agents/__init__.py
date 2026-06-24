@@ -1,21 +1,22 @@
-"""Agent constants — re-exported from per-agent modules."""
-
 from __future__ import annotations
 
-from .agent_claude import AGENT_CLAUDE, CLAUDE_MD, CLAUDE_MD_PATH, CLAUDE_SKILLS_DIR
-from .agent_codex import AGENT_CODEX
-from .agent_copilot import AGENT_COPILOT, COPILOT_INSTRUCTIONS_DIR, EXT_INSTRUCTIONS_MD
-from .agent_cursor import AGENT_CURSOR, EXT_MDC
-from .agent_gemini import AGENT_GEMINI, GEMINI_MD
+from .agents import AGENTS_MD, AGENTS_SKILLS_DIR, TARGET_AGENTS
+from .claude import AGENT_CLAUDE, CLAUDE_DIR, CLAUDE_MD, CLAUDE_MD_PATH, CLAUDE_SKILLS_DIR
+from .codex import AGENT_CODEX, CODEX_DIR
+from .copilot import (
+    AGENT_COPILOT,
+    COPILOT_INSTRUCTIONS_DIR,
+    COPILOT_INSTRUCTIONS_MD,
+    COPILOT_SKILLS_DIR,
+    EXT_INSTRUCTIONS_MD,
+)
+from .cursor import AGENT_CURSOR, CURSOR_DIR, CURSOR_RULES_FILE, EXT_MDC
+from .gemini import AGENT_GEMINI, GEMINI_DIR, GEMINI_MD
 from .shared import (
     AGENT_NAMES,
     AGENT_PROJECT_SIGNALS,
-    AGENTS_MD,
-    AGENTS_SKILLS_DIR,
     AGENTS_TARGET_COVERS,
-    RULES_DIR_FMT,
     SOURCE_PROJECT,
-    TARGET_AGENTS,
     VALID_RULE_TARGET_IDS,
     VALID_SKILL_TARGET_IDS,
 )
@@ -31,14 +32,20 @@ __all__ = [
     "AGENTS_MD",
     "AGENTS_SKILLS_DIR",
     "AGENTS_TARGET_COVERS",
+    "CLAUDE_DIR",
     "CLAUDE_MD",
     "CLAUDE_MD_PATH",
     "CLAUDE_SKILLS_DIR",
+    "CODEX_DIR",
     "COPILOT_INSTRUCTIONS_DIR",
+    "COPILOT_INSTRUCTIONS_MD",
+    "COPILOT_SKILLS_DIR",
+    "CURSOR_DIR",
+    "CURSOR_RULES_FILE",
     "EXT_INSTRUCTIONS_MD",
     "EXT_MDC",
+    "GEMINI_DIR",
     "GEMINI_MD",
-    "RULES_DIR_FMT",
     "SOURCE_PROJECT",
     "TARGET_AGENTS",
     "VALID_RULE_TARGET_IDS",

@@ -1,5 +1,3 @@
-"""CLI display constants — banner, statuses, column layout, prompts, and messages."""
-
 from __future__ import annotations
 
 BANNER = r"""

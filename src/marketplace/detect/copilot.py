@@ -1,6 +1,13 @@
 from __future__ import annotations
 
-from marketplace.consts.agents import AGENT_COPILOT, AGENTS_MD
+from marketplace.consts.agents import (
+    AGENT_COPILOT,
+    AGENTS_MD,
+    AGENTS_SKILLS_DIR,
+    COPILOT_INSTRUCTIONS_DIR,
+    COPILOT_INSTRUCTIONS_MD,
+    COPILOT_SKILLS_DIR,
+)
 from marketplace.detect.base import Platform, PlatformDetector
 
 
@@ -11,10 +18,10 @@ class CopilotDetector(PlatformDetector):
 
     def detect(self) -> Platform:
         signals = [
-            ".github/skills",
-            ".agents/skills",
-            ".github/instructions",
-            ".github/copilot-instructions.md",
+            COPILOT_SKILLS_DIR,
+            AGENTS_SKILLS_DIR,
+            COPILOT_INSTRUCTIONS_DIR,
+            COPILOT_INSTRUCTIONS_MD,
             AGENTS_MD,
         ]
         if signal := self._signal(signals):

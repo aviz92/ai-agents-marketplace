@@ -1,5 +1,3 @@
-"""Authoring-format constants — on-disk layout for catalog items."""
-
 from __future__ import annotations
 
 from marketplace.kind_catalog.config import ALL_KINDS

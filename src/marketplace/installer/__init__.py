@@ -1,5 +1,3 @@
-"""Render catalog items and write them into a project's agent directories."""
-
 from __future__ import annotations
 
 from .install import RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS, install_to_target

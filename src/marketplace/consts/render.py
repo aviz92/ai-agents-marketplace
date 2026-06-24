@@ -1,5 +1,3 @@
-"""Rendering and installation path constants."""
-
 from __future__ import annotations
 
 import re
@@ -11,6 +9,7 @@ PLUGIN_TEMPLATE = "plugin.md.j2"
 PLUGIN_OUTPUT_FILE = "PLUGIN.md"
 CLAUDE_MD_FALLBACK = "Refer to ../AGENTS.md\n"
 
+RULES_DIR_FMT = ".{agent}/rules"
 RULE_FILENAME_FMT = "{{id}}.{extension}"
 RULE_TEMPLATE_FMT = "rule.{agent}.{extension}.j2"
 RULE_REFERENCE_NOTE_FMT = "Project rules live in `{rules_dir}/` — read and follow every file there."

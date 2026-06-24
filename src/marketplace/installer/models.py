@@ -20,12 +20,12 @@ from marketplace.consts.agents import (
     EXT_INSTRUCTIONS_MD,
     EXT_MDC,
     GEMINI_MD,
-    RULES_DIR_FMT,
     TARGET_AGENTS,
 )
 from marketplace.consts.render import (
     RULE_FILENAME_FMT,
     RULE_TEMPLATE_FMT,
+    RULES_DIR_FMT,
 )
 
 
