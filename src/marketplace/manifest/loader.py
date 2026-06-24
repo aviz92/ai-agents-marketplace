@@ -39,22 +39,24 @@ def _validate_per_agent(per_agent: dict[str, dict[str, list[str]]]) -> None:
             )
 
 
-def load_manifest(project_dir: Path) -> Manifest | None:
-    """Parse the project manifest; None when the file doesn't exist."""
-    path = manifest_path(project_dir)
-    if not path.is_file():
-        return None
+def _read_manifest_data(path: Path) -> dict:
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     if not isinstance(data, dict):
         raise ManifestError(f"{MANIFEST_NAME} must contain a YAML mapping")
+    return data
 
-    flat_keys: set[str] = set()
-    flat: dict[str, list[str]] = {}
-    for cfg in FLAT_KINDS:
-        flat_keys.add(cfg.dir_name)
-        if cfg.dir_name in data:
-            flat[cfg.dir_name] = _parse_kind(data, cfg.dir_name)
 
+def _parse_flat(data: dict) -> tuple[dict[str, list[str]], set[str]]:
+    flat_keys = {cfg.dir_name for cfg in FLAT_KINDS}
+    flat = {
+        cfg.dir_name: _parse_kind(data, cfg.dir_name)
+        for cfg in FLAT_KINDS
+        if cfg.dir_name in data
+    }
+    return flat, flat_keys
+
+
+def _parse_per_agent(data: dict, flat_keys: set[str]) -> dict[str, dict[str, list[str]]]:
     valid_targets = VALID_SKILL_TARGET_IDS | VALID_RULE_TARGET_IDS
     per_agent: dict[str, dict[str, list[str]]] = {}
     for target_id, entry in data.items():
@@ -69,5 +71,16 @@ def load_manifest(project_dir: Path) -> Manifest | None:
             for cfg in PER_AGENT_KINDS
             if cfg.dir_name in entry
         }
+    return per_agent
+
+
+def load_manifest(project_dir: Path) -> Manifest | None:
+    """Parse the project manifest; None when the file doesn't exist."""
+    path = manifest_path(project_dir)
+    if not path.is_file():
+        return None
+    data = _read_manifest_data(path)
+    flat, flat_keys = _parse_flat(data)
+    per_agent = _parse_per_agent(data, flat_keys)
     _validate_per_agent(per_agent)
     return Manifest(per_agent=per_agent, flat=flat)
