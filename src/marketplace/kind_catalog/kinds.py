@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Literal
 
 from marketplace.consts.kinds import KindCategory
+
+Kind = Literal["skill", "plugin", "rule", "external-plugin"]
 from marketplace.consts.manifest import ManifestMode
 from marketplace.consts.render import (
     PLUGIN_OUTPUT_FILE,
@@ -14,7 +17,7 @@ from marketplace.consts.render import (
 
 @dataclass(frozen=True)
 class KindConfig:
-    kind_name: str
+    kind_name: Kind
     dir_name: str
     icon: str
     display_name: str

@@ -15,6 +15,8 @@ def install_skill(target_id: str, items: list[CatalogItem], project_dir: Path) -
     files_written: list[str] = []
     for item in items:
         cfg = item.config
+        if cfg.output_file is None or cfg.template is None:
+            raise ValueError(f"Skill kind '{item.kind}' missing output_file or template")
         out_dir = project_dir / target.dir / item.id
         _write_rendered(
             out_dir / cfg.output_file,

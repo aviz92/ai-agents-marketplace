@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
+from typing import TypeVar
 
 from marketplace.consts import display
 from marketplace.consts.kinds import KindCategory
@@ -22,10 +23,13 @@ def _read_installed_version(file_path: Path) -> str | None:
     return match.group(1) if match else None
 
 
+_T = TypeVar("_T", TargetInfo, RuleTargetInfo)
+
+
 def _get_versions_by_target(
     item_id: str,
-    target_map: dict[str, TargetInfo] | dict[str, RuleTargetInfo],
-    path_resolver: Callable[[str, TargetInfo | RuleTargetInfo], Path],
+    target_map: dict[str, _T],
+    path_resolver: Callable[[str, _T], Path],
     project_dir: Path,
 ) -> dict[str, str]:
     versions: dict[str, str] = {}
@@ -73,14 +77,16 @@ def get_installed_rule_versions_by_target(
 
 
 def _status_skill(item: CatalogItem, project_dir: Path) -> dict[str, str]:
+    output_file = item.config.output_file or SKILL_OUTPUT_FILE
     return _get_versions_by_target(
-        item.id, targets(), lambda iid, t: Path(t.dir) / iid / item.config.output_file, project_dir
+        item.id, targets(), lambda iid, t: Path(t.dir) / iid / output_file, project_dir
     )
 
 
 def _status_plugin(item: CatalogItem, project_dir: Path) -> dict[str, str]:
+    output_file = item.config.output_file or PLUGIN_OUTPUT_FILE
     return _get_versions_by_target(
-        item.id, targets(), lambda iid, t: Path(t.dir) / iid / item.config.output_file, project_dir
+        item.id, targets(), lambda iid, t: Path(t.dir) / iid / output_file, project_dir
     )
 
 
