@@ -3,13 +3,11 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, ClassVar, Literal, Self
+from typing import Any, ClassVar, Self
 
 from marketplace.consts.authoring import DEFAULT_AUTHOR, DEFAULT_VERSION
-from marketplace.kind_catalog.kinds import KindConfig
+from marketplace.kind_catalog.kinds import Kind, KindConfig
 from marketplace.kind_catalog.registry import get_kind
-
-Kind = Literal["skill", "plugin", "rule", "external-plugin"]
 
 
 @dataclass
