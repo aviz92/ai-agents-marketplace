@@ -15,18 +15,11 @@ from marketplace.kind_catalog.config import (
     get_kind,
 )
 
-# typing.Literal only accepts inline string literals (constants are a syntax error
-# here) — keep in sync with the kind strings in consts/kinds.py.
 Kind = Literal["skill", "plugin", "rule", "external-plugin"]
 
 
 @dataclass
 class CatalogItem(ABC):
-    """Abstract base for every marketplace artifact.
-
-    Not instantiated directly — use a concrete subclass (Skill, Plugin, Rule, ExternalPlugin).
-    """
-
     id: str
     name: str
     description: str
@@ -40,7 +33,6 @@ class CatalogItem(ABC):
 
     @property
     def config(self) -> KindConfig:
-        """This kind's full configuration — use instead of scattered constant lookups."""
         return get_kind(self.kind)
 
     @property
@@ -51,7 +43,6 @@ class CatalogItem(ABC):
     def _common_fields(
         cls, item_id: str, metadata: dict[str, Any], content: str, path: Path
     ) -> dict[str, Any]:
-        """Parse the fields shared by every kind out of raw metadata."""
         return {
             "id": item_id,
             "name": str(metadata.get("name", item_id)),
@@ -73,8 +64,6 @@ class CatalogItem(ABC):
 
 @dataclass
 class Rule(CatalogItem):
-    """A coding rule (rules/) — adds glob scoping and an always-apply flag."""
-
     kind: ClassVar[Kind] = RULE_KIND.kind_name
     globs: list[str] = field(default_factory=list)
     always_apply: bool = False
@@ -92,8 +81,6 @@ class Rule(CatalogItem):
 
 @dataclass
 class Skill(CatalogItem):
-    """A reusable agent skill (skills/)."""
-
     kind: ClassVar[Kind] = SKILL_KIND.kind_name
 
     @classmethod
@@ -105,8 +92,6 @@ class Skill(CatalogItem):
 
 @dataclass
 class Plugin(CatalogItem):
-    """A plugin bundle (plugins/) — same shape as a skill, different home."""
-
     kind: ClassVar[Kind] = PLUGIN_KIND.kind_name
 
     @classmethod
@@ -118,11 +103,6 @@ class Plugin(CatalogItem):
 
 @dataclass
 class ExternalPlugin(CatalogItem):
-    """A third-party plugin (external-plugins/) — pointer to an external repo + install command.
-
-    The install command is stored and displayed; it is never executed by the marketplace.
-    """
-
     kind: ClassVar[Kind] = EXTERNAL_PLUGIN_KIND.kind_name
     source: str = ""
     install: str = ""
