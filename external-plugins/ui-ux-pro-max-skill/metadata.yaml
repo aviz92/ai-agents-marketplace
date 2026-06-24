@@ -1,0 +1,7 @@
+name: ui-ux-pro-max-skill
+description: The flagship feature of v2.0 is the Design System Generator - an AI-powered reasoning engine that analyzes your project requirements and generates a complete, tailored design system in seconds.
+source: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+install: "npm install -g uipro-cli"
+author: nextlevelbuilder
+version: 2.2.3
+tags: [ui, ux, design-system, frontend, ai, components]

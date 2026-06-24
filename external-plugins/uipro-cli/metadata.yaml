@@ -1,0 +1,7 @@
+name: uipro-cli
+description: CLI installer for the UI/UX Pro Max skill — renders design intelligence (UI styles, color palettes, font pairings, charts, UX guidelines) into the native format of Claude Code, Cursor, Windsurf, Copilot, Codex, Gemini, and 14+ other AI coding assistants.
+source: https://www.npmjs.com/package/uipro-cli
+install: "npm install -g uipro-cli"
+author: viettranx (nextlevelbuilder)
+version: 2.2.3
+tags: [npm, cli, ui, ux, design, skill-installer, multi-agent]
