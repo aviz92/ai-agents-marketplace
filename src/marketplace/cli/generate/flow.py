@@ -6,14 +6,14 @@ from pathlib import Path
 
 from rich.console import Console
 
-from marketplace.catalog import load_catalog
 from marketplace.cli import render
 from marketplace.cli.generate import prompts
 from marketplace.consts import display
+from marketplace.consts.kinds import RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS, KindCategory
 from marketplace.detect import detect_platforms
-from marketplace.installer import split_install_kinds
+from marketplace.kind_catalog.loader import load_catalog
+from marketplace.kind_catalog.models import CatalogItem
 from marketplace.manifest import save_manifest
-from marketplace.models import CatalogItem
 
 
 def _build_per_target(
@@ -21,12 +21,15 @@ def _build_per_target(
     skill_targets: list[str],
     rule_targets: list[str],
 ) -> dict[str, list[CatalogItem]]:
-    skills, rules = split_install_kinds(selected)
     per_target: dict[str, list[CatalogItem]] = {}
     for target_id in skill_targets:
-        per_target.setdefault(target_id, []).extend(skills)
+        per_target.setdefault(target_id, []).extend(
+            item for item in selected if item.config.kind_category in SKILLS_TARGET_GROUPS
+        )
     for target_id in rule_targets:
-        per_target.setdefault(target_id, []).extend(rules)
+        per_target.setdefault(target_id, []).extend(
+            item for item in selected if item.config.kind_category in RULE_TARGET_GROUPS
+        )
     return per_target
 
 
@@ -45,15 +48,26 @@ def run_generate(console: Console, project_dir: Path) -> None:
             console.print(display.MSG_NOTHING_SELECTED)
             return
 
-        platforms = detect_platforms(project_dir)
-        render.print_platforms(console, platforms)
-        render.print_targets_panel(console)
+        external_selected = [
+            item for item in selected if item.config.kind_category == KindCategory.EXTERNAL_PLUGIN
+        ]
+        regular_selected = [
+            item for item in selected if item.config.kind_category != KindCategory.EXTERNAL_PLUGIN
+        ]
 
-        detected = {platform.id for platform in platforms if platform.detected}
-        skill_targets, rule_targets = prompts.prompt_all_targets(console, selected, detected)
-        if not skill_targets and not rule_targets:
-            console.print(display.MSG_NO_TARGETS)
-            return
+        skill_targets: list[str] = []
+        rule_targets: list[str] = []
+        if regular_selected:
+            platforms = detect_platforms(project_dir)
+            render.print_platforms(console, platforms)
+            render.print_targets_panel(console)
+            detected = {platform.id for platform in platforms if platform.detected}
+            skill_targets, rule_targets = prompts.prompt_all_targets(
+                console, regular_selected, detected
+            )
+            if not skill_targets and not rule_targets and not external_selected:
+                console.print(display.MSG_NO_TARGETS)
+                return
 
         render.print_summary(console, selected, project_dir, skill_targets, rule_targets)
         if not prompts.confirm_generate():
@@ -63,6 +77,6 @@ def run_generate(console: Console, project_dir: Path) -> None:
         console.print(display.MSG_CANCELLED)
         return
 
-    per_target = _build_per_target(selected, skill_targets, rule_targets)
-    path = save_manifest(project_dir, per_target)
+    per_target = _build_per_target(regular_selected, skill_targets, rule_targets)
+    path = save_manifest(project_dir, per_target, external_items=external_selected)
     console.print(display.MSG_MANIFEST_SAVED_FMT.format(name=path.name))

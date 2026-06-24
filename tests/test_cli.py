@@ -5,7 +5,6 @@ from pathlib import Path
 
 from InquirerPy.base.control import Choice
 
-from marketplace.catalog import CatalogItem
 from marketplace.cli import (
     build_item_choices,
     collect_installed_state,
@@ -15,7 +14,8 @@ from marketplace.cli import (
     get_status_and_versions,
 )
 from marketplace.consts.display import STATUS_INSTALLED, STATUS_NOT_INSTALLED, STATUS_UPDATE
-from marketplace.installer import install_rules_to_target, install_to_target
+from marketplace.installer import install_rules_to_target, install_skills_to_target
+from marketplace.kind_catalog.models import CatalogItem
 
 
 class TestVersionDetection:
@@ -28,7 +28,7 @@ class TestVersionDetection:
     def test_get_installed_versions_after_install_returns_catalog_version(
         self, project_dir: Path, sample_skill: CatalogItem
     ) -> None:
-        install_to_target("agents", [sample_skill], project_dir)
+        install_skills_to_target("agents", [sample_skill], project_dir)
         versions = get_installed_versions(sample_skill.id, project_dir)
         assert versions == {"1.0.0"}, f"Expected {{'1.0.0'}}, got {versions}"
 
@@ -49,7 +49,7 @@ class TestVersionDetection:
     def test_get_installed_plugin_versions_after_install_returns_catalog_version(
         self, project_dir: Path, sample_plugin: CatalogItem
     ) -> None:
-        install_to_target("agents", [sample_plugin], project_dir)
+        install_skills_to_target("agents", [sample_plugin], project_dir)
         versions = get_installed_plugin_versions(sample_plugin.id, project_dir)
         assert versions == {"1.0.0"}, f"Expected {{'1.0.0'}}, got {versions}"
 
@@ -82,7 +82,7 @@ class TestCollectInstalledState:
     def test_collect_installed_state_reflects_disk_per_target(
         self, project_dir: Path, sample_skill: CatalogItem, sample_rule: CatalogItem
     ) -> None:
-        install_to_target("agents", [sample_skill], project_dir)
+        install_skills_to_target("agents", [sample_skill], project_dir)
         install_rules_to_target("cursor", [sample_rule], project_dir)
         install_rules_to_target("claude", [sample_rule], project_dir)
         catalog = [sample_skill, sample_rule]
@@ -115,7 +115,7 @@ class TestStatus:
     def test_get_status_installed_matching_version_reports_installed(
         self, project_dir: Path, sample_skill: CatalogItem
     ) -> None:
-        install_to_target("claude", [sample_skill], project_dir)
+        install_skills_to_target("claude", [sample_skill], project_dir)
         status, _ = get_status_and_versions(sample_skill, project_dir)
         assert status == STATUS_INSTALLED, f"Wrong status: {status}"
 
@@ -131,9 +131,9 @@ class TestStatus:
     def test_get_status_mixed_versions_across_targets_reports_update(
         self, project_dir: Path, sample_skill: CatalogItem
     ) -> None:
-        install_to_target("claude", [sample_skill], project_dir)
+        install_skills_to_target("claude", [sample_skill], project_dir)
         sample_skill.version = "1.1.0"
-        install_to_target("agents", [sample_skill], project_dir)
+        install_skills_to_target("agents", [sample_skill], project_dir)
         status, versions = get_status_and_versions(sample_skill, project_dir)
         assert status == STATUS_UPDATE, f"Wrong status: {status}"
         assert versions == {"1.0.0", "1.1.0"}, f"Versions wrong: {versions}"
@@ -148,14 +148,14 @@ class TestStatus:
     def test_get_status_plugin_installed_matching_version_reports_installed(
         self, project_dir: Path, sample_plugin: CatalogItem
     ) -> None:
-        install_to_target("agents", [sample_plugin], project_dir)
+        install_skills_to_target("agents", [sample_plugin], project_dir)
         status, _ = get_status_and_versions(sample_plugin, project_dir)
         assert status == STATUS_INSTALLED, f"Wrong status: {status}"
 
     def test_get_status_plugin_version_bumped_reports_update(
         self, project_dir: Path, sample_plugin: CatalogItem
     ) -> None:
-        install_to_target("agents", [sample_plugin], project_dir)
+        install_skills_to_target("agents", [sample_plugin], project_dir)
         sample_plugin.version = "2.0.0"
         status, versions = get_status_and_versions(sample_plugin, project_dir)
         assert status == STATUS_UPDATE, f"Wrong status: {status}"

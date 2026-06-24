@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from marketplace.consts.kinds import KIND_DIRS, KIND_PLUGIN, KIND_SKILL
+from marketplace.kind_catalog.kinds import PLUGIN, SKILL
 
 
 def get_marketplace_root() -> Path:
@@ -17,8 +17,8 @@ def get_marketplace_root() -> Path:
     """
     package_dir = Path(__file__).resolve().parent
     for candidate in (package_dir, *package_dir.parents):
-        has_skills = (candidate / KIND_DIRS[KIND_SKILL]).is_dir()
-        has_plugins = (candidate / KIND_DIRS[KIND_PLUGIN]).is_dir()
+        has_skills = (candidate / SKILL.dir_name).is_dir()
+        has_plugins = (candidate / PLUGIN.dir_name).is_dir()
         if has_skills or has_plugins:
             return candidate
     # No content tree found — fall back to the package directory itself.

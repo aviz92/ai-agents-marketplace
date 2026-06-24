@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 from rich.console import Console
 
-from marketplace.catalog import CatalogItem
 from marketplace.cli import run_sync
+from marketplace.kind_catalog.models import CatalogItem
 from marketplace.manifest import (
     MANIFEST_HEADER,
     MANIFEST_NAME,

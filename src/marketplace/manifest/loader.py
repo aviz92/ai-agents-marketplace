@@ -7,8 +7,9 @@ from pathlib import Path
 import yaml
 
 from marketplace.consts.agents import VALID_RULE_TARGET_IDS, VALID_SKILL_TARGET_IDS
-from marketplace.consts.kinds import KIND_DIRS, KIND_PLUGIN, KIND_RULE, KIND_SKILL
-from marketplace.consts.manifest import MANIFEST_KIND_KEYS, MANIFEST_NAME
+from marketplace.consts.manifest import MANIFEST_NAME
+from marketplace.kind_catalog.kinds import PLUGIN, RULE, SKILL
+from marketplace.kind_catalog.registry import flat_kinds, per_agent_kinds
 from marketplace.manifest.models import Manifest, ManifestError
 
 
@@ -24,8 +25,8 @@ def _parse_kind(data: dict, key: str) -> list[str]:
 
 
 def _validate_per_agent(per_agent: dict[str, dict[str, list[str]]]) -> None:
-    skill_keys = {KIND_DIRS[KIND_SKILL], KIND_DIRS[KIND_PLUGIN]}
-    rule_key = KIND_DIRS[KIND_RULE]
+    skill_keys = {SKILL.dir_name, PLUGIN.dir_name}
+    rule_key = RULE.dir_name
     for target_id, entry in per_agent.items():
         if skill_keys & set(entry) and target_id not in VALID_SKILL_TARGET_IDS:
             raise ManifestError(
@@ -39,23 +40,48 @@ def _validate_per_agent(per_agent: dict[str, dict[str, list[str]]]) -> None:
             )
 
 
-def load_manifest(project_dir: Path) -> Manifest | None:
-    """Parse the project manifest; None when the file doesn't exist."""
-    path = manifest_path(project_dir)
-    if not path.is_file():
-        return None
+def _read_manifest_data(path: Path) -> dict:
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     if not isinstance(data, dict):
         raise ManifestError(f"{MANIFEST_NAME} must contain a YAML mapping")
+    return data
+
+
+def _parse_flat(data: dict) -> tuple[dict[str, list[str]], set[str]]:
+    flat_keys = {cfg.dir_name for cfg in flat_kinds()}
+    flat = {
+        cfg.dir_name: _parse_kind(data, cfg.dir_name)
+        for cfg in flat_kinds()
+        if cfg.dir_name in data
+    }
+    return flat, flat_keys
+
+
+def _parse_per_agent(data: dict, flat_keys: set[str]) -> dict[str, dict[str, list[str]]]:
     valid_targets = VALID_SKILL_TARGET_IDS | VALID_RULE_TARGET_IDS
     per_agent: dict[str, dict[str, list[str]]] = {}
     for target_id, entry in data.items():
+        if target_id in flat_keys:
+            continue
         if target_id not in valid_targets:
             raise ManifestError(f"Unknown target '{target_id}' — valid: {sorted(valid_targets)}")
         if not isinstance(entry, dict):
             raise ManifestError(f"Entry for '{target_id}' must be a mapping")
         per_agent[target_id] = {
-            key: _parse_kind(entry, key) for _, key in MANIFEST_KIND_KEYS if key in entry
+            cfg.dir_name: _parse_kind(entry, cfg.dir_name)
+            for cfg in per_agent_kinds()
+            if cfg.dir_name in entry
         }
+    return per_agent
+
+
+def load_manifest(project_dir: Path) -> Manifest | None:
+    """Parse the project manifest; None when the file doesn't exist."""
+    path = manifest_path(project_dir)
+    if not path.is_file():
+        return None
+    data = _read_manifest_data(path)
+    flat, flat_keys = _parse_flat(data)
+    per_agent = _parse_per_agent(data, flat_keys)
     _validate_per_agent(per_agent)
-    return Manifest(per_agent=per_agent)
+    return Manifest(per_agent=per_agent, flat=flat)

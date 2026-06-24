@@ -1,10 +1,10 @@
-"""Authoring-format constants — on-disk layout for catalog items."""
-
 from __future__ import annotations
 
-from marketplace.consts.kinds import BODY_FILES
+from marketplace.kind_catalog.registry import all_kinds
 
 METADATA_FILE = "metadata.yaml"
-AUTHORING_FILES = frozenset({METADATA_FILE, *BODY_FILES.values()})
+AUTHORING_FILES = frozenset(
+    {METADATA_FILE, *(cfg.body_filename for cfg in all_kinds() if cfg.body_filename)}
+)
 DEFAULT_AUTHOR = "unknown"
 DEFAULT_VERSION = "1.0.0"

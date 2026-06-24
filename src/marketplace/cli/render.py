@@ -11,15 +11,11 @@ from rich.table import Table
 
 from marketplace.cli.status import get_status_and_versions
 from marketplace.consts import display
-from marketplace.consts.kinds import (
-    KIND_PLUGIN,
-    KIND_RULE,
-    KIND_SECTIONS,
-    KIND_SKILL,
-)
 from marketplace.detect import Platform
-from marketplace.installer import RULE_TARGETS, TARGETS, InstallResult
-from marketplace.models import CatalogItem
+from marketplace.installer import InstallResult, rule_targets, targets
+from marketplace.kind_catalog.kinds import EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL
+from marketplace.kind_catalog.models import CatalogItem, ExternalPlugin
+from marketplace.kind_catalog.registry import all_kinds
 
 
 def _clip(text: str, width: int) -> str:
@@ -52,15 +48,6 @@ def picker_header() -> str:
     )
 
 
-# Rich markup styles per kind — avoids emoji in table cells (emoji display width
-# is terminal-dependent and causes column misalignment across environments).
-_KIND_STYLE: dict[str, str] = {
-    KIND_SKILL: "green",
-    KIND_PLUGIN: "blue",
-    KIND_RULE: "yellow",
-}
-
-
 def print_banner(console: Console, project_dir: Path) -> None:
     console.print(f"[bold cyan]{display.BANNER}[/bold cyan]")
     msg = display.MSG_INSTALLING_INTO_FMT.format(project_dir=project_dir)
@@ -68,10 +55,16 @@ def print_banner(console: Console, project_dir: Path) -> None:
 
 
 def print_catalog_counts(console: Console, catalog: list[CatalogItem]) -> None:
-    counts = {kind: sum(1 for item in catalog if item.kind == kind) for kind, _ in KIND_SECTIONS}
+    counts = {
+        cfg.kind_name: sum(1 for item in catalog if item.kind == cfg.kind_name)
+        for cfg in all_kinds()
+    }
     console.print(
         display.MSG_CATALOG_COUNTS_FMT.format(
-            skills=counts[KIND_SKILL], rules=counts[KIND_RULE], plugins=counts[KIND_PLUGIN]
+            skills=counts[SKILL.kind_name],
+            rules=counts[RULE.kind_name],
+            plugins=counts[PLUGIN.kind_name],
+            external=counts[EXTERNAL_PLUGIN.kind_name],
         )
     )
 
@@ -88,7 +81,7 @@ def print_platforms(console: Console, platforms: list[Platform]) -> None:
 
 
 def print_targets_panel(console: Console) -> None:
-    all_targets = list(TARGETS.values()) + list(RULE_TARGETS.values())
+    all_targets = list(targets().values()) + list(rule_targets().values())
     lines = [
         display.TARGET_PANEL_LINE_FMT.format(label=target.label, covers=", ".join(target.covers))
         for target in all_targets
@@ -101,20 +94,21 @@ def print_summary(
     items: list[CatalogItem],
     project_dir: Path,
     skill_targets: list[str],
-    rule_targets: list[str],
+    rule_target_ids: list[str],
 ) -> None:
     table = Table(title=display.TITLE_SUMMARY, title_justify=display.TABLE_TITLE_JUSTIFY)
     for column in display.SUMMARY_TABLE_COLUMNS:
         table.add_column(column)
     for item in items:
         status, _ = get_status_and_versions(item, project_dir)
-        style = _KIND_STYLE.get(item.kind, "")
+        style = item.config.table_style
         kind_cell = f"[{style}]{item.kind}[/]" if style else item.kind
         table.add_row(item.name, kind_cell, item.version, display.ACTION_BY_STATUS[status])
     console.print(table)
-    dirs = [TARGETS[target_id].dir for target_id in skill_targets]
-    dirs += [RULE_TARGETS[target_id].dir for target_id in rule_targets]
-    console.print(Panel("\n".join(dirs), title=display.TITLE_TARGET_DIRS, title_align="left"))
+    dirs = [targets()[target_id].dir for target_id in skill_targets]
+    dirs += [rule_targets()[target_id].dir for target_id in rule_target_ids]
+    if dirs:
+        console.print(Panel("\n".join(dirs), title=display.TITLE_TARGET_DIRS, title_align="left"))
 
 
 def print_results(console: Console, results: list[InstallResult]) -> None:
@@ -123,3 +117,20 @@ def print_results(console: Console, results: list[InstallResult]) -> None:
         lines.append(f"[bold]{result.output_dir}[/bold] ({result.installed} installed)")
         lines.extend(f"  ✓ {file}" for file in result.files_written)
     console.print(Panel("\n".join(lines), title=display.TITLE_FILES_WRITTEN, style="green"))
+
+
+def print_external_plugins(console: Console, items: list[CatalogItem]) -> None:
+    """Display each external plugin's source and install command. Never executes the command."""
+    lines: list[str] = []
+    for item in items:
+        if not isinstance(item, ExternalPlugin):
+            continue
+        lines.append(f"[bold]{item.label}[/bold]  v{item.version}")
+        lines.append(f"  {item.description}")
+        lines.append(f"  Source:  [cyan]{item.source}[/cyan]")
+        lines.append(f"  Install: [dim]{item.install}[/dim]")
+        lines.append("")
+    if lines:
+        console.print(
+            Panel("\n".join(lines).rstrip(), title=display.TITLE_EXTERNAL_PLUGINS, style="blue")
+        )

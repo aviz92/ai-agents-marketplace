@@ -15,6 +15,9 @@ class Manifest:
 
     per_agent maps each target_id to a dict of kind_key -> explicit artifact IDs.
     Example: {"claude": {"skills": ["a"], "rules": ["b"]}, "cursor": {"rules": ["b"]}}
+
+    flat maps dir_name -> [ids] for ManifestMode.FLAT kinds (e.g. external-plugins).
     """
 
     per_agent: dict[str, dict[str, list[str]]] = field(default_factory=dict)
+    flat: dict[str, list[str]] = field(default_factory=dict)

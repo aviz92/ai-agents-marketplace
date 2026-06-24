@@ -7,25 +7,22 @@ from typing import TYPE_CHECKING
 
 from rich.console import Console
 
-from marketplace.catalog import load_catalog
 from marketplace.cli import render
 from marketplace.cli.sync.prompts import prompt_sync_agents
 from marketplace.consts import display
 from marketplace.installer import (
-    RULE_TARGETS,
-    TARGETS,
     InstallResult,
-    install_rules_to_target,
     install_to_target,
-    split_install_kinds,
 )
+from marketplace.kind_catalog.loader import load_catalog
+from marketplace.kind_catalog.models import CatalogItem
 from marketplace.manifest import (
     MANIFEST_NAME,
     ManifestError,
     load_manifest,
+    resolve_flat,
     resolve_per_agent,
 )
-from marketplace.models import CatalogItem
 
 if TYPE_CHECKING:
     from marketplace.manifest import Manifest
@@ -36,11 +33,7 @@ def _install_per_target(
 ) -> list[InstallResult]:
     results: list[InstallResult] = []
     for target_id, items in per_target.items():
-        skills, rules = split_install_kinds(items)
-        if target_id in TARGETS and skills:
-            results.append(install_to_target(target_id, skills, project_dir))
-        if target_id in RULE_TARGETS and rules:
-            results.append(install_rules_to_target(target_id, rules, project_dir))
+        results.extend(install_to_target(target_id, items, project_dir))
     return results
 
 
@@ -85,16 +78,23 @@ def run_sync(console: Console, project_dir: Path, *, install_all: bool = False) 
     with console.status(display.LOADING_CATALOG):
         catalog = load_catalog()
     per_target, missing = resolve_per_agent(manifest, catalog)
+    external_items, missing_ext = resolve_flat(manifest, catalog)
+    missing = missing + missing_ext
     for reference in missing:
         err.print(display.MSG_MISSING_REF_FMT.format(reference=reference))
 
-    if not (installable := {k: v for k, v in per_target.items() if v}):
+    installable = {k: v for k, v in per_target.items() if v}
+    if not installable and not external_items:
         err.print(display.MSG_MANIFEST_EMPTY_FMT.format(manifest=MANIFEST_NAME))
         raise SystemExit(1)
 
-    if not install_all:
-        installable = _select_sync_targets(console, installable)
+    if installable:
+        if not install_all:
+            installable = _select_sync_targets(console, installable)
+        render.print_results(console, _install_per_target(installable, project_dir))
 
-    render.print_results(console, _install_per_target(installable, project_dir))
+    if external_items:
+        render.print_external_plugins(console, external_items)
+
     if missing:
         raise SystemExit(1)

@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from marketplace.consts.manifest import MANIFEST_KIND_KEYS
+from marketplace.consts.manifest import ManifestMode
+from marketplace.kind_catalog.models import CatalogItem
+from marketplace.kind_catalog.registry import flat_kinds, per_agent_kinds
 from marketplace.manifest.models import Manifest
-from marketplace.models import CatalogItem
 
 
 def resolve_per_agent(
@@ -15,21 +16,44 @@ def resolve_per_agent(
     Returns (per_target_items, missing_refs).
     """
     kind_index: dict[str, dict[str, CatalogItem]] = {
-        kind: {item.id: item for item in catalog if item.kind == kind}
-        for kind, _ in MANIFEST_KIND_KEYS
+        cfg.kind_name: {item.id: item for item in catalog if item.kind == cfg.kind_name}
+        for cfg in per_agent_kinds()
     }
     per_target: dict[str, list[CatalogItem]] = {}
     missing: list[str] = []
     for target_id, entry in manifest.per_agent.items():
         items: list[CatalogItem] = []
-        for kind, key in MANIFEST_KIND_KEYS:
-            if key not in entry:
+        for cfg in per_agent_kinds():
+            if cfg.dir_name not in entry:
                 continue
-            kind_items = kind_index[kind]
-            for item_id in entry[key]:
+            kind_items = kind_index[cfg.kind_name]
+            for item_id in entry[cfg.dir_name]:
                 if item_id in kind_items:
                     items.append(kind_items[item_id])
                 else:
-                    missing.append(f"{kind}:{item_id}")
+                    missing.append(f"{cfg.kind_name}:{item_id}")
         per_target[target_id] = items
     return per_target, missing
+
+
+def resolve_flat(
+    manifest: Manifest, catalog: list[CatalogItem]
+) -> tuple[list[CatalogItem], list[str]]:
+    """Resolve flat-mode artifact IDs from the manifest against the catalog.
+
+    Works for any ManifestMode.FLAT kind (e.g. external-plugins).
+    Returns (items, missing_refs).
+    """
+    flat_dir_to_cfg = {cfg.dir_name: cfg for cfg in flat_kinds()}
+    index = {item.id: item for item in catalog if item.config.manifest_mode == ManifestMode.FLAT}
+    items: list[CatalogItem] = []
+    missing: list[str] = []
+    for key, ids in manifest.flat.items():
+        cfg = flat_dir_to_cfg.get(key)
+        kind_label = cfg.kind_name if cfg else key
+        for item_id in ids:
+            if item_id in index:
+                items.append(index[item_id])
+            else:
+                missing.append(f"{kind_label}:{item_id}")
+    return items, missing

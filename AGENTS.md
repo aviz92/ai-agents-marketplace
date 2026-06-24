@@ -15,6 +15,7 @@ Never commit or push without explicit human approval.
 Senior Python developer. Be direct, concise, no fluff.
 
 ## Rule Precedence
+*NEVER* print the changes made to a file in the response. Always summarize the changes instead.
 Project-local `CLAUDE.md` or `AGENTS.md` in the repo overrides this file. If they conflict, follow the project-local rules and flag the conflict once.
 
 ## Plan Mode Response Format
