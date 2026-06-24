@@ -14,6 +14,7 @@ from typing import Any, ClassVar, Literal, Self
 from marketplace.consts.authoring import DEFAULT_AUTHOR, DEFAULT_VERSION
 from marketplace.consts.kinds import (
     DEFAULT_ICON,
+    KIND_EXTERNAL_PLUGIN,
     KIND_ICONS,
     KIND_PLUGIN,
     KIND_RULE,
@@ -21,8 +22,8 @@ from marketplace.consts.kinds import (
 )
 
 # typing.Literal only accepts inline string literals (constants are a syntax error
-# here) — keep in sync with KIND_SKILL / KIND_PLUGIN / KIND_RULE in kinds.py.
-Kind = Literal["skill", "plugin", "rule"]
+# here) — keep in sync with the KIND_* constants in kinds.py.
+Kind = Literal["skill", "plugin", "rule", "external-plugin"]
 
 
 @dataclass
@@ -105,8 +106,37 @@ class Rule(CatalogItem):
         )
 
 
+@dataclass
+class ExternalPlugin(CatalogItem):
+    """A third-party plugin (external-plugins/) — pointer to an external repo + install command.
+
+    The install command is stored and displayed; it is never executed by the marketplace.
+    """
+
+    kind: ClassVar[Kind] = KIND_EXTERNAL_PLUGIN
+    source: str = ""
+    install: str = ""
+
+    @classmethod
+    def from_metadata(
+        cls, item_id: str, metadata: dict[str, Any], content: str, path: Path
+    ) -> Self:
+        source = metadata.get("source")
+        install = metadata.get("install")
+        if not source or not install:
+            raise ValueError(
+                f"External plugin '{item_id}' missing required 'source' or 'install' field"
+            )
+        return cls(
+            **cls._common_fields(item_id, metadata, content, path),
+            source=str(source),
+            install=str(install),
+        )
+
+
 KIND_CLASSES: dict[Kind, type[CatalogItem]] = {
     KIND_SKILL: Skill,
     KIND_PLUGIN: Plugin,
     KIND_RULE: Rule,
+    KIND_EXTERNAL_PLUGIN: ExternalPlugin,
 }

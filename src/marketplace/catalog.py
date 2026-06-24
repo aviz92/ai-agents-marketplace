@@ -17,11 +17,16 @@ _log = logging.getLogger(__name__)
 
 def _load_item(item_dir: Path, kind: Kind) -> CatalogItem | None:
     metadata_file = item_dir / METADATA_FILE
-    body_file = item_dir / BODY_FILES[kind]
-    if not metadata_file.is_file() or not body_file.is_file():
+    if not metadata_file.is_file():
         return None
     metadata = yaml.safe_load(metadata_file.read_text(encoding="utf-8")) or {}
-    content = body_file.read_text(encoding="utf-8").strip() + "\n"
+    if kind in BODY_FILES:
+        body_file = item_dir / BODY_FILES[kind]
+        if not body_file.is_file():
+            return None
+        content = body_file.read_text(encoding="utf-8").strip() + "\n"
+    else:
+        content = ""
     return KIND_CLASSES[kind].from_metadata(item_dir.name, metadata, content, item_dir)
 
 

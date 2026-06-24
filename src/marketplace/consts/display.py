@@ -50,6 +50,7 @@ TITLE_INSTALL_TARGETS = "Install Targets"
 TITLE_SUMMARY = "Manifest Preview"
 TITLE_TARGET_DIRS = "Target directories"
 TITLE_FILES_WRITTEN = "Files written"
+TITLE_EXTERNAL_PLUGINS = "🌐 External Plugins"
 
 DETECTED_MARK = "[green]✓[/green]"
 NOT_DETECTED_MARK = "[dim]✗[/dim]"
@@ -68,7 +69,8 @@ SELECTED_COUNT_FMT = "{count} selected"
 MSG_INSTALLING_INTO_FMT = "Generating manifest in: [bold]{project_dir}[/bold]"
 MSG_CATALOG_COUNTS_FMT = (
     "Catalog: [bold]{skills}[/bold] skills · "
-    "[bold]{rules}[/bold] rules · [bold]{plugins}[/bold] plugins\n"
+    "[bold]{rules}[/bold] rules · [bold]{plugins}[/bold] plugins · "
+    "[bold]{external}[/bold] external\n"
 )
 MSG_EMPTY_CATALOG = "[red]No artifacts found in the marketplace catalog.[/red]"
 MSG_NOTHING_SELECTED = "[yellow]Nothing selected — exiting.[/yellow]"

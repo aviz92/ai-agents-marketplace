@@ -15,6 +15,9 @@ class Manifest:
 
     per_agent maps each target_id to a dict of kind_key -> explicit artifact IDs.
     Example: {"claude": {"skills": ["a"], "rules": ["b"]}, "cursor": {"rules": ["b"]}}
+
+    external is a flat list of external-plugin IDs (agent-agnostic, display-only).
     """
 
     per_agent: dict[str, dict[str, list[str]]] = field(default_factory=dict)
+    external: list[str] = field(default_factory=list)

@@ -23,6 +23,7 @@ from marketplace.manifest import (
     MANIFEST_NAME,
     ManifestError,
     load_manifest,
+    resolve_external,
     resolve_per_agent,
 )
 from marketplace.models import CatalogItem
@@ -85,16 +86,23 @@ def run_sync(console: Console, project_dir: Path, *, install_all: bool = False) 
     with console.status(display.LOADING_CATALOG):
         catalog = load_catalog()
     per_target, missing = resolve_per_agent(manifest, catalog)
+    external_items, missing_ext = resolve_external(manifest, catalog)
+    missing = missing + missing_ext
     for reference in missing:
         err.print(display.MSG_MISSING_REF_FMT.format(reference=reference))
 
-    if not (installable := {k: v for k, v in per_target.items() if v}):
+    installable = {k: v for k, v in per_target.items() if v}
+    if not installable and not external_items:
         err.print(display.MSG_MANIFEST_EMPTY_FMT.format(manifest=MANIFEST_NAME))
         raise SystemExit(1)
 
-    if not install_all:
-        installable = _select_sync_targets(console, installable)
+    if installable:
+        if not install_all:
+            installable = _select_sync_targets(console, installable)
+        render.print_results(console, _install_per_target(installable, project_dir))
 
-    render.print_results(console, _install_per_target(installable, project_dir))
+    if external_items:
+        render.print_external_plugins(console, external_items)
+
     if missing:
         raise SystemExit(1)

@@ -1,0 +1,7 @@
+name: Caveman Mode
+description: Ultra-compressed communication mode for AI agents. Cuts ~75% of tokens while keeping full technical accuracy by speaking like a caveman. Supports intensity levels — lite, full (default), ultra, and wenyan variants.
+source: https://github.com/JuliusBrussee/caveman
+install: "curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash"
+author: JuliusBrussee
+version: 1.0.1
+tags: [productivity, token-efficiency, communication]

@@ -12,6 +12,7 @@ from rich.table import Table
 from marketplace.cli.status import get_status_and_versions
 from marketplace.consts import display
 from marketplace.consts.kinds import (
+    KIND_EXTERNAL_PLUGIN,
     KIND_PLUGIN,
     KIND_RULE,
     KIND_SECTIONS,
@@ -19,7 +20,7 @@ from marketplace.consts.kinds import (
 )
 from marketplace.detect import Platform
 from marketplace.installer import RULE_TARGETS, TARGETS, InstallResult
-from marketplace.models import CatalogItem
+from marketplace.models import CatalogItem, ExternalPlugin
 
 
 def _clip(text: str, width: int) -> str:
@@ -71,7 +72,10 @@ def print_catalog_counts(console: Console, catalog: list[CatalogItem]) -> None:
     counts = {kind: sum(1 for item in catalog if item.kind == kind) for kind, _ in KIND_SECTIONS}
     console.print(
         display.MSG_CATALOG_COUNTS_FMT.format(
-            skills=counts[KIND_SKILL], rules=counts[KIND_RULE], plugins=counts[KIND_PLUGIN]
+            skills=counts[KIND_SKILL],
+            rules=counts[KIND_RULE],
+            plugins=counts[KIND_PLUGIN],
+            external=counts[KIND_EXTERNAL_PLUGIN],
         )
     )
 
@@ -114,7 +118,8 @@ def print_summary(
     console.print(table)
     dirs = [TARGETS[target_id].dir for target_id in skill_targets]
     dirs += [RULE_TARGETS[target_id].dir for target_id in rule_targets]
-    console.print(Panel("\n".join(dirs), title=display.TITLE_TARGET_DIRS, title_align="left"))
+    if dirs:
+        console.print(Panel("\n".join(dirs), title=display.TITLE_TARGET_DIRS, title_align="left"))
 
 
 def print_results(console: Console, results: list[InstallResult]) -> None:
@@ -123,3 +128,20 @@ def print_results(console: Console, results: list[InstallResult]) -> None:
         lines.append(f"[bold]{result.output_dir}[/bold] ({result.installed} installed)")
         lines.extend(f"  ✓ {file}" for file in result.files_written)
     console.print(Panel("\n".join(lines), title=display.TITLE_FILES_WRITTEN, style="green"))
+
+
+def print_external_plugins(console: Console, items: list[CatalogItem]) -> None:
+    """Display each external plugin's source and install command. Never executes the command."""
+    lines: list[str] = []
+    for item in items:
+        if not isinstance(item, ExternalPlugin):
+            continue
+        lines.append(f"[bold]{item.label}[/bold]  v{item.version}")
+        lines.append(f"  {item.description}")
+        lines.append(f"  Source:  [cyan]{item.source}[/cyan]")
+        lines.append(f"  Install: [dim]{item.install}[/dim]")
+        lines.append("")
+    if lines:
+        console.print(
+            Panel("\n".join(lines).rstrip(), title=display.TITLE_EXTERNAL_PLUGINS, style="blue")
+        )

@@ -10,6 +10,7 @@ from marketplace.catalog import load_catalog
 from marketplace.cli import render
 from marketplace.cli.generate import prompts
 from marketplace.consts import display
+from marketplace.consts.kinds import KIND_EXTERNAL_PLUGIN
 from marketplace.detect import detect_platforms
 from marketplace.installer import split_install_kinds
 from marketplace.manifest import save_manifest
@@ -45,15 +46,22 @@ def run_generate(console: Console, project_dir: Path) -> None:
             console.print(display.MSG_NOTHING_SELECTED)
             return
 
-        platforms = detect_platforms(project_dir)
-        render.print_platforms(console, platforms)
-        render.print_targets_panel(console)
+        external_selected = [item for item in selected if item.kind == KIND_EXTERNAL_PLUGIN]
+        regular_selected = [item for item in selected if item.kind != KIND_EXTERNAL_PLUGIN]
 
-        detected = {platform.id for platform in platforms if platform.detected}
-        skill_targets, rule_targets = prompts.prompt_all_targets(console, selected, detected)
-        if not skill_targets and not rule_targets:
-            console.print(display.MSG_NO_TARGETS)
-            return
+        skill_targets: list[str] = []
+        rule_targets: list[str] = []
+        if regular_selected:
+            platforms = detect_platforms(project_dir)
+            render.print_platforms(console, platforms)
+            render.print_targets_panel(console)
+            detected = {platform.id for platform in platforms if platform.detected}
+            skill_targets, rule_targets = prompts.prompt_all_targets(
+                console, regular_selected, detected
+            )
+            if not skill_targets and not rule_targets and not external_selected:
+                console.print(display.MSG_NO_TARGETS)
+                return
 
         render.print_summary(console, selected, project_dir, skill_targets, rule_targets)
         if not prompts.confirm_generate():
@@ -63,6 +71,6 @@ def run_generate(console: Console, project_dir: Path) -> None:
         console.print(display.MSG_CANCELLED)
         return
 
-    per_target = _build_per_target(selected, skill_targets, rule_targets)
-    path = save_manifest(project_dir, per_target)
+    per_target = _build_per_target(regular_selected, skill_targets, rule_targets)
+    path = save_manifest(project_dir, per_target, external_items=external_selected)
     console.print(display.MSG_MANIFEST_SAVED_FMT.format(name=path.name))

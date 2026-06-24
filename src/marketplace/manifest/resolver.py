@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from marketplace.consts.kinds import KIND_EXTERNAL_PLUGIN
 from marketplace.consts.manifest import MANIFEST_KIND_KEYS
 from marketplace.manifest.models import Manifest
 from marketplace.models import CatalogItem
@@ -33,3 +34,21 @@ def resolve_per_agent(
                     missing.append(f"{kind}:{item_id}")
         per_target[target_id] = items
     return per_target, missing
+
+
+def resolve_external(
+    manifest: Manifest, catalog: list[CatalogItem]
+) -> tuple[list[CatalogItem], list[str]]:
+    """Resolve external-plugin IDs from the manifest against the catalog.
+
+    Returns (external_items, missing_refs).
+    """
+    ext_index = {item.id: item for item in catalog if item.kind == KIND_EXTERNAL_PLUGIN}
+    items: list[CatalogItem] = []
+    missing: list[str] = []
+    for item_id in manifest.external:
+        if item_id in ext_index:
+            items.append(ext_index[item_id])
+        else:
+            missing.append(f"{KIND_EXTERNAL_PLUGIN}:{item_id}")
+    return items, missing

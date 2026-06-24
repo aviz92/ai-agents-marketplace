@@ -6,7 +6,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from marketplace.consts import display
-from marketplace.consts.kinds import KIND_PLUGIN, KIND_RULE, SKILL_LIKE_KINDS
+from marketplace.consts.kinds import KIND_EXTERNAL_PLUGIN, KIND_PLUGIN, KIND_RULE, SKILL_LIKE_KINDS
 from marketplace.consts.render import PLUGIN_OUTPUT_FILE, SKILL_OUTPUT_FILE, VERSION_RE
 from marketplace.installer import RULE_TARGETS, TARGETS, RuleTargetInfo, TargetInfo
 from marketplace.models import CatalogItem
@@ -77,6 +77,8 @@ def _resolve_versions_by_target(item: CatalogItem, project_dir: Path) -> dict[st
         return get_installed_plugin_versions_by_target(item.id, TARGETS, project_dir)
     if item.kind in SKILL_LIKE_KINDS:
         return get_installed_versions_by_target(item.id, TARGETS, project_dir)
+    if item.kind == KIND_EXTERNAL_PLUGIN:
+        return {}  # never written to disk — no installed version to track
     raise ValueError(f"Unknown item kind: {item.kind!r}")
 
 

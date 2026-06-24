@@ -6,7 +6,8 @@ from pathlib import Path
 
 import yaml
 
-from marketplace.consts.manifest import MANIFEST_HEADER, MANIFEST_KIND_KEYS
+from marketplace.consts.kinds import KIND_EXTERNAL_PLUGIN
+from marketplace.consts.manifest import MANIFEST_EXTERNAL_KEY, MANIFEST_HEADER, MANIFEST_KIND_KEYS
 from marketplace.manifest.loader import manifest_path
 from marketplace.models import CatalogItem
 
@@ -14,9 +15,14 @@ from marketplace.models import CatalogItem
 def save_manifest(
     project_dir: Path,
     per_target: dict[str, list[CatalogItem]],
+    external_items: list[CatalogItem] | None = None,
 ) -> Path:
     """Write the manifest describing what is installed per target."""
     data: dict = {}
+    if external_items:
+        data[MANIFEST_EXTERNAL_KEY] = sorted(
+            item.id for item in external_items if item.kind == KIND_EXTERNAL_PLUGIN
+        )
     for target_id, items in per_target.items():
         entry: dict = {
             key: sorted(item.id for item in items if item.kind == kind)
