@@ -7,8 +7,8 @@ from pathlib import Path
 
 from marketplace.consts.agents import AGENT_CLAUDE, CLAUDE_MD_PATH
 from marketplace.consts.authoring import AUTHORING_FILES, METADATA_FILE
-from marketplace.consts.render import CLAUDE_MD_FALLBACK, RULE_REFERENCE_NOTE_FMT
 from marketplace.consts.reference import ReferenceSpec
+from marketplace.consts.render import CLAUDE_MD_FALLBACK, RULE_REFERENCE_NOTE_FMT
 from marketplace.kind_catalog.models import CatalogItem
 
 
