@@ -1,10 +1,27 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 
 from marketplace.consts.agents import AGENT_NAMES, SOURCE_PROJECT
+
+
+@dataclass(frozen=True)
+class ReferenceSpec:
+    """How to point an agent's top-level instructions file at an installed rules dir."""
+
+    candidates: list[str]
+    fallback: str
+    fallback_header: str = ""
+
+
+@dataclass(frozen=True)
+class AgentConfig:
+    """Static identity and detection metadata for one AI coding agent."""
+
+    id: str
+    signals: list[str]
+    rule_reference: ReferenceSpec | None = None
 
 
 @dataclass
@@ -21,23 +38,20 @@ class Platform:
         return f"{self.name} ({status})"
 
 
-class PlatformDetector(ABC):
-    def __init__(self, project_dir: Path) -> None:
+class AgentDetector:
+    def __init__(self, config: AgentConfig, project_dir: Path) -> None:
+        self._config = config
         self._project_dir = project_dir
 
-    @property
-    @abstractmethod
-    def platform_id(self) -> str:
-        """Return the platform id."""
-
-    @abstractmethod
     def detect(self) -> Platform:
-        """Return the platform detected."""
+        if signal := self._signal(self._config.signals):
+            return self.found(signal)
+        return self.not_found()
 
     def found(self, indicator: str) -> Platform:
         return Platform(
-            id=self.platform_id,
-            name=AGENT_NAMES[self.platform_id],
+            id=self._config.id,
+            name=AGENT_NAMES[self._config.id],
             detected=True,
             indicator=indicator,
             detection_source=SOURCE_PROJECT,
@@ -45,8 +59,8 @@ class PlatformDetector(ABC):
 
     def not_found(self, indicator: str | None = None) -> Platform:
         return Platform(
-            id=self.platform_id,
-            name=AGENT_NAMES[self.platform_id],
+            id=self._config.id,
+            name=AGENT_NAMES[self._config.id],
             detected=False,
             indicator=indicator,
             detection_source=SOURCE_PROJECT,
