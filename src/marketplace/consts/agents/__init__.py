@@ -14,7 +14,6 @@ from marketplace.consts.agents.cursor import AGENT_CURSOR, CURSOR_DIR, CURSOR_RU
 from marketplace.consts.agents.gemini import AGENT_GEMINI, GEMINI_DIR, GEMINI_MD
 from marketplace.consts.agents.shared import (
     AGENT_NAMES,
-    AGENT_PROJECT_SIGNALS,
     AGENTS_TARGET_COVERS,
     SOURCE_PROJECT,
     VALID_RULE_TARGET_IDS,
@@ -28,7 +27,6 @@ __all__ = [
     "AGENT_CURSOR",
     "AGENT_GEMINI",
     "AGENT_NAMES",
-    "AGENT_PROJECT_SIGNALS",
     "AGENTS_MD",
     "AGENTS_SKILLS_DIR",
     "AGENTS_TARGET_COVERS",

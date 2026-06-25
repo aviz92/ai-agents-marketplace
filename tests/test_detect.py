@@ -14,9 +14,8 @@ from marketplace.consts.agents import (
     AGENT_CURSOR,
     AGENT_GEMINI,
     AGENT_NAMES,
-    AGENT_PROJECT_SIGNALS,
 )
-from marketplace.detect import Platform, detect_platforms
+from marketplace.detect import DETECTORS, Platform, detect_platforms
 
 
 class TestDetectPlatforms:
@@ -38,7 +37,7 @@ class TestDetectPlatforms:
     def test_detect_platforms_first_signal_triggers_detection(
         self, tmp_path: Path, agent_id: str
     ) -> None:
-        signal = AGENT_PROJECT_SIGNALS[agent_id][0]
+        signal = DETECTORS[agent_id].signals[0]
         signal_path = tmp_path / signal
         # Create as a file or directory based on whether it has an extension
         if "." in signal_path.name:
@@ -72,7 +71,7 @@ class TestDetectPlatforms:
     def test_detect_platforms_detection_source_is_set_on_detected_agent(
         self, tmp_path: Path
     ) -> None:
-        signal = AGENT_PROJECT_SIGNALS[AGENT_CURSOR][0]
+        signal = DETECTORS[AGENT_CURSOR].signals[0]
         (tmp_path / signal).mkdir(parents=True, exist_ok=True)
         platforms = detect_platforms(tmp_path)
         cursor = next(p for p in platforms if p.id == AGENT_CURSOR)
