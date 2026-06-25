@@ -5,7 +5,6 @@ from typing import Literal
 
 from marketplace.consts.kinds import KindCategory
 
-Kind = Literal["skill", "plugin", "rule", "external-plugin"]
 from marketplace.consts.manifest import ManifestMode
 from marketplace.consts.render import (
     PLUGIN_OUTPUT_FILE,
@@ -13,6 +12,8 @@ from marketplace.consts.render import (
     SKILL_OUTPUT_FILE,
     SKILL_TEMPLATE,
 )
+
+Kind = Literal["skill", "plugin", "rule", "external-plugin"]
 
 
 @dataclass(frozen=True)
