@@ -1,7 +1,13 @@
 from __future__ import annotations
 
 from marketplace.consts.agents.agents import AGENTS_MD, AGENTS_SKILLS_DIR, TARGET_AGENTS
-from marketplace.consts.agents.claude import AGENT_CLAUDE, CLAUDE_DIR, CLAUDE_MD, CLAUDE_MD_PATH, CLAUDE_SKILLS_DIR
+from marketplace.consts.agents.claude import (
+    AGENT_CLAUDE,
+    CLAUDE_DIR,
+    CLAUDE_MD,
+    CLAUDE_MD_PATH,
+    CLAUDE_SKILLS_DIR,
+)
 from marketplace.consts.agents.codex import AGENT_CODEX, CODEX_DIR
 from marketplace.consts.agents.copilot import (
     AGENT_COPILOT,
