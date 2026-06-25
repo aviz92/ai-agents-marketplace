@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from marketplace.consts.agents import AGENT_NAMES, SOURCE_PROJECT
-from marketplace.consts.reference import ReferenceSpec
 
 
 @dataclass(frozen=True)
@@ -13,7 +12,8 @@ class AgentConfig:
 
     id: str
     signals: list[str]
-    rule_reference: ReferenceSpec | None = None
+    instructions_candidates: list[str] = field(default_factory=list)
+    instructions_fallback_header: str = ""
 
 
 @dataclass
