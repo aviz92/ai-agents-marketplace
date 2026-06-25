@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from typing import Literal
 
 from marketplace.consts.kinds import KindCategory
-
 from marketplace.consts.manifest import ManifestMode
 from marketplace.consts.render import (
     PLUGIN_OUTPUT_FILE,
