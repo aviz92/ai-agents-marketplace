@@ -181,16 +181,6 @@ docker-compose.override.yml
 # Cursor
 .cursor
 
-# ============================================================
-# AI
-# ============================================================
-# AGENTS.md
-
-# Claude
-.claude
-CLAUDE.md
-CLAUDE.local.md
-
 # Marketplace install outputs (derived — sources live in skills/ and rules/)
 .agents/
 .codex/
@@ -211,4 +201,19 @@ results_output/
 internal_assets/
 !src/marketplace/manifest/
 
+# ============================================================
+# AI
+# ============================================================
+# AGENTS.md
+
+# Claude
+.claude
+CLAUDE.md
+CLAUDE.local.md
+# =====
+agents-marketplace.yaml
+skills-lock.json
+
+# ============================================================
 # git restore --staged .
+# ============================================================
