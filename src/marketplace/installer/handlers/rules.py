@@ -3,11 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 
 from marketplace.detect.orchestrator import DETECTORS
-from marketplace.kind_catalog.models import CatalogItem
-
 from marketplace.installer.models import InstallResult, rule_targets
 from marketplace.installer.rendering.templates import _get_template_env
 from marketplace.installer.rendering.writer import _ensure_reference, _write_rendered
+from marketplace.kind_catalog.models import CatalogItem
 
 
 def install_rule(target_id: str, items: list[CatalogItem], project_dir: Path) -> InstallResult:
@@ -19,7 +18,9 @@ def install_rule(target_id: str, items: list[CatalogItem], project_dir: Path) ->
         _write_rendered(out_file, template.render(item=item), project_dir, files_written)
     agent_cfg = DETECTORS.get(target_id)
     if agent_cfg is not None and agent_cfg.rule_reference is not None:
-        _ensure_reference(project_dir, files_written, agent_cfg.rule_reference, rules_dir=target.dir)
+        _ensure_reference(
+            project_dir, files_written, agent_cfg.rule_reference, rules_dir=target.dir
+        )
     return InstallResult(
         target=target_id,
         installed=len(items),
