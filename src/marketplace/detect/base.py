@@ -17,7 +17,7 @@ class Platform:
 
     @property
     def label(self) -> str:
-        status = "✅detected" if self.detected else "❌not detected"
+        status = "✅ detected" if self.detected else "❌ not detected"
         return f"{self.name} ({status})"
 
 
