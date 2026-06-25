@@ -4,15 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from marketplace.consts.agents import AGENT_NAMES, SOURCE_PROJECT
-
-
-@dataclass(frozen=True)
-class ReferenceSpec:
-    """How to point an agent's top-level instructions file at an installed rules dir."""
-
-    candidates: list[str]
-    fallback: str
-    fallback_header: str = ""
+from marketplace.consts.reference import ReferenceSpec
 
 
 @dataclass(frozen=True)
