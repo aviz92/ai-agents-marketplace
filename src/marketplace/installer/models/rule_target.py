@@ -51,7 +51,9 @@ class RuleTargetInfo:
 def rule_targets() -> dict[str, RuleTargetInfo]:
     return {
         AGENT_CURSOR: RuleTargetInfo.for_agent(AGENT_CURSOR, EXT_MDC),
-        AGENT_COPILOT: RuleTargetInfo.for_agent(AGENT_COPILOT, EXT_INSTRUCTIONS_MD, rules_dir=COPILOT_INSTRUCTIONS_DIR),
+        AGENT_COPILOT: RuleTargetInfo.for_agent(
+            AGENT_COPILOT, EXT_INSTRUCTIONS_MD, rules_dir=COPILOT_INSTRUCTIONS_DIR
+        ),
         AGENT_CLAUDE: RuleTargetInfo.for_agent(AGENT_CLAUDE, "md"),
         AGENT_CODEX: RuleTargetInfo.for_agent(AGENT_CODEX, "md"),
         AGENT_GEMINI: RuleTargetInfo.for_agent(AGENT_GEMINI, "md"),
