@@ -45,7 +45,7 @@ _SECTIONS: tuple[tuple[KindConfig, tuple[str, str]], ...] = (
     (RULE, ("rule", "rules")),
     (COMMAND, ("command", "commands")),
 )
-_NOUNS: dict[KindConfig, tuple[str, str]] = {cfg: nouns for cfg, nouns in _SECTIONS}
+_NOUNS: dict[KindConfig, tuple[str, str]] = dict(_SECTIONS)
 
 
 def _has_kind(items: list[CatalogItem], cfg: KindConfig) -> bool:
