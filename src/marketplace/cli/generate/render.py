@@ -12,8 +12,8 @@ from rich.table import Table
 from marketplace.cli.status import get_status_and_versions
 from marketplace.consts import display
 from marketplace.detect import Platform
-from marketplace.installer import rule_targets, targets
-from marketplace.kind_catalog.kinds import EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL
+from marketplace.installer import command_targets, rule_targets, targets
+from marketplace.kind_catalog.kinds import COMMAND, EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL
 from marketplace.kind_catalog.models import CatalogItem
 from marketplace.kind_catalog.registry import all_kinds
 
@@ -64,6 +64,7 @@ def print_catalog_counts(console: Console, catalog: list[CatalogItem]) -> None:
             skills=counts[SKILL.kind_name],
             rules=counts[RULE.kind_name],
             plugins=counts[PLUGIN.kind_name],
+            commands=counts[COMMAND.kind_name],
             external=counts[EXTERNAL_PLUGIN.kind_name],
         )
     )
@@ -81,7 +82,9 @@ def print_platforms(console: Console, platforms: list[Platform]) -> None:
 
 
 def print_targets_panel(console: Console) -> None:
-    all_targets = list(targets().values()) + list(rule_targets().values())
+    all_targets = (
+        list(targets().values()) + list(rule_targets().values()) + list(command_targets().values())
+    )
     lines = [
         display.TARGET_PANEL_LINE_FMT.format(label=target.label, covers=", ".join(target.covers))
         for target in all_targets
@@ -93,8 +96,8 @@ def print_summary(
     console: Console,
     items: list[CatalogItem],
     project_dir: Path,
-    skill_targets: list[str],
-    rule_target_ids: list[str],
+    skill_target_ids: list[str],
+    extra_dirs: list[str],
 ) -> None:
     table = Table(title=display.TITLE_SUMMARY, title_justify=display.TABLE_TITLE_JUSTIFY)
     for column in display.SUMMARY_TABLE_COLUMNS:
@@ -105,7 +108,5 @@ def print_summary(
         kind_cell = f"[{style}]{item.kind}[/]" if style else item.kind
         table.add_row(item.name, kind_cell, item.version, display.ACTION_BY_STATUS[status])
     console.print(table)
-    dirs = [targets()[target_id].dir for target_id in skill_targets]
-    dirs += [rule_targets()[target_id].dir for target_id in rule_target_ids]
-    if dirs:
+    if dirs := [targets()[target_id].dir for target_id in skill_target_ids] + extra_dirs:
         console.print(Panel("\n".join(dirs), title=display.TITLE_TARGET_DIRS, title_align="left"))

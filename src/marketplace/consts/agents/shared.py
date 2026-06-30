@@ -13,6 +13,9 @@ VALID_RULE_TARGET_IDS: frozenset[str] = frozenset(
     {AGENT_CURSOR, AGENT_COPILOT, AGENT_CLAUDE, AGENT_CODEX, AGENT_GEMINI}
 )
 VALID_SKILL_TARGET_IDS: frozenset[str] = frozenset({AGENT_CLAUDE, TARGET_AGENTS})
+VALID_COMMAND_TARGET_IDS: frozenset[str] = frozenset(
+    {AGENT_CLAUDE, AGENT_CURSOR, AGENT_COPILOT, AGENT_GEMINI}
+)
 
 AGENT_NAMES: dict[str, str] = {
     AGENT_CLAUDE: "Claude Code",

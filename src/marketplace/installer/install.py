@@ -6,11 +6,18 @@ import subprocess
 from pathlib import Path
 
 from marketplace.consts.kinds import KindCategory
-from marketplace.kind_catalog.models import CatalogItem, ExternalPlugin
-from marketplace.installer.models import ExternalInstallResult, InstallResult, rule_targets, targets
+from marketplace.installer.handlers.commands import install_command
 from marketplace.installer.handlers.plugins import install_plugin
 from marketplace.installer.handlers.rules import install_rule
 from marketplace.installer.handlers.skills import install_skill
+from marketplace.installer.models import (
+    ExternalInstallResult,
+    InstallResult,
+    command_targets,
+    rule_targets,
+    targets,
+)
+from marketplace.kind_catalog.models import CatalogItem, ExternalPlugin
 
 
 def install_skills_to_target(
@@ -29,6 +36,12 @@ def install_rules_to_target(
     return install_rule(target_id, items, project_dir)
 
 
+def install_commands_to_target(
+    target_id: str, items: list[CatalogItem], project_dir: Path
+) -> InstallResult:
+    return install_command(target_id, items, project_dir)
+
+
 def install_external_plugin(item: ExternalPlugin) -> ExternalInstallResult:
     """Run item.install and stream output to the terminal.
 
@@ -37,7 +50,7 @@ def install_external_plugin(item: ExternalPlugin) -> ExternalInstallResult:
     confirm with the user before calling this function.
     """
     try:
-        proc = subprocess.run(item.install, shell=True)  # noqa: S602
+        proc = subprocess.run(item.install, shell=True, check=False)  # noqa: S602
         success = proc.returncode == 0
     except Exception as exc:
         success = False
@@ -65,4 +78,7 @@ def install_to_target(
     if target_id in rule_targets():
         if group := by_kind.get(KindCategory.RULES):
             results.append(install_rule(target_id, group, project_dir))
+    if target_id in command_targets():
+        if group := by_kind.get(KindCategory.COMMAND):
+            results.append(install_command(target_id, group, project_dir))
     return results

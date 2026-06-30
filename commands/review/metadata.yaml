@@ -1,0 +1,5 @@
+name: Review
+description: Run a senior code review on the current changes
+tags: [quality, review]
+author: aviz92
+version: 1.0.0

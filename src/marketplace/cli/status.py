@@ -9,7 +9,14 @@ from typing import TypeVar
 from marketplace.consts import display
 from marketplace.consts.kinds import KindCategory
 from marketplace.consts.render import PLUGIN_OUTPUT_FILE, SKILL_OUTPUT_FILE, VERSION_RE
-from marketplace.installer import RuleTargetInfo, TargetInfo, rule_targets, targets
+from marketplace.installer import (
+    CommandTargetInfo,
+    RuleTargetInfo,
+    TargetInfo,
+    command_targets,
+    rule_targets,
+    targets,
+)
 from marketplace.kind_catalog.models import CatalogItem
 
 _StatusFn = Callable[["CatalogItem", Path], dict[str, str]]
@@ -23,7 +30,7 @@ def _read_installed_version(file_path: Path) -> str | None:
     return match.group(1) if match else None
 
 
-_T = TypeVar("_T", TargetInfo, RuleTargetInfo)
+_T = TypeVar("_T", TargetInfo, RuleTargetInfo, CommandTargetInfo)
 
 
 def _get_versions_by_target(
@@ -94,10 +101,27 @@ def _status_rule(item: CatalogItem, project_dir: Path) -> dict[str, str]:
     return get_installed_rule_versions_by_target(item.id, rule_targets(), project_dir)
 
 
+def get_installed_command_versions_by_target(
+    item_id: str, command_target_map: dict[str, CommandTargetInfo], project_dir: Path
+) -> dict[str, str]:
+    """Map command target id → installed version found in its rendered command file."""
+    return _get_versions_by_target(
+        item_id,
+        command_target_map,
+        lambda iid, t: Path(t.dir) / t.filename_pattern.format(id=iid),
+        project_dir,
+    )
+
+
+def _status_command(item: CatalogItem, project_dir: Path) -> dict[str, str]:
+    return get_installed_command_versions_by_target(item.id, command_targets(), project_dir)
+
+
 _STATUS_DISPATCH: dict[KindCategory, _StatusFn] = {
     KindCategory.SKILL: _status_skill,
     KindCategory.PLUGIN: _status_plugin,
     KindCategory.RULES: _status_rule,
+    KindCategory.COMMAND: _status_command,
 }
 
 
@@ -116,6 +140,12 @@ def get_installed_plugin_versions(item_id: str, project_dir: Path) -> set[str]:
 
 def get_installed_rule_versions(item_id: str, project_dir: Path) -> set[str]:
     return set(get_installed_rule_versions_by_target(item_id, rule_targets(), project_dir).values())
+
+
+def get_installed_command_versions(item_id: str, project_dir: Path) -> set[str]:
+    return set(
+        get_installed_command_versions_by_target(item_id, command_targets(), project_dir).values()
+    )
 
 
 def get_status_and_versions(item: CatalogItem, project_dir: Path) -> tuple[str, set[str]]:

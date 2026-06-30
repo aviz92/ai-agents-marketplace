@@ -60,6 +60,7 @@ LOADING_CATALOG = "Loading catalog..."
 PROMPT_SELECT_ITEMS = "Select artifacts to add (space toggles, enter confirms):"
 PROMPT_SKILL_TARGETS = "Add skills/plugins for:"
 PROMPT_RULE_TARGETS = "Add rules for (one native format per agent):"
+PROMPT_COMMAND_TARGETS = "Add commands for:"
 PROMPT_CONFIRM_GENERATE = "Generate agents-marketplace.yaml?"
 SELECTED_COUNT_FMT = "{count} selected"
 
@@ -68,6 +69,7 @@ MSG_INSTALLING_INTO_FMT = "Generating manifest in: [bold]{project_dir}[/bold]"
 MSG_CATALOG_COUNTS_FMT = (
     "Catalog: [bold]{skills}[/bold] skills · "
     "[bold]{rules}[/bold] rules · [bold]{plugins}[/bold] plugins · "
+    "[bold]{commands}[/bold] commands · "
     "[bold]{external}[/bold] external\n"
 )
 MSG_EMPTY_CATALOG = "[red]No artifacts found in the marketplace catalog.[/red]"
@@ -75,6 +77,7 @@ MSG_NOTHING_SELECTED = "[yellow]Nothing selected — exiting.[/yellow]"
 MSG_NO_TARGETS = "[yellow]No targets selected — exiting.[/yellow]"
 MSG_NO_SKILL_TARGETS = "[yellow]No skill/plugin target selected — skipping those items.[/yellow]"
 MSG_NO_RULE_TARGETS = "[yellow]No rule target selected — skipping rules.[/yellow]"
+MSG_NO_COMMAND_TARGETS = "[yellow]No command target selected — skipping commands.[/yellow]"
 MSG_ABORTED = "[yellow]Aborted.[/yellow]"
 MSG_CANCELLED = "\n[yellow]Cancelled.[/yellow]"
 MSG_INVALID_MANIFEST_FMT = "[red]Invalid {manifest}: {error}[/red]"
@@ -98,3 +101,4 @@ def _section_header(label: str) -> str:
 SYNC_SECTION_SKILLS = _section_header("Skills")
 SYNC_SECTION_PLUGINS = _section_header("External Plugins")
 SYNC_SECTION_RULES = _section_header("Rules")
+SYNC_SECTION_COMMANDS = _section_header("Commands")

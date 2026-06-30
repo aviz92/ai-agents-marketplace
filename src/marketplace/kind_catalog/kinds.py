@@ -12,7 +12,7 @@ from marketplace.consts.render import (
     SKILL_TEMPLATE,
 )
 
-Kind = Literal["skill", "plugin", "rule", "external-plugin"]
+Kind = Literal["skill", "plugin", "rule", "external-plugin", "command"]
 
 
 @dataclass(frozen=True)
@@ -72,4 +72,14 @@ EXTERNAL_PLUGIN = KindConfig(
     body_filename=None,
     manifest_mode=ManifestMode.FLAT,
     kind_category=KindCategory.EXTERNAL_PLUGIN,
+)
+COMMAND = KindConfig(
+    kind_name="command",
+    dir_name="commands",
+    icon="⚡",
+    display_name="Commands",
+    table_style="cyan",
+    body_filename="command.md",
+    manifest_mode=ManifestMode.PER_AGENT,
+    kind_category=KindCategory.COMMAND,
 )

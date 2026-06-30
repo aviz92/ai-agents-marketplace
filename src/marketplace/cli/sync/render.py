@@ -24,6 +24,4 @@ def print_external_results(console: Console, results: list[ExternalInstallResult
         icon = "[green]✓[/green]" if result.success else "[red]✗[/red]"
         lines.append(f"{icon} [bold]{result.name}[/bold]  [dim]{result.command}[/dim]")
     style = "green" if all_ok else "red"
-    console.print(
-        Panel("\n".join(lines), title=display.TITLE_EXTERNAL_PLUGINS, style=style)
-    )
+    console.print(Panel("\n".join(lines), title=display.TITLE_EXTERNAL_PLUGINS, style=style))

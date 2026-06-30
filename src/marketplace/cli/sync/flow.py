@@ -16,9 +16,8 @@ from marketplace.installer import (
     install_external_plugin,
     install_to_target,
 )
-from marketplace.kind_catalog.models import ExternalPlugin
 from marketplace.kind_catalog.loader import load_catalog
-from marketplace.kind_catalog.models import CatalogItem
+from marketplace.kind_catalog.models import CatalogItem, ExternalPlugin
 from marketplace.manifest import (
     MANIFEST_NAME,
     ManifestError,
@@ -70,6 +69,29 @@ def _select_sync_targets(
     return {k: v for k, v in installable.items() if k in selected}
 
 
+def _install_external_items(
+    console: Console, external_items: list[CatalogItem], install_all: bool
+) -> bool:
+    """Run external plugin installs, prompting unless install_all is set.
+
+    Returns True if any install failed.
+    """
+    ext_results: list[ExternalInstallResult] = []
+    for item in external_items:
+        if not isinstance(item, ExternalPlugin):
+            continue
+        try:
+            confirmed = install_all or prompt_confirm_external_plugin(item)
+        except (KeyboardInterrupt, EOFError) as exc:
+            console.print(display.MSG_CANCELLED)
+            raise SystemExit(0) from exc
+        if confirmed:
+            ext_results.append(install_external_plugin(item))
+    if ext_results:
+        render.print_external_results(console, ext_results)
+    return any(not r.success for r in ext_results)
+
+
 def run_sync(console: Console, project_dir: Path, *, install_all: bool = False) -> None:
     """Install artifacts declared in agents-marketplace.yaml.
 
@@ -96,22 +118,9 @@ def run_sync(console: Console, project_dir: Path, *, install_all: bool = False) 
             installable = _select_sync_targets(console, installable)
         render.print_results(console, _install_per_target(installable, project_dir))
 
-    ext_failed = False
-    if external_items:
-        ext_results: list[ExternalInstallResult] = []
-        for item in external_items:
-            if not isinstance(item, ExternalPlugin):
-                continue
-            try:
-                confirmed = install_all or prompt_confirm_external_plugin(item)
-            except (KeyboardInterrupt, EOFError):
-                console.print(display.MSG_CANCELLED)
-                raise SystemExit(0)
-            if confirmed:
-                ext_results.append(install_external_plugin(item))
-        if ext_results:
-            render.print_external_results(console, ext_results)
-            ext_failed = any(not r.success for r in ext_results)
+    ext_failed = bool(external_items) and _install_external_items(
+        console, external_items, install_all
+    )
 
     if missing or ext_failed:
         raise SystemExit(1)

@@ -14,8 +14,15 @@ from InquirerPy.separator import Separator
 
 from marketplace.consts import display
 from marketplace.consts.agents import AGENT_NAMES, TARGET_AGENTS
-from marketplace.installer import RuleTargetInfo, TargetInfo, rule_targets, targets
-from marketplace.kind_catalog.kinds import PLUGIN, RULE, SKILL, KindConfig
+from marketplace.installer import (
+    CommandTargetInfo,
+    RuleTargetInfo,
+    TargetInfo,
+    command_targets,
+    rule_targets,
+    targets,
+)
+from marketplace.kind_catalog.kinds import COMMAND, PLUGIN, RULE, SKILL, KindConfig
 from marketplace.kind_catalog.models import CatalogItem, ExternalPlugin
 
 _NAME_W = 26
@@ -24,8 +31,8 @@ _GUTTER = 4  # "  ◉ " prefix InquirerPy adds to every choice row
 _ARROW = "  →  "
 
 
-def _target_info() -> dict[str, TargetInfo | RuleTargetInfo]:
-    return {**targets(), **rule_targets()}
+def _target_info() -> dict[str, TargetInfo | RuleTargetInfo | CommandTargetInfo]:
+    return {**targets(), **rule_targets(), **command_targets()}
 
 
 _DISPLAY_NAMES = {**AGENT_NAMES, TARGET_AGENTS: "agents/ (multi-agent)"}
@@ -35,6 +42,7 @@ _SECTIONS: tuple[tuple[KindConfig, str, tuple[str, str]], ...] = (
     (SKILL, display.SYNC_SECTION_SKILLS, ("skill", "skills")),
     (PLUGIN, display.SYNC_SECTION_PLUGINS, ("plugin", "plugins")),
     (RULE, display.SYNC_SECTION_RULES, ("rule", "rules")),
+    (COMMAND, display.SYNC_SECTION_COMMANDS, ("command", "commands")),
 )
 _NOUNS: dict[KindConfig, tuple[str, str]] = {cfg: nouns for cfg, _, nouns in _SECTIONS}
 

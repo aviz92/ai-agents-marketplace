@@ -3,12 +3,12 @@ from __future__ import annotations
 from functools import cache
 
 from marketplace.consts.manifest import ManifestMode
-from marketplace.kind_catalog.kinds import EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL, KindConfig
+from marketplace.kind_catalog.kinds import COMMAND, EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL, KindConfig
 
 
 @cache
 def all_kinds() -> tuple[KindConfig, ...]:
-    return SKILL, PLUGIN, RULE, EXTERNAL_PLUGIN
+    return SKILL, PLUGIN, RULE, EXTERNAL_PLUGIN, COMMAND
 
 
 @cache
