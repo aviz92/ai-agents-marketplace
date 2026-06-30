@@ -36,12 +36,6 @@ def install_rules_to_target(
     return install_rule(target_id, items, project_dir)
 
 
-def install_commands_to_target(
-    target_id: str, items: list[CatalogItem], project_dir: Path
-) -> InstallResult:
-    return install_command(target_id, items, project_dir)
-
-
 def install_external_plugin(item: ExternalPlugin) -> ExternalInstallResult:
     """Run item.install and stream output to the terminal.
 

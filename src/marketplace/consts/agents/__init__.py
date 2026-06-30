@@ -20,7 +20,6 @@ from marketplace.consts.agents.copilot import (
 )
 from marketplace.consts.agents.cursor import (
     AGENT_CURSOR,
-    CURSOR_COMMANDS_DIR,
     CURSOR_DIR,
     CURSOR_RULES_FILE,
     EXT_MDC,
@@ -60,7 +59,6 @@ __all__ = [
     "COPILOT_INSTRUCTIONS_MD",
     "COPILOT_PROMPTS_DIR",
     "COPILOT_SKILLS_DIR",
-    "CURSOR_COMMANDS_DIR",
     "CURSOR_DIR",
     "CURSOR_RULES_FILE",
     "EXT_INSTRUCTIONS_MD",

@@ -28,18 +28,15 @@ def _build_per_target(
     command_target_ids: list[str],
 ) -> dict[str, list[CatalogItem]]:
     per_target: dict[str, list[CatalogItem]] = {}
-    for target_id in skill_target_ids:
-        per_target.setdefault(target_id, []).extend(
-            item for item in selected if item.config.kind_category in SKILLS_TARGET_GROUPS
-        )
-    for target_id in rule_target_ids:
-        per_target.setdefault(target_id, []).extend(
-            item for item in selected if item.config.kind_category in RULE_TARGET_GROUPS
-        )
-    for target_id in command_target_ids:
-        per_target.setdefault(target_id, []).extend(
-            item for item in selected if item.config.kind_category in COMMAND_TARGET_GROUPS
-        )
+    for target_ids, kind_groups in (
+        (skill_target_ids, SKILLS_TARGET_GROUPS),
+        (rule_target_ids, RULE_TARGET_GROUPS),
+        (command_target_ids, COMMAND_TARGET_GROUPS),
+    ):
+        for target_id in target_ids:
+            per_target.setdefault(target_id, []).extend(
+                item for item in selected if item.config.kind_category in kind_groups
+            )
     return per_target
 
 

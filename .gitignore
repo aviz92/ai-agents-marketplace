@@ -186,6 +186,7 @@ docker-compose.override.yml
 .codex/
 .gemini/
 .github/instructions/
+.github/prompts/
 GEMINI.md
 
 # ============================================================

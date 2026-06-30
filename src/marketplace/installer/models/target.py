@@ -29,10 +29,7 @@ def targets() -> dict[str, TargetInfo]:
     return {
         AGENT_CLAUDE: TargetInfo(
             dir=CLAUDE_SKILLS_DIR,
-            covers=[AGENT_NAMES[AGENT_CLAUDE], AGENT_NAMES[AGENT_COPILOT]],
+            covers=[AGENT_NAMES[AGENT_CLAUDE], AGENT_NAMES[AGENT_COPILOT]]
         ),
-        TARGET_AGENTS: TargetInfo(
-            dir=AGENTS_SKILLS_DIR,
-            covers=AGENTS_TARGET_COVERS,
-        ),
+        TARGET_AGENTS: TargetInfo(dir=AGENTS_SKILLS_DIR, covers=AGENTS_TARGET_COVERS),
     }

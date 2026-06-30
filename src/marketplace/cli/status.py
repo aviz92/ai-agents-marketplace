@@ -47,6 +47,10 @@ def _get_versions_by_target(
     return versions
 
 
+def _flat_file_path(iid: str, target: RuleTargetInfo | CommandTargetInfo) -> Path:
+    return Path(target.dir) / target.filename_pattern.format(id=iid)
+
+
 def get_installed_versions_by_target(
     item_id: str, target_map: dict[str, TargetInfo], project_dir: Path
 ) -> dict[str, str]:
@@ -75,12 +79,14 @@ def get_installed_rule_versions_by_target(
     item_id: str, rule_target_map: dict[str, RuleTargetInfo], project_dir: Path
 ) -> dict[str, str]:
     """Map rule target id → installed version found in its rendered rule file."""
-    return _get_versions_by_target(
-        item_id,
-        rule_target_map,
-        lambda iid, t: Path(t.dir) / t.filename_pattern.format(id=iid),
-        project_dir,
-    )
+    return _get_versions_by_target(item_id, rule_target_map, _flat_file_path, project_dir)
+
+
+def get_installed_command_versions_by_target(
+    item_id: str, command_target_map: dict[str, CommandTargetInfo], project_dir: Path
+) -> dict[str, str]:
+    """Map command target id → installed version found in its rendered command file."""
+    return _get_versions_by_target(item_id, command_target_map, _flat_file_path, project_dir)
 
 
 def _status_skill(item: CatalogItem, project_dir: Path) -> dict[str, str]:
@@ -99,18 +105,6 @@ def _status_plugin(item: CatalogItem, project_dir: Path) -> dict[str, str]:
 
 def _status_rule(item: CatalogItem, project_dir: Path) -> dict[str, str]:
     return get_installed_rule_versions_by_target(item.id, rule_targets(), project_dir)
-
-
-def get_installed_command_versions_by_target(
-    item_id: str, command_target_map: dict[str, CommandTargetInfo], project_dir: Path
-) -> dict[str, str]:
-    """Map command target id → installed version found in its rendered command file."""
-    return _get_versions_by_target(
-        item_id,
-        command_target_map,
-        lambda iid, t: Path(t.dir) / t.filename_pattern.format(id=iid),
-        project_dir,
-    )
 
 
 def _status_command(item: CatalogItem, project_dir: Path) -> dict[str, str]:

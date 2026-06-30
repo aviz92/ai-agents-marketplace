@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from marketplace.installer.install import (
-    install_commands_to_target,
     install_external_plugin,
     install_rules_to_target,
     install_skills_to_target,
@@ -29,7 +28,6 @@ __all__ = [
     "TargetInfo",
     "clear_template_env_cache",
     "command_targets",
-    "install_commands_to_target",
     "install_external_plugin",
     "install_rules_to_target",
     "install_skills_to_target",

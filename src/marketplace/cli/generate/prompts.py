@@ -14,6 +14,7 @@ from marketplace.consts import display
 from marketplace.consts.agents import AGENT_CLAUDE, TARGET_AGENTS
 from marketplace.consts.kinds import COMMAND_TARGET_GROUPS, RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS
 from marketplace.installer import command_targets, rule_targets, targets
+from marketplace.installer.models import CommandTargetInfo, RuleTargetInfo
 from marketplace.kind_catalog.models import CatalogItem
 from marketplace.kind_catalog.registry import all_kinds
 
@@ -75,8 +76,12 @@ def _prompt_targets(detected: set[str]) -> list[str]:
     ).execute()
 
 
-def _prompt_rule_targets(detected: set[str]) -> list[str]:
-    any_detected = bool(detected & set(rule_targets()))
+def _prompt_agent_targets(
+    target_map: dict[str, RuleTargetInfo | CommandTargetInfo],
+    message: str,
+    detected: set[str],
+) -> list[str]:
+    any_detected = bool(detected & set(target_map))
     choices = [
         Choice(
             value=target_id,
@@ -85,28 +90,17 @@ def _prompt_rule_targets(detected: set[str]) -> list[str]:
             ),
             enabled=target_id in detected or not any_detected,
         )
-        for target_id, target in rule_targets().items()
+        for target_id, target in target_map.items()
     ]
-    return inquirer.checkbox(
-        message=display.PROMPT_RULE_TARGETS, choices=choices, cycle=True
-    ).execute()
+    return inquirer.checkbox(message=message, choices=choices, cycle=True).execute()
+
+
+def _prompt_rule_targets(detected: set[str]) -> list[str]:
+    return _prompt_agent_targets(rule_targets(), display.PROMPT_RULE_TARGETS, detected)
 
 
 def _prompt_command_targets(detected: set[str]) -> list[str]:
-    any_detected = bool(detected & set(command_targets()))
-    choices = [
-        Choice(
-            value=target_id,
-            name=display.TARGET_CHOICE_FMT.format(
-                label=target.label, covers=", ".join(target.covers)
-            ),
-            enabled=target_id in detected or not any_detected,
-        )
-        for target_id, target in command_targets().items()
-    ]
-    return inquirer.checkbox(
-        message=display.PROMPT_COMMAND_TARGETS, choices=choices, cycle=True
-    ).execute()
+    return _prompt_agent_targets(command_targets(), display.PROMPT_COMMAND_TARGETS, detected)
 
 
 def prompt_all_targets(
