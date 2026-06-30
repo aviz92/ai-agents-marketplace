@@ -42,4 +42,3 @@ Verdict: APPROVE ✅ / REQUEST CHANGES ❌
 ```
 
 Be direct and concise. Every critical/major issue needs a concrete fix.
-
