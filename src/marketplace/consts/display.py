@@ -48,7 +48,6 @@ TITLE_INSTALL_TARGETS = "Install Targets"
 TITLE_SUMMARY = "Manifest Preview"
 TITLE_TARGET_DIRS = "Target directories"
 TITLE_FILES_WRITTEN = "Files written"
-TITLE_EXTERNAL_PLUGINS = "🌐 External Plugins"
 
 DETECTED_MARK = "[green]✓[/green]"
 NOT_DETECTED_MARK = "[dim]✗[/dim]"
@@ -92,13 +91,7 @@ _SEP_LEAD = "─" * 4
 _SEP_TOTAL = 65
 
 
-def _section_header(label: str) -> str:
+def section_header(label: str) -> str:
     """Build a fixed-total-width section separator string."""
     fill = max(0, _SEP_TOTAL - len(_SEP_LEAD) - 1 - len(label) - 1)
     return f"{_SEP_LEAD} {label} {'─' * fill}"
-
-
-SYNC_SECTION_SKILLS = _section_header("Skills")
-SYNC_SECTION_PLUGINS = _section_header("External Plugins")
-SYNC_SECTION_RULES = _section_header("Rules")
-SYNC_SECTION_COMMANDS = _section_header("Commands")

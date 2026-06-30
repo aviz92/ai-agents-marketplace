@@ -7,6 +7,7 @@ agent — kept apart from the simpler questions in the install flow's prompts.
 from __future__ import annotations
 
 import shutil
+from typing import Any, Literal
 
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
@@ -37,23 +38,23 @@ def _target_info() -> dict[str, TargetInfo | RuleTargetInfo | CommandTargetInfo]
 
 _DISPLAY_NAMES = {**AGENT_NAMES, TARGET_AGENTS: "agents/ (multi-agent)"}
 
-# Each kind's section title and the singular/plural noun for its count column, in display order.
-_SECTIONS: tuple[tuple[KindConfig, str, tuple[str, str]], ...] = (
-    (SKILL, display.SYNC_SECTION_SKILLS, ("skill", "skills")),
-    (PLUGIN, display.SYNC_SECTION_PLUGINS, ("plugin", "plugins")),
-    (RULE, display.SYNC_SECTION_RULES, ("rule", "rules")),
-    (COMMAND, display.SYNC_SECTION_COMMANDS, ("command", "commands")),
+# Each kind and the singular/plural noun for its count column, in display order.
+_SECTIONS: tuple[tuple[KindConfig, tuple[str, str]], ...] = (
+    (SKILL, ("skill", "skills")),
+    (PLUGIN, ("plugin", "plugins")),
+    (RULE, ("rule", "rules")),
+    (COMMAND, ("command", "commands")),
 )
-_NOUNS: dict[KindConfig, tuple[str, str]] = {cfg: nouns for cfg, _, nouns in _SECTIONS}
+_NOUNS: dict[KindConfig, tuple[str, str]] = {cfg: nouns for cfg, nouns in _SECTIONS}
 
 
 def _has_kind(items: list[CatalogItem], cfg: KindConfig) -> bool:
     return any(item.config == cfg for item in items)
 
 
-def _kind_column(items: list[CatalogItem], cfg: KindConfig) -> tuple[int, str, str]:
+def _kind_column(items: list[CatalogItem], cfg: KindConfig) -> tuple[int | Literal[0], Any]:
     count = sum(1 for item in items if item.config == cfg)
-    return (count, *_NOUNS[cfg])
+    return count, *_NOUNS[cfg]
 
 
 def _count_label(count: int, singular: str, plural: str) -> str:
@@ -65,7 +66,7 @@ def _primary_kind(items: list[CatalogItem]) -> KindConfig:
 
     Every populated target carries at least one kind, so a match is always found.
     """
-    for cfg, _, _ in _SECTIONS:
+    for cfg, _ in _SECTIONS:
         if _has_kind(items, cfg):
             return cfg
     return RULE  # unreachable: a populated target always has a kind
@@ -100,7 +101,7 @@ def prompt_confirm_external_plugin(plugin: ExternalPlugin) -> bool:
 
 
 def prompt_sync_agents(per_target: dict[str, list[CatalogItem]]) -> list[str]:
-    grouped: dict[KindConfig, dict[str, list[CatalogItem]]] = {cfg: {} for cfg, _, _ in _SECTIONS}
+    grouped: dict[KindConfig, dict[str, list[CatalogItem]]] = {cfg: {} for cfg, _ in _SECTIONS}
     for target_id, items in per_target.items():
         if items:
             grouped[_primary_kind(items)][target_id] = items
@@ -114,11 +115,11 @@ def prompt_sync_agents(per_target: dict[str, list[CatalogItem]]) -> list[str]:
         return [_kind_column(items, cfg)]
 
     choices: list[Choice | Separator] = []
-    for cfg, title, _ in _SECTIONS:
+    for cfg, _ in _SECTIONS:
         if not (group := grouped[cfg]):
             continue
         choices.append(Separator(""))
-        choices.append(Separator(title))
+        choices.append(Separator(display.section_header(cfg.display_name)))
         choices.extend(_choice(tid, columns_for(cfg, items)) for tid, items in group.items())
     choices.append(Separator(""))
 

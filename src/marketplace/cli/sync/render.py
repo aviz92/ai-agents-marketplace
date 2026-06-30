@@ -7,6 +7,7 @@ from rich.panel import Panel
 
 from marketplace.consts import display
 from marketplace.installer import ExternalInstallResult, InstallResult
+from marketplace.kind_catalog.kinds import EXTERNAL_PLUGIN
 
 
 def print_results(console: Console, results: list[InstallResult]) -> None:
@@ -24,4 +25,5 @@ def print_external_results(console: Console, results: list[ExternalInstallResult
         icon = "[green]✓[/green]" if result.success else "[red]✗[/red]"
         lines.append(f"{icon} [bold]{result.name}[/bold]  [dim]{result.command}[/dim]")
     style = "green" if all_ok else "red"
-    console.print(Panel("\n".join(lines), title=display.TITLE_EXTERNAL_PLUGINS, style=style))
+    title = f"{EXTERNAL_PLUGIN.icon} {EXTERNAL_PLUGIN.display_name}"
+    console.print(Panel("\n".join(lines), title=title, style=style))
