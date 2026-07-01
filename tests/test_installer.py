@@ -254,9 +254,9 @@ class TestForceFlag:
         assert skill_file.read_text() == "custom content\n", "File overwritten despite force=False"
         assert result.installed == 0, f"Expected 0 installed, got {result.installed}"
         assert result.files_written == [], f"Expected no files written, got {result.files_written}"
-        assert ".agents/skills/sample-skill/SKILL.md" in result.files_skipped, (
-            f"Expected skipped file in files_skipped: {result.files_skipped}"
-        )
+        assert (
+            ".agents/skills/sample-skill/SKILL.md" in result.files_skipped
+        ), f"Expected skipped file in files_skipped: {result.files_skipped}"
 
     def test_install_skill_with_force_overwrites_existing_file(
         self, project_dir: Path, sample_skill: CatalogItem
@@ -267,7 +267,9 @@ class TestForceFlag:
 
         result = install_skills_to_target("agents", [sample_skill], project_dir, True)
 
-        assert "custom content" not in skill_file.read_text(), "File not overwritten with force=True"
+        assert (
+            "custom content" not in skill_file.read_text()
+        ), "File not overwritten with force=True"
         assert result.installed == 1, f"Expected 1 installed, got {result.installed}"
         assert result.files_skipped == [], f"Expected no skipped files, got {result.files_skipped}"
 
@@ -314,9 +316,9 @@ class TestForceFlag:
 
         assert rule_file.read_text() == "custom content\n", "Rule overwritten despite force=False"
         assert result.installed == 0, f"Expected 0 installed, got {result.installed}"
-        assert ".gemini/rules/sample-rule.md" in result.files_skipped, (
-            f"Expected skipped rule in files_skipped: {result.files_skipped}"
-        )
+        assert (
+            ".gemini/rules/sample-rule.md" in result.files_skipped
+        ), f"Expected skipped rule in files_skipped: {result.files_skipped}"
 
     def test_install_rule_with_force_overwrites_existing_file(
         self, project_dir: Path, sample_rule: CatalogItem
@@ -340,14 +342,14 @@ class TestForceFlag:
 
         result = install_to_target("claude", [sample_command], project_dir, False)
 
-        assert command_file.read_text() == "custom content\n", (
-            "Command overwritten despite force=False"
-        )
+        assert (
+            command_file.read_text() == "custom content\n"
+        ), "Command overwritten despite force=False"
         assert len(result) == 1, f"Expected 1 result, got {len(result)}"
         assert result[0].installed == 0, f"Expected 0 installed, got {result[0].installed}"
-        assert ".claude/commands/sample-command.md" in result[0].files_skipped, (
-            f"Expected skipped command: {result[0].files_skipped}"
-        )
+        assert (
+            ".claude/commands/sample-command.md" in result[0].files_skipped
+        ), f"Expected skipped command: {result[0].files_skipped}"
 
     def test_install_command_with_force_overwrites_existing_file(
         self, project_dir: Path, sample_command: Command
@@ -358,9 +360,9 @@ class TestForceFlag:
 
         result = install_to_target("claude", [sample_command], project_dir, True)
 
-        assert "custom content" not in command_file.read_text(), (
-            "Command not overwritten with force=True"
-        )
+        assert (
+            "custom content" not in command_file.read_text()
+        ), "Command not overwritten with force=True"
         assert result[0].installed == 1, f"Expected 1 installed, got {result[0].installed}"
         assert result[0].files_skipped == [], f"Expected no skipped, got {result[0].files_skipped}"
 
@@ -373,13 +375,13 @@ class TestForceFlag:
 
         result = install_skills_to_target("agents", [sample_plugin], project_dir, False)
 
-        assert plugin_file.read_text() == "custom content\n", (
-            "Plugin overwritten despite force=False"
-        )
+        assert (
+            plugin_file.read_text() == "custom content\n"
+        ), "Plugin overwritten despite force=False"
         assert result.installed == 0, f"Expected 0 installed, got {result.installed}"
-        assert ".agents/skills/sample-plugin/PLUGIN.md" in result.files_skipped, (
-            f"Expected skipped plugin in files_skipped: {result.files_skipped}"
-        )
+        assert (
+            ".agents/skills/sample-plugin/PLUGIN.md" in result.files_skipped
+        ), f"Expected skipped plugin in files_skipped: {result.files_skipped}"
 
     def test_install_plugin_with_force_overwrites_existing_file(
         self, project_dir: Path, sample_plugin: CatalogItem
@@ -390,9 +392,9 @@ class TestForceFlag:
 
         result = install_skills_to_target("agents", [sample_plugin], project_dir, True)
 
-        assert "custom content" not in plugin_file.read_text(), (
-            "Plugin not overwritten with force=True"
-        )
+        assert (
+            "custom content" not in plugin_file.read_text()
+        ), "Plugin not overwritten with force=True"
         assert result.installed == 1, f"Expected 1 installed, got {result.installed}"
         assert result.files_skipped == [], f"Expected no skipped, got {result.files_skipped}"
 
@@ -404,7 +406,9 @@ class TestForceFlag:
         (authored / "metadata.yaml").write_text("name: With Assets\n", encoding="utf-8")
         (authored / "skill.md").write_text("# Body\n", encoding="utf-8")
         (authored / "assets" / "template.md").write_text("# Original\n", encoding="utf-8")
-        item = Skill(id="with-assets", name="With Assets", description="", content="# Body\n", path=authored)
+        item = Skill(
+            id="with-assets", name="With Assets", description="", content="# Body\n", path=authored
+        )
 
         install_skills_to_target("agents", [item], project_dir)
         skill_file = project_dir / ".agents/skills/with-assets/SKILL.md"
@@ -414,9 +418,9 @@ class TestForceFlag:
 
         result = install_skills_to_target("agents", [item], project_dir, False)
 
-        assert asset_file.read_text() == "# Original\n", (
-            "Asset updated despite force=False — _copy_assets must be skipped with main file"
-        )
+        assert (
+            asset_file.read_text() == "# Original\n"
+        ), "Asset updated despite force=False — _copy_assets must be skipped with main file"
         assert result.installed == 0, f"Expected 0 installed, got {result.installed}"
         assert result.files_written == [], f"Expected no files written, got {result.files_written}"
 
@@ -455,12 +459,10 @@ class TestForceFlag:
         result = install_rules_to_target("gemini", [sample_rule], project_dir, False)
 
         reference = project_dir / "GEMINI.md"
-        assert reference.is_file(), (
-            "Reference file must be created even when all rule files were skipped"
-        )
-        assert ".gemini/rules" in reference.read_text(), (
-            "Reference must point at rules dir"
-        )
+        assert (
+            reference.is_file()
+        ), "Reference file must be created even when all rule files were skipped"
+        assert ".gemini/rules" in reference.read_text(), "Reference must point at rules dir"
         assert result.installed == 0, f"Expected 0 installed, got {result.installed}"
         assert ".gemini/rules/sample-rule.md" in result.files_skipped
 
@@ -480,9 +482,9 @@ class TestForceFlag:
         skill_result = next(r for r in results if r.output_dir == ".claude/skills")
         command_result = next(r for r in results if r.output_dir == ".claude/commands")
         assert skill_result.installed == 0, f"Skill must be skipped, got {skill_result.installed}"
-        assert command_result.installed == 0, (
-            f"Command must be skipped, got {command_result.installed}"
-        )
+        assert (
+            command_result.installed == 0
+        ), f"Command must be skipped, got {command_result.installed}"
         assert ".claude/skills/sample-skill/SKILL.md" in skill_result.files_skipped
         assert ".claude/commands/sample-command.md" in command_result.files_skipped
 
@@ -495,7 +497,9 @@ class TestForceFlagRender:
 
     def test_print_results_no_skipped_shows_installed_only(self) -> None:
         result = InstallResult(
-            target="claude", installed=2, files_written=["a/SKILL.md", "b/SKILL.md"],
+            target="claude",
+            installed=2,
+            files_written=["a/SKILL.md", "b/SKILL.md"],
             output_dir=".claude/skills",
         )
         output = self._render([result])
@@ -504,7 +508,8 @@ class TestForceFlagRender:
 
     def test_print_results_with_skipped_shows_count_in_summary(self) -> None:
         result = InstallResult(
-            target="claude", installed=1,
+            target="claude",
+            installed=1,
             files_written=["a/SKILL.md"],
             files_skipped=["b/SKILL.md", "c/SKILL.md"],
             output_dir=".claude/skills",
@@ -515,7 +520,8 @@ class TestForceFlagRender:
 
     def test_print_results_with_skipped_lists_dim_already_installed_label(self) -> None:
         result = InstallResult(
-            target="claude", installed=0,
+            target="claude",
+            installed=0,
             files_written=[],
             files_skipped=["x/SKILL.md"],
             output_dir=".claude/skills",
@@ -526,7 +532,8 @@ class TestForceFlagRender:
 
     def test_print_results_all_skipped_shows_zero_installed(self) -> None:
         result = InstallResult(
-            target="agents", installed=0,
+            target="agents",
+            installed=0,
             files_written=[],
             files_skipped=["a/SKILL.md", "b/SKILL.md"],
             output_dir=".agents/skills",

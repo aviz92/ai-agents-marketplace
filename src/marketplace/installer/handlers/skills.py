@@ -25,7 +25,9 @@ def install_skill(
         if not force and out_file.exists():
             files_skipped.append(str(out_file.relative_to(project_dir)))
             continue
-        _write_rendered(out_file, env.get_template(cfg.template).render(item=item), project_dir, files_written)
+        _write_rendered(
+            out_file, env.get_template(cfg.template).render(item=item), project_dir, files_written
+        )
         _copy_assets(item, out_dir, project_dir, files_written)
         installed += 1
     _ensure_claude_md(target_id, project_dir, files_written)
