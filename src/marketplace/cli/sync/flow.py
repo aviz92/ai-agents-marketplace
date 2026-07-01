@@ -31,11 +31,11 @@ if TYPE_CHECKING:
 
 
 def _install_per_target(
-    per_target: dict[str, list[CatalogItem]], project_dir: Path
+    per_target: dict[str, list[CatalogItem]], project_dir: Path, force: bool = True
 ) -> list[InstallResult]:
     results: list[InstallResult] = []
     for target_id, items in per_target.items():
-        results.extend(install_to_target(target_id, items, project_dir))
+        results.extend(install_to_target(target_id, items, project_dir, force))
     return results
 
 
@@ -92,10 +92,13 @@ def _install_external_items(
     return any(not r.success for r in ext_results)
 
 
-def run_sync(console: Console, project_dir: Path, *, install_all: bool = False) -> None:
+def run_sync(
+    console: Console, project_dir: Path, install_all: bool = False, force: bool = False
+) -> None:
     """Install artifacts declared in agents-marketplace.yaml.
 
     Prompts the user to choose which agents to install for unless install_all is True.
+    Skips already-installed artifacts unless force is True.
     """
     err = Console(stderr=True)
     manifest = _load_manifest_or_exit(err, project_dir)
@@ -116,7 +119,7 @@ def run_sync(console: Console, project_dir: Path, *, install_all: bool = False) 
     if installable:
         if not install_all:
             installable = _select_sync_targets(console, installable)
-        render.print_results(console, _install_per_target(installable, project_dir))
+        render.print_results(console, _install_per_target(installable, project_dir, force))
 
     ext_failed = bool(external_items) and _install_external_items(
         console, external_items, install_all

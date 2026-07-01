@@ -41,11 +41,18 @@ class _SyncCommand(BaseCommand):
             dest="install_all",
             help="Install for all agents in the manifest without prompting.",
         )
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            dest="force",
+            help="Overwrite already-installed artifacts with the latest version.",
+        )
 
     def handle(self, **kwargs: object) -> None:
         verbosity = int(str(kwargs.get("verbosity", 1)))
         install_all = bool(kwargs.get("install_all", False))
-        run_sync(Console(quiet=verbosity == 0), Path.cwd(), install_all=install_all)
+        force = bool(kwargs.get("force", False))
+        run_sync(Console(quiet=verbosity == 0), Path.cwd(), install_all, force)
 
 
 _registry = CommandRegistry()

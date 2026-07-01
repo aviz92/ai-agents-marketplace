@@ -21,19 +21,19 @@ from marketplace.kind_catalog.models import CatalogItem, ExternalPlugin
 
 
 def install_skills_to_target(
-    target_id: str, items: list[CatalogItem], project_dir: Path
+    target_id: str, items: list[CatalogItem], project_dir: Path, force: bool = True
 ) -> InstallResult:
     plugins = [i for i in items if i.config.kind_category == KindCategory.PLUGIN]
     skills = [i for i in items if i.config.kind_category == KindCategory.SKILL]
     if plugins:
-        return install_plugin(target_id, plugins, project_dir)
-    return install_skill(target_id, skills, project_dir)
+        return install_plugin(target_id, plugins, project_dir, force)
+    return install_skill(target_id, skills, project_dir, force)
 
 
 def install_rules_to_target(
-    target_id: str, items: list[CatalogItem], project_dir: Path
+    target_id: str, items: list[CatalogItem], project_dir: Path, force: bool = True
 ) -> InstallResult:
-    return install_rule(target_id, items, project_dir)
+    return install_rule(target_id, items, project_dir, force)
 
 
 def install_external_plugin(item: ExternalPlugin) -> ExternalInstallResult:
@@ -57,7 +57,7 @@ def install_external_plugin(item: ExternalPlugin) -> ExternalInstallResult:
 
 
 def install_to_target(
-    target_id: str, items: list[CatalogItem], project_dir: Path
+    target_id: str, items: list[CatalogItem], project_dir: Path, force: bool = True
 ) -> list[InstallResult]:
     by_kind: dict[KindCategory, list[CatalogItem]] = {}
     for item in items:
@@ -66,13 +66,13 @@ def install_to_target(
     results: list[InstallResult] = []
     if target_id in targets():
         if group := by_kind.get(KindCategory.SKILL):
-            results.append(install_skill(target_id, group, project_dir))
+            results.append(install_skill(target_id, group, project_dir, force))
         if group := by_kind.get(KindCategory.PLUGIN):
-            results.append(install_plugin(target_id, group, project_dir))
+            results.append(install_plugin(target_id, group, project_dir, force))
     if target_id in rule_targets():
         if group := by_kind.get(KindCategory.RULES):
-            results.append(install_rule(target_id, group, project_dir))
+            results.append(install_rule(target_id, group, project_dir, force))
     if target_id in command_targets():
         if group := by_kind.get(KindCategory.COMMAND):
-            results.append(install_command(target_id, group, project_dir))
+            results.append(install_command(target_id, group, project_dir, force))
     return results
