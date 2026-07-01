@@ -128,6 +128,12 @@ uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-m
 
 # Install all agents in the manifest without prompting (CI-friendly)
 uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync --all
+
+# Overwrite already-installed artifacts with the latest version
+uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync --force
+
+# CI-friendly: install all agents and overwrite existing artifacts, no prompting
+uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync --all --force
 ```
 
 ```yaml

@@ -201,3 +201,29 @@ class TestRunSync:
         _write_manifest(project_dir, "claude:\n  skills: 42\n")
         with pytest.raises(SystemExit, match="1"):
             run_sync(_quiet_console(), project_dir, install_all=True)
+
+    def test_run_sync_install_all_without_force_skips_existing_file(
+        self, project_dir: Path
+    ) -> None:
+        _write_manifest(project_dir, "agents:\n  skills: [create-skill]\n")
+        run_sync(_quiet_console(), project_dir, install_all=True)
+        skill_file = project_dir / ".agents/skills/create-skill/SKILL.md"
+        skill_file.write_text("custom content\n", encoding="utf-8")
+
+        run_sync(_quiet_console(), project_dir, install_all=True, force=False)
+
+        assert skill_file.read_text() == "custom content\n", "File overwritten despite force=False"
+
+    def test_run_sync_install_all_with_force_overwrites_existing_file(
+        self, project_dir: Path
+    ) -> None:
+        _write_manifest(project_dir, "agents:\n  skills: [create-skill]\n")
+        run_sync(_quiet_console(), project_dir, install_all=True)
+        skill_file = project_dir / ".agents/skills/create-skill/SKILL.md"
+        skill_file.write_text("custom content\n", encoding="utf-8")
+
+        run_sync(_quiet_console(), project_dir, install_all=True, force=True)
+
+        assert (
+            "custom content" not in skill_file.read_text()
+        ), "File not overwritten with install_all=True, force=True"
