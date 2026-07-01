@@ -154,6 +154,23 @@ copilot:
 - Every list must be explicit artifact IDs — no wildcards.
 - Unknown IDs are reported and skipped; sync exits non-zero so CI can catch drift.
 
+To keep every clone's artifacts current automatically, wire `sync --all --force` into `.pre-commit-config.yaml` as a local hook:
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: local
+    hooks:
+      - id: agents-marketplace-sync
+        name: Sync agents-marketplace artifacts
+        entry: uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync --all --force
+        language: system
+        pass_filenames: false
+        files: ^agents-marketplace\.yaml$
+```
+
+`--all` skips the interactive prompt and `--force` overwrites artifacts already on disk, so the hook always installs exactly what `agents-marketplace.yaml` declares whenever that file changes.
+
 The easiest way to create this file: run `generate` once and answer **yes** to "Save installed state?" — the manifest snapshots everything currently installed (all targets), so re-saving never drops previously installed artifacts.
 
 ---
