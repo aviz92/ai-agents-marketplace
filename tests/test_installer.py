@@ -15,7 +15,7 @@ from marketplace.installer import (
     rule_targets,
     targets,
 )
-from marketplace.kind_catalog.models import CatalogItem, Command, Skill
+from marketplace.kind_catalog.models import CatalogItem, Command, Rule, Skill
 
 TARGETS = targets()
 RULE_TARGETS = rule_targets()
@@ -253,7 +253,7 @@ class TestForceFlag:
 
         assert skill_file.read_text() == "custom content\n", "File overwritten despite force=False"
         assert result.installed == 0, f"Expected 0 installed, got {result.installed}"
-        assert result.files_written == [], f"Expected no files written, got {result.files_written}"
+        assert not result.files_written, f"Expected no files written, got {result.files_written}"
         assert (
             ".agents/skills/sample-skill/SKILL.md" in result.files_skipped
         ), f"Expected skipped file in files_skipped: {result.files_skipped}"
@@ -271,7 +271,7 @@ class TestForceFlag:
             "custom content" not in skill_file.read_text()
         ), "File not overwritten with force=True"
         assert result.installed == 1, f"Expected 1 installed, got {result.installed}"
-        assert result.files_skipped == [], f"Expected no skipped files, got {result.files_skipped}"
+        assert not result.files_skipped, f"Expected no skipped files, got {result.files_skipped}"
 
     def test_install_skill_without_force_installs_when_file_missing(
         self, project_dir: Path, sample_skill: CatalogItem
@@ -281,7 +281,7 @@ class TestForceFlag:
         skill_file = project_dir / ".agents/skills/sample-skill/SKILL.md"
         assert skill_file.is_file(), "SKILL.md not written when file was missing"
         assert result.installed == 1, f"Expected 1 installed, got {result.installed}"
-        assert result.files_skipped == [], f"Expected no skipped files, got {result.files_skipped}"
+        assert not result.files_skipped, f"Expected no skipped files, got {result.files_skipped}"
 
     def test_install_skill_without_force_partial_skip_mixed_items(
         self, project_dir: Path, sample_skill: CatalogItem
@@ -331,7 +331,7 @@ class TestForceFlag:
 
         assert "custom content" not in rule_file.read_text(), "Rule not overwritten with force=True"
         assert result.installed == 1, f"Expected 1 installed, got {result.installed}"
-        assert result.files_skipped == [], f"Expected no skipped files, got {result.files_skipped}"
+        assert not result.files_skipped, f"Expected no skipped files, got {result.files_skipped}"
 
     def test_install_command_without_force_skips_existing_file(
         self, project_dir: Path, sample_command: Command
@@ -364,7 +364,7 @@ class TestForceFlag:
             "custom content" not in command_file.read_text()
         ), "Command not overwritten with force=True"
         assert result[0].installed == 1, f"Expected 1 installed, got {result[0].installed}"
-        assert result[0].files_skipped == [], f"Expected no skipped, got {result[0].files_skipped}"
+        assert not result[0].files_skipped, f"Expected no skipped, got {result[0].files_skipped}"
 
     def test_install_plugin_without_force_skips_existing_file(
         self, project_dir: Path, sample_plugin: CatalogItem
@@ -396,7 +396,7 @@ class TestForceFlag:
             "custom content" not in plugin_file.read_text()
         ), "Plugin not overwritten with force=True"
         assert result.installed == 1, f"Expected 1 installed, got {result.installed}"
-        assert result.files_skipped == [], f"Expected no skipped, got {result.files_skipped}"
+        assert not result.files_skipped, f"Expected no skipped, got {result.files_skipped}"
 
     def test_install_skill_without_force_skips_assets_when_main_file_exists(
         self, project_dir: Path, tmp_path: Path
@@ -422,13 +422,11 @@ class TestForceFlag:
             asset_file.read_text() == "# Original\n"
         ), "Asset updated despite force=False — _copy_assets must be skipped with main file"
         assert result.installed == 0, f"Expected 0 installed, got {result.installed}"
-        assert result.files_written == [], f"Expected no files written, got {result.files_written}"
+        assert not result.files_written, f"Expected no files written, got {result.files_written}"
 
     def test_install_rule_without_force_partial_skip_mixed_rules(
         self, project_dir: Path, sample_rule: CatalogItem
     ) -> None:
-        from marketplace.kind_catalog.models import Rule
-
         new_rule = Rule(
             id="new-rule",
             name="New Rule",
