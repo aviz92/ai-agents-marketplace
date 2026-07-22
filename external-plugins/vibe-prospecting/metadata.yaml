@@ -1,0 +1,7 @@
+name: Vibe Prospecting
+description: B2B prospecting, enrichment, and GTM workflows inside Claude Code, Codex, and other AI agents. Search 150M+ companies and 800M+ professionals for lead lists, contact discovery, enrichment, and account research.
+source: https://github.com/explorium-ai/vibeprospecting-plugin
+install: "npx skills add explorium-ai/vibeprospecting-plugin --all"
+author: explorium-ai
+version: 0.1.108
+tags: [b2b, prospecting, sales, enrichment, leads, gtm, contacts, companies]
