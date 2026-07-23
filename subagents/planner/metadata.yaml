@@ -1,0 +1,6 @@
+name: Planner
+description: Designs an implementation plan for a feature before any code is written
+tags: [planning, architecture]
+author: aviz92
+version: 1.0.0
+model_strength: strong

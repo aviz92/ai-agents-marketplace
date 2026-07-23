@@ -1,0 +1,6 @@
+name: Test Runner
+description: Runs the project test suite and reports failures with file:line detail
+tags: [testing, ci]
+author: aviz92
+version: 1.0.0
+model_strength: weak

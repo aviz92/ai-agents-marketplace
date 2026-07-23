@@ -67,6 +67,25 @@ class TestLoadManifest:
         with pytest.raises(ManifestError, match="does not support rules"):
             load_manifest(project_dir)
 
+    def test_load_manifest_parses_subagents_per_target(self, project_dir: Path) -> None:
+        _write_manifest(
+            project_dir,
+            "claude:\n  subagents: [planner]\ncodex:\n  subagents: [planner]\n",
+        )
+        manifest = load_manifest(project_dir)
+        assert manifest is not None
+        assert manifest.per_agent == {
+            "claude": {"subagents": ["planner"]},
+            "codex": {"subagents": ["planner"]},
+        }, f"Wrong per_agent: {manifest.per_agent}"
+
+    def test_load_manifest_subagent_on_skill_only_target_raises_manifest_error(
+        self, project_dir: Path
+    ) -> None:
+        _write_manifest(project_dir, "agents:\n  subagents: [x]\n")
+        with pytest.raises(ManifestError, match="does not support subagents"):
+            load_manifest(project_dir)
+
     def test_load_manifest_non_list_kind_raises_manifest_error(self, project_dir: Path) -> None:
         _write_manifest(project_dir, "claude:\n  skills: 42\n")
         with pytest.raises(ManifestError, match="list of strings"):

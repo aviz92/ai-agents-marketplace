@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import subprocess
+from collections.abc import Callable
 from pathlib import Path
 
 from marketplace.consts.kinds import KindCategory
@@ -10,14 +11,28 @@ from marketplace.installer.handlers.commands import install_command
 from marketplace.installer.handlers.plugins import install_plugin
 from marketplace.installer.handlers.rules import install_rule
 from marketplace.installer.handlers.skills import install_skill
+from marketplace.installer.handlers.subagents import install_subagent
 from marketplace.installer.models import (
     ExternalInstallResult,
     InstallResult,
     command_targets,
     rule_targets,
+    subagent_targets,
     targets,
 )
 from marketplace.kind_catalog.models import CatalogItem, ExternalPlugin
+
+_Installer = Callable[[str, list[CatalogItem], Path, bool], InstallResult]
+_TargetRegistry = Callable[[], dict]
+
+# (target registry, kind processed, installer) — one row per kind install_to_target can dispatch.
+_DISPATCH: tuple[tuple[_TargetRegistry, KindCategory, _Installer], ...] = (
+    (targets, KindCategory.SKILL, install_skill),
+    (targets, KindCategory.PLUGIN, install_plugin),
+    (rule_targets, KindCategory.RULES, install_rule),
+    (command_targets, KindCategory.COMMAND, install_command),
+    (subagent_targets, KindCategory.SUBAGENT, install_subagent),
+)
 
 
 def install_skills_to_target(
@@ -64,15 +79,9 @@ def install_to_target(
         by_kind.setdefault(item.config.kind_category, []).append(item)
 
     results: list[InstallResult] = []
-    if target_id in targets():
-        if group := by_kind.get(KindCategory.SKILL):
-            results.append(install_skill(target_id, group, project_dir, force))
-        if group := by_kind.get(KindCategory.PLUGIN):
-            results.append(install_plugin(target_id, group, project_dir, force))
-    if target_id in rule_targets():
-        if group := by_kind.get(KindCategory.RULES):
-            results.append(install_rule(target_id, group, project_dir, force))
-    if target_id in command_targets():
-        if group := by_kind.get(KindCategory.COMMAND):
-            results.append(install_command(target_id, group, project_dir, force))
+    for registry, kind_category, installer in _DISPATCH:
+        if target_id not in registry():
+            continue
+        if group := by_kind.get(kind_category):
+            results.append(installer(target_id, group, project_dir, force))
     return results

@@ -258,3 +258,8 @@ uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-m
 | Rule | `.github/instructions/` | `<id>.instructions.md` | GitHub Copilot |
 | Rule | `.codex/rules/` | `<id>.md` | Codex CLI |
 | Rule | `.gemini/rules/` | `<id>.md` | Gemini CLI |
+| Sub-Agent | `.claude/agents/` | `<id>.md` | Claude Code |
+| Sub-Agent | `.cursor/agents/` | `<id>.md` | Cursor |
+| Sub-Agent | `.github/agents/` | `<id>.md` | GitHub Copilot |
+| Sub-Agent | `.codex/agents/` | `<id>.md` | Codex CLI |
+| Sub-Agent | `.gemini/agents/` | `<id>.md` | Gemini CLI |

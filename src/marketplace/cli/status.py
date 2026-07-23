@@ -12,9 +12,11 @@ from marketplace.consts.render import PLUGIN_OUTPUT_FILE, SKILL_OUTPUT_FILE, VER
 from marketplace.installer import (
     CommandTargetInfo,
     RuleTargetInfo,
+    SubagentTargetInfo,
     TargetInfo,
     command_targets,
     rule_targets,
+    subagent_targets,
     targets,
 )
 from marketplace.kind_catalog.models import CatalogItem
@@ -30,7 +32,7 @@ def _read_installed_version(file_path: Path) -> str | None:
     return match.group(1) if match else None
 
 
-_T = TypeVar("_T", TargetInfo, RuleTargetInfo, CommandTargetInfo)
+_T = TypeVar("_T", TargetInfo, RuleTargetInfo, CommandTargetInfo, SubagentTargetInfo)
 
 
 def _get_versions_by_target(
@@ -47,7 +49,9 @@ def _get_versions_by_target(
     return versions
 
 
-def _flat_file_path(iid: str, target: RuleTargetInfo | CommandTargetInfo) -> Path:
+def _flat_file_path(
+    iid: str, target: RuleTargetInfo | CommandTargetInfo | SubagentTargetInfo
+) -> Path:
     return Path(target.dir) / target.filename_pattern.format(id=iid)
 
 
@@ -89,6 +93,13 @@ def get_installed_command_versions_by_target(
     return _get_versions_by_target(item_id, command_target_map, _flat_file_path, project_dir)
 
 
+def get_installed_subagent_versions_by_target(
+    item_id: str, subagent_target_map: dict[str, SubagentTargetInfo], project_dir: Path
+) -> dict[str, str]:
+    """Map subagent target id → installed version found in its rendered subagent file."""
+    return _get_versions_by_target(item_id, subagent_target_map, _flat_file_path, project_dir)
+
+
 def _status_skill(item: CatalogItem, project_dir: Path) -> dict[str, str]:
     output_file = item.config.output_file or SKILL_OUTPUT_FILE
     return _get_versions_by_target(
@@ -111,11 +122,16 @@ def _status_command(item: CatalogItem, project_dir: Path) -> dict[str, str]:
     return get_installed_command_versions_by_target(item.id, command_targets(), project_dir)
 
 
+def _status_subagent(item: CatalogItem, project_dir: Path) -> dict[str, str]:
+    return get_installed_subagent_versions_by_target(item.id, subagent_targets(), project_dir)
+
+
 _STATUS_DISPATCH: dict[KindCategory, _StatusFn] = {
     KindCategory.SKILL: _status_skill,
     KindCategory.PLUGIN: _status_plugin,
     KindCategory.RULES: _status_rule,
     KindCategory.COMMAND: _status_command,
+    KindCategory.SUBAGENT: _status_subagent,
 }
 
 
@@ -139,6 +155,12 @@ def get_installed_rule_versions(item_id: str, project_dir: Path) -> set[str]:
 def get_installed_command_versions(item_id: str, project_dir: Path) -> set[str]:
     return set(
         get_installed_command_versions_by_target(item_id, command_targets(), project_dir).values()
+    )
+
+
+def get_installed_subagent_versions(item_id: str, project_dir: Path) -> set[str]:
+    return set(
+        get_installed_subagent_versions_by_target(item_id, subagent_targets(), project_dir).values()
     )
 
 

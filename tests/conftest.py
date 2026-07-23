@@ -6,7 +6,7 @@ import pytest
 
 import marketplace.installer as _installer
 from marketplace.kind_catalog import loader as catalog
-from marketplace.kind_catalog.models import Command, Plugin, Rule, Skill
+from marketplace.kind_catalog.models import Command, Plugin, Rule, Skill, Subagent
 
 
 @pytest.fixture(autouse=True)
@@ -75,4 +75,16 @@ def sample_command() -> Command:
         description="A command used in tests",
         version="1.0.0",
         content="# Sample command body\n",
+    )
+
+
+@pytest.fixture
+def sample_subagent() -> Subagent:
+    return Subagent(
+        id="sample-subagent",
+        name="Sample Subagent",
+        description="A subagent used in tests",
+        version="1.0.0",
+        content="# Sample subagent body\n",
+        model_strength="weak",
     )

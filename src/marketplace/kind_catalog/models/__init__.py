@@ -4,6 +4,7 @@ from marketplace.kind_catalog.kinds import (
     PLUGIN as PLUGIN_KIND,
     RULE as RULE_KIND,
     SKILL as SKILL_KIND,
+    SUBAGENT as SUBAGENT_KIND,
 )
 from marketplace.kind_catalog.models.base import CatalogItem, Kind
 from marketplace.kind_catalog.models.command import Command
@@ -11,6 +12,7 @@ from marketplace.kind_catalog.models.external_plugin import ExternalPlugin
 from marketplace.kind_catalog.models.plugin import Plugin
 from marketplace.kind_catalog.models.rule import Rule
 from marketplace.kind_catalog.models.skill import Skill
+from marketplace.kind_catalog.models.subagent import Subagent
 
 KIND_CLASSES: dict[str, type[CatalogItem]] = {
     COMMAND_KIND.kind_name: Command,
@@ -18,6 +20,7 @@ KIND_CLASSES: dict[str, type[CatalogItem]] = {
     SKILL_KIND.kind_name: Skill,
     PLUGIN_KIND.kind_name: Plugin,
     EXTERNAL_PLUGIN_KIND.kind_name: ExternalPlugin,
+    SUBAGENT_KIND.kind_name: Subagent,
 }
 
 __all__ = [
@@ -29,4 +32,5 @@ __all__ = [
     "Plugin",
     "Rule",
     "Skill",
+    "Subagent",
 ]

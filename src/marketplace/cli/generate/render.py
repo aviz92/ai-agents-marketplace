@@ -12,8 +12,8 @@ from rich.table import Table
 from marketplace.cli.status import get_status_and_versions
 from marketplace.consts import display
 from marketplace.detect import Platform
-from marketplace.installer import command_targets, rule_targets, targets
-from marketplace.kind_catalog.kinds import COMMAND, EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL
+from marketplace.installer import command_targets, rule_targets, subagent_targets, targets
+from marketplace.kind_catalog.kinds import COMMAND, EXTERNAL_PLUGIN, PLUGIN, RULE, SKILL, SUBAGENT
 from marketplace.kind_catalog.models import CatalogItem
 from marketplace.kind_catalog.registry import all_kinds
 
@@ -65,6 +65,7 @@ def print_catalog_counts(console: Console, catalog: list[CatalogItem]) -> None:
             rules=counts[RULE.kind_name],
             plugins=counts[PLUGIN.kind_name],
             commands=counts[COMMAND.kind_name],
+            subagents=counts[SUBAGENT.kind_name],
             external=counts[EXTERNAL_PLUGIN.kind_name],
         )
     )
@@ -83,7 +84,10 @@ def print_platforms(console: Console, platforms: list[Platform]) -> None:
 
 def print_targets_panel(console: Console) -> None:
     all_targets = (
-        list(targets().values()) + list(rule_targets().values()) + list(command_targets().values())
+        list(targets().values())
+        + list(rule_targets().values())
+        + list(command_targets().values())
+        + list(subagent_targets().values())
     )
     lines = [
         display.TARGET_PANEL_LINE_FMT.format(label=target.label, covers=", ".join(target.covers))

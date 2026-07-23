@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from marketplace.kind_catalog.loader import load_catalog
-from marketplace.kind_catalog.models import CatalogItem, Plugin, Rule, Skill
+from marketplace.kind_catalog.models import CatalogItem, Plugin, Rule, Skill, Subagent
 
 
 def _write_item(root: Path, kind_dir: str, item_id: str, metadata: str, body_file: str) -> None:
@@ -73,11 +73,43 @@ class TestLoadCatalog:
         assert item.globs == [], f"Default globs wrong: {item.globs}"
         assert item.always_apply is False, "Default always_apply must be False"
 
+    def test_load_catalog_minimal_subagent_applies_regular_strength_default(
+        self, fake_root: Path
+    ) -> None:
+        _write_item(fake_root, "subagents", "min", "name: Min\n", "subagent.md")
+        item = load_catalog()[0]
+        assert isinstance(item, Subagent), f"Expected a Subagent, got {type(item).__name__}"
+        assert (
+            item.model_strength == "regular"
+        ), f"Default model_strength wrong: {item.model_strength}"
+
+    def test_load_catalog_subagent_reads_model_strength_from_metadata(
+        self, fake_root: Path
+    ) -> None:
+        _write_item(
+            fake_root,
+            "subagents",
+            "weak-one",
+            "name: Weak One\nmodel_strength: weak\n",
+            "subagent.md",
+        )
+        item = load_catalog()[0]
+        assert isinstance(item, Subagent), f"Expected a Subagent, got {type(item).__name__}"
+        assert item.model_strength == "weak", f"model_strength not read: {item.model_strength}"
+
+    def test_load_catalog_subagent_invalid_model_strength_skips_item_silently(
+        self, fake_root: Path
+    ) -> None:
+        _write_item(
+            fake_root, "subagents", "bad", "name: Bad\nmodel_strength: nope\n", "subagent.md"
+        )
+        assert load_catalog() == [], "Invalid model_strength must cause the item to be skipped"
+
 
 class TestCatalogItemLabel:
     @pytest.mark.parametrize(
         ("cls", "icon"),
-        [(Skill, "🧠"), (Plugin, "🔌"), (Rule, "📏")],
+        [(Skill, "🧠"), (Plugin, "🔌"), (Rule, "📏"), (Subagent, "🤖")],
     )
     def test_label_per_kind_uses_matching_icon(self, cls: type[CatalogItem], icon: str) -> None:
         item = cls(id="x", name="X", description="")

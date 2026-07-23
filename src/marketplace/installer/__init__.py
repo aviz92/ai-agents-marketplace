@@ -12,9 +12,11 @@ from marketplace.installer.models import (
     InstallResult,
     ReferenceSpec,
     RuleTargetInfo,
+    SubagentTargetInfo,
     TargetInfo,
     command_targets,
     rule_targets,
+    subagent_targets,
     targets,
 )
 from marketplace.installer.rendering.templates import clear_template_env_cache
@@ -25,6 +27,7 @@ __all__ = [
     "InstallResult",
     "ReferenceSpec",
     "RuleTargetInfo",
+    "SubagentTargetInfo",
     "TargetInfo",
     "clear_template_env_cache",
     "command_targets",
@@ -33,5 +36,6 @@ __all__ = [
     "install_skills_to_target",
     "install_to_target",
     "rule_targets",
+    "subagent_targets",
     "targets",
 ]
