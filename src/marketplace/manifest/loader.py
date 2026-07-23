@@ -10,9 +10,10 @@ from marketplace.consts.agents import (
     VALID_COMMAND_TARGET_IDS,
     VALID_RULE_TARGET_IDS,
     VALID_SKILL_TARGET_IDS,
+    VALID_SUBAGENT_TARGET_IDS,
 )
 from marketplace.consts.manifest import MANIFEST_NAME
-from marketplace.kind_catalog.kinds import COMMAND, PLUGIN, RULE, SKILL
+from marketplace.kind_catalog.kinds import COMMAND, PLUGIN, RULE, SKILL, SUBAGENT
 from marketplace.kind_catalog.registry import flat_kinds, per_agent_kinds
 from marketplace.manifest.models import Manifest, ManifestError
 
@@ -32,6 +33,7 @@ def _validate_per_agent(per_agent: dict[str, dict[str, list[str]]]) -> None:
     skill_keys = {SKILL.dir_name, PLUGIN.dir_name}
     rule_key = RULE.dir_name
     command_key = COMMAND.dir_name
+    subagent_key = SUBAGENT.dir_name
     for target_id, entry in per_agent.items():
         if skill_keys & set(entry) and target_id not in VALID_SKILL_TARGET_IDS:
             raise ManifestError(
@@ -47,6 +49,11 @@ def _validate_per_agent(per_agent: dict[str, dict[str, list[str]]]) -> None:
             raise ManifestError(
                 f"Target '{target_id}' does not support commands"
                 f" — valid command targets: {sorted(VALID_COMMAND_TARGET_IDS)}"
+            )
+        if subagent_key in entry and target_id not in VALID_SUBAGENT_TARGET_IDS:
+            raise ManifestError(
+                f"Target '{target_id}' does not support subagents"
+                f" — valid subagent targets: {sorted(VALID_SUBAGENT_TARGET_IDS)}"
             )
 
 
@@ -68,7 +75,12 @@ def _parse_flat(data: dict) -> tuple[dict[str, list[str]], set[str]]:
 
 
 def _parse_per_agent(data: dict, flat_keys: set[str]) -> dict[str, dict[str, list[str]]]:
-    valid_targets = VALID_SKILL_TARGET_IDS | VALID_RULE_TARGET_IDS | VALID_COMMAND_TARGET_IDS
+    valid_targets = (
+        VALID_SKILL_TARGET_IDS
+        | VALID_RULE_TARGET_IDS
+        | VALID_COMMAND_TARGET_IDS
+        | VALID_SUBAGENT_TARGET_IDS
+    )
     per_agent: dict[str, dict[str, list[str]]] = {}
     for target_id, entry in data.items():
         if target_id in flat_keys:

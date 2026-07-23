@@ -12,9 +12,14 @@ from rich.console import Console
 from marketplace.cli.generate.render import description_width, item_row, picker_header
 from marketplace.consts import display
 from marketplace.consts.agents import AGENT_CLAUDE, TARGET_AGENTS
-from marketplace.consts.kinds import COMMAND_TARGET_GROUPS, RULE_TARGET_GROUPS, SKILLS_TARGET_GROUPS
-from marketplace.installer import command_targets, rule_targets, targets
-from marketplace.installer.models import CommandTargetInfo, RuleTargetInfo
+from marketplace.consts.kinds import (
+    COMMAND_TARGET_GROUPS,
+    RULE_TARGET_GROUPS,
+    SKILLS_TARGET_GROUPS,
+    SUBAGENT_TARGET_GROUPS,
+)
+from marketplace.installer import command_targets, rule_targets, subagent_targets, targets
+from marketplace.installer.models import CommandTargetInfo, RuleTargetInfo, SubagentTargetInfo
 from marketplace.kind_catalog.models import CatalogItem
 from marketplace.kind_catalog.registry import all_kinds
 
@@ -77,7 +82,7 @@ def _prompt_targets(detected: set[str]) -> list[str]:
 
 
 def _prompt_agent_targets(
-    target_map: dict[str, RuleTargetInfo | CommandTargetInfo],
+    target_map: dict[str, RuleTargetInfo | CommandTargetInfo | SubagentTargetInfo],
     message: str,
     detected: set[str],
 ) -> list[str]:
@@ -103,22 +108,30 @@ def _prompt_command_targets(detected: set[str]) -> list[str]:
     return _prompt_agent_targets(command_targets(), display.PROMPT_COMMAND_TARGETS, detected)
 
 
+def _prompt_subagent_targets(detected: set[str]) -> list[str]:
+    return _prompt_agent_targets(subagent_targets(), display.PROMPT_SUBAGENT_TARGETS, detected)
+
+
 def prompt_all_targets(
     console: Console, selected: list[CatalogItem], detected: set[str]
-) -> tuple[list[str], list[str], list[str]]:
+) -> tuple[list[str], list[str], list[str], list[str]]:
     has_skills = any(item.config.kind_category in SKILLS_TARGET_GROUPS for item in selected)
     has_rules = any(item.config.kind_category in RULE_TARGET_GROUPS for item in selected)
     has_commands = any(item.config.kind_category in COMMAND_TARGET_GROUPS for item in selected)
+    has_subagents = any(item.config.kind_category in SUBAGENT_TARGET_GROUPS for item in selected)
     skill_targets = _prompt_targets(detected) if has_skills else []
     rule_target_ids = _prompt_rule_targets(detected) if has_rules else []
     command_target_ids = _prompt_command_targets(detected) if has_commands else []
+    subagent_target_ids = _prompt_subagent_targets(detected) if has_subagents else []
     if has_skills and not skill_targets:
         console.print(display.MSG_NO_SKILL_TARGETS)
     if has_rules and not rule_target_ids:
         console.print(display.MSG_NO_RULE_TARGETS)
     if has_commands and not command_target_ids:
         console.print(display.MSG_NO_COMMAND_TARGETS)
-    return skill_targets, rule_target_ids, command_target_ids
+    if has_subagents and not subagent_target_ids:
+        console.print(display.MSG_NO_SUBAGENT_TARGETS)
+    return skill_targets, rule_target_ids, command_target_ids, subagent_target_ids
 
 
 def confirm_generate() -> bool:

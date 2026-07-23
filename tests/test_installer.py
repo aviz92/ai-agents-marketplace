@@ -13,12 +13,14 @@ from marketplace.installer import (
     install_skills_to_target,
     install_to_target,
     rule_targets,
+    subagent_targets,
     targets,
 )
-from marketplace.kind_catalog.models import CatalogItem, Command, Rule, Skill
+from marketplace.kind_catalog.models import CatalogItem, Command, Rule, Skill, Subagent
 
 TARGETS = targets()
 RULE_TARGETS = rule_targets()
+SUBAGENT_TARGETS = subagent_targets()
 
 
 class TestInstallSkillsToTarget:
@@ -182,6 +184,47 @@ class TestInstallRulesToTarget:
         assert 'applyTo: "**"' in text, f"applyTo fallback wrong:\n{text}"
 
 
+class TestInstallSubagentToTarget:
+    _EXPECTED_WEAK_MODEL = {
+        "claude": "haiku",
+        "cursor": "claude-haiku-4.5",
+        "copilot": "o4-mini",
+        "gemini": "gemini-3-flash-lite",
+        "codex": "gpt-5.1-codex-mini",
+    }
+
+    @pytest.mark.parametrize("target_id", sorted(SUBAGENT_TARGETS))
+    def test_install_subagent_to_target_writes_native_file_with_name_and_model(
+        self, project_dir: Path, sample_subagent: Subagent, target_id: str
+    ) -> None:
+        target = SUBAGENT_TARGETS[target_id]
+        install_to_target(target_id, [sample_subagent], project_dir)
+        out = project_dir / target.dir / target.filename_pattern.format(id=sample_subagent.id)
+        assert out.is_file(), f"{target_id}: subagent file not written at {out}"
+        text = out.read_text()
+        assert f"name: {sample_subagent.id}" in text, f"{target_id}: name missing:\n{text}"
+        assert (
+            f"model: {self._EXPECTED_WEAK_MODEL[target_id]}" in text
+        ), f"{target_id}: wrong resolved model:\n{text}"
+        assert "version: 1.0.0" in text, f"{target_id}: version frontmatter missing:\n{text}"
+
+    def test_install_subagent_to_target_claude_writes_dot_claude_agents(
+        self, project_dir: Path, sample_subagent: Subagent
+    ) -> None:
+        install_to_target("claude", [sample_subagent], project_dir)
+        assert (
+            project_dir / ".claude/agents/sample-subagent.md"
+        ).is_file(), "Subagent must install under .claude/agents"
+
+    def test_install_subagent_to_target_copilot_writes_dot_github_agents(
+        self, project_dir: Path, sample_subagent: Subagent
+    ) -> None:
+        install_to_target("copilot", [sample_subagent], project_dir)
+        assert (
+            project_dir / ".github/agents/sample-subagent.md"
+        ).is_file(), "Copilot subagent must install under .github/agents"
+
+
 class TestReferenceInjection:
     def test_install_rules_codex_no_agents_md_creates_fallback(
         self, project_dir: Path, sample_rule: CatalogItem
@@ -239,6 +282,12 @@ class TestTargetRegistries:
     def test_rule_targets_registry_has_all_five_agents(self) -> None:
         expected = {"cursor", "copilot", "claude", "codex", "gemini"}
         assert set(RULE_TARGETS) == expected, f"Unexpected rule targets: {set(RULE_TARGETS)}"
+
+    def test_subagent_targets_registry_has_all_five_agents(self) -> None:
+        expected = {"cursor", "copilot", "claude", "codex", "gemini"}
+        assert (
+            set(SUBAGENT_TARGETS) == expected
+        ), f"Unexpected subagent targets: {set(SUBAGENT_TARGETS)}"
 
 
 class TestForceFlag:
@@ -363,6 +412,39 @@ class TestForceFlag:
         assert (
             "custom content" not in command_file.read_text()
         ), "Command not overwritten with force=True"
+        assert result[0].installed == 1, f"Expected 1 installed, got {result[0].installed}"
+        assert not result[0].files_skipped, f"Expected no skipped, got {result[0].files_skipped}"
+
+    def test_install_subagent_without_force_skips_existing_file(
+        self, project_dir: Path, sample_subagent: Subagent
+    ) -> None:
+        install_to_target("claude", [sample_subagent], project_dir)
+        subagent_file = project_dir / ".claude/agents/sample-subagent.md"
+        subagent_file.write_text("custom content\n", encoding="utf-8")
+
+        result = install_to_target("claude", [sample_subagent], project_dir, False)
+
+        assert (
+            subagent_file.read_text() == "custom content\n"
+        ), "Subagent overwritten despite force=False"
+        assert len(result) == 1, f"Expected 1 result, got {len(result)}"
+        assert result[0].installed == 0, f"Expected 0 installed, got {result[0].installed}"
+        assert (
+            ".claude/agents/sample-subagent.md" in result[0].files_skipped
+        ), f"Expected skipped subagent: {result[0].files_skipped}"
+
+    def test_install_subagent_with_force_overwrites_existing_file(
+        self, project_dir: Path, sample_subagent: Subagent
+    ) -> None:
+        install_to_target("claude", [sample_subagent], project_dir)
+        subagent_file = project_dir / ".claude/agents/sample-subagent.md"
+        subagent_file.write_text("custom content\n", encoding="utf-8")
+
+        result = install_to_target("claude", [sample_subagent], project_dir, True)
+
+        assert (
+            "custom content" not in subagent_file.read_text()
+        ), "Subagent not overwritten with force=True"
         assert result[0].installed == 1, f"Expected 1 installed, got {result[0].installed}"
         assert not result[0].files_skipped, f"Expected no skipped, got {result[0].files_skipped}"
 
