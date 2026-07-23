@@ -20,6 +20,7 @@ COMMAND_TEMPLATE_FMT = "command.{agent}.md.j2"
 
 SUBAGENTS_DIR_FMT = ".{agent}/agents"
 SUBAGENT_FILENAME_FMT = "{id}.md"
+COPILOT_SUBAGENT_FILENAME_FMT = "{id}.agent.md"
 SUBAGENT_TEMPLATE_FMT = "subagent.{agent}.md.j2"
 
 VERSION_RE = re.compile(r"^version:\s*(\S+)", re.MULTILINE)

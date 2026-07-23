@@ -13,6 +13,7 @@ from marketplace.consts.agents import (
     COPILOT_AGENTS_DIR,
 )
 from marketplace.consts.render import (
+    COPILOT_SUBAGENT_FILENAME_FMT,
     SUBAGENT_FILENAME_FMT,
     SUBAGENT_TEMPLATE_FMT,
     SUBAGENTS_DIR_FMT,
@@ -49,7 +50,7 @@ def subagent_targets() -> dict[str, SubagentTargetInfo]:
         AGENT_CODEX: SubagentTargetInfo.for_agent(AGENT_CODEX),
         AGENT_COPILOT: SubagentTargetInfo(
             dir=COPILOT_AGENTS_DIR,
-            filename_pattern=SUBAGENT_FILENAME_FMT,
+            filename_pattern=COPILOT_SUBAGENT_FILENAME_FMT,
             template=SUBAGENT_TEMPLATE_FMT.format(agent=AGENT_COPILOT),
             covers=[AGENT_NAMES[AGENT_COPILOT]],
         ),
