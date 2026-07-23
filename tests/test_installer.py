@@ -221,8 +221,8 @@ class TestInstallSubagentToTarget:
     ) -> None:
         install_to_target("copilot", [sample_subagent], project_dir)
         assert (
-            project_dir / ".github/agents/sample-subagent.md"
-        ).is_file(), "Copilot subagent must install under .github/agents"
+            project_dir / ".github/agents/sample-subagent.agent.md"
+        ).is_file(), "Copilot subagent must install under .github/agents with .agent.md extension"
 
 
 class TestReferenceInjection:
