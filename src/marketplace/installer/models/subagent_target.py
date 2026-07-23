@@ -12,7 +12,11 @@ from marketplace.consts.agents import (
     AGENT_NAMES,
     COPILOT_AGENTS_DIR,
 )
-from marketplace.consts.render import SUBAGENT_FILENAME_FMT, SUBAGENT_TEMPLATE_FMT, SUBAGENTS_DIR_FMT
+from marketplace.consts.render import (
+    SUBAGENT_FILENAME_FMT,
+    SUBAGENT_TEMPLATE_FMT,
+    SUBAGENTS_DIR_FMT,
+)
 
 
 @dataclass
