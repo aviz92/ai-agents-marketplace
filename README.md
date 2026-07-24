@@ -1,14 +1,20 @@
 # Agents Marketplace
 
 An interactive CLI (`agents-marketplace`) that distributes reusable AI-agent context —
-**skills** 🧠, **plugins** 🔌, and **rules** 📏 — into any project, rendering each artifact
-into the **native format** every supported AI coding agent expects.
+**skills** 🧠, **plugins** 🔌, **rules** 📏, **commands** ⚡, and **sub-agents** 🤖 — into
+any project, rendering each artifact into the **native format** every supported AI coding
+agent expects. It can also surface **external plugins** 🌐 — third-party artifacts installed
+via their own install script.
 
 - **Skills & plugins** are universal: authored once, installed into shared open-standard
   directories (`.claude/skills/`, `.agents/skills/`) that many agents already read.
-- **Rules** are agent-specific: each agent has its own rules format, frontmatter, and
-  location — so one authored rule is rendered into up to **5 native formats** at install
-  time. *Author once, render many.*
+- **Rules, commands, and sub-agents** are agent-specific: each agent has its own format,
+  frontmatter, and location — so one authored artifact is rendered into each target agent's
+  native file at install time. *Author once, render many.* Sub-agents also declare a
+  `model_strength` (`strong`/`regular`/`weak`) that's resolved to the right concrete model
+  name per agent (e.g. Claude → `opus`/`sonnet`/`haiku`, Cursor → `claude-opus-4.5`/...).
+- **External plugins** are third-party artifacts with their own install command — the CLI
+  just tracks and (with confirmation) runs it.
 
 
 ## 🎬 Demo
@@ -30,7 +36,7 @@ into the **native format** every supported AI coding agent expects.
 
 Go to `https://github.com/aviz92/ai-agents-marketplace` and click **Fork**.
 
-> You now have your own copy at `https://github.com/<your-username>/ai-agents-marketplace`. This is your personal catalog — add your own skills, rules, and plugins here.
+> You now have your own copy at `https://github.com/<your-username>/ai-agents-marketplace`. This is your personal catalog — add your own skills, plugins, rules, commands, and sub-agents here.
 
 ---
 
@@ -49,6 +55,9 @@ cd ai-agents-marketplace
 ls skills/
 ls rules/
 ls plugins/
+ls commands/
+ls subagents/
+ls external-plugins/
 ```
 
 ---
@@ -139,18 +148,25 @@ uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-m
 ```yaml
 # agents-marketplace.yaml
 claude:
-  skills: [python-code-review, pre-push-checklist]
-  rules: [no-debug-code]
+  skills: [create-skill]
+  rules: [no-debug-code, subagent-usage]
+  commands: [review]
+  subagents: [planner, test-runner]
 agents:
-  skills: [python-code-review]
+  skills: [create-skill]
 cursor:
   rules: [no-debug-code]
-copilot:
-  rules: [no-debug-code]
+  commands: [review]
+  subagents: [planner]
+external-plugins:
+- caveman
 ```
 
 - Valid skill/plugin targets: `claude`, `agents`
 - Valid rule targets: `claude`, `cursor`, `copilot`, `codex`, `gemini`
+- Valid command targets: `claude`, `cursor`, `copilot`, `gemini` (no Codex CLI support for commands)
+- Valid subagent targets: `claude`, `cursor`, `copilot`, `codex`, `gemini`
+- `external-plugins` is a flat list (not per-agent) — each ID must exist under `external-plugins/`
 - Every list must be explicit artifact IDs — no wildcards.
 - Unknown IDs are reported and skipped; sync exits non-zero so CI can catch drift.
 
@@ -225,6 +241,62 @@ One authored rule produces per-target files: `.cursor/rules/<id>.mdc`, `.github/
 
 Identical to a skill, but under `plugins/<plugin-id>/` with the body in `plugin.md`.
 
+**Command**
+
+```bash
+mkdir -p commands/my-new-command
+```
+
+```yaml
+# commands/my-new-command/metadata.yaml
+name: My New Command
+description: One-line description
+tags: [optional]
+author: your-name
+version: 1.0.0
+```
+
+```markdown
+<!-- commands/my-new-command/command.md -->
+Instructions the slash command runs...
+```
+
+Installed as `.claude/commands/<id>.md`, `.cursor/commands/<id>.md`, `.gemini/commands/<id>.md`, and `.github/prompts/<id>.prompt.md` (Copilot). No Codex CLI target.
+
+**Sub-Agent**
+
+```yaml
+# subagents/my-new-agent/metadata.yaml
+name: My New Agent
+description: One-line description
+tags: [optional]
+author: your-name
+version: 1.0.0
+model_strength: strong   # strong | regular | weak — resolved to a concrete model per agent
+```
+
+```markdown
+<!-- subagents/my-new-agent/subagent.md -->
+System prompt for the sub-agent...
+```
+
+Installed as `.claude/agents/<id>.md`, `.cursor/agents/<id>.md`, `.gemini/agents/<id>.md`, `.codex/agents/<id>.md`, and `.github/agents/<id>.agent.md` (Copilot). `model_strength` is resolved to each agent's actual model name at render time (e.g. `strong` → Claude `opus`, Cursor `claude-opus-4.5`, Copilot `gpt-5`).
+
+**External Plugin**
+
+```yaml
+# external-plugins/my-third-party-tool/metadata.yaml
+name: My Third-Party Tool
+description: One-line description
+source: https://github.com/someone/my-third-party-tool
+install: "curl -fsSL https://raw.githubusercontent.com/someone/my-third-party-tool/main/install.sh | bash"
+author: someone
+version: 1.0.0
+tags: [optional]
+```
+
+No template rendering — `sync` prompts for confirmation, then runs `install` as-is. `source` and `install` are required.
+
 Push to your fork, then run `generate` in any target project — the new artifact appears in the picker:
 
 ```bash
@@ -258,8 +330,13 @@ uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-m
 | Rule | `.github/instructions/` | `<id>.instructions.md` | GitHub Copilot |
 | Rule | `.codex/rules/` | `<id>.md` | Codex CLI |
 | Rule | `.gemini/rules/` | `<id>.md` | Gemini CLI |
+| Command | `.claude/commands/` | `<id>.md` | Claude Code |
+| Command | `.cursor/commands/` | `<id>.md` | Cursor |
+| Command | `.github/prompts/` | `<id>.prompt.md` | GitHub Copilot |
+| Command | `.gemini/commands/` | `<id>.md` | Gemini CLI |
 | Sub-Agent | `.claude/agents/` | `<id>.md` | Claude Code |
 | Sub-Agent | `.cursor/agents/` | `<id>.md` | Cursor |
-| Sub-Agent | `.github/agents/` | `<id>.md` | GitHub Copilot |
+| Sub-Agent | `.github/agents/` | `<id>.agent.md` | GitHub Copilot |
 | Sub-Agent | `.codex/agents/` | `<id>.md` | Codex CLI |
 | Sub-Agent | `.gemini/agents/` | `<id>.md` | Gemini CLI |
+| External Plugin | *(third-party, per plugin)* | *(defined by `install`)* | Any (self-installed) |
