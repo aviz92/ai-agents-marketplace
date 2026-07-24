@@ -316,7 +316,14 @@ uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-m
 uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync --all
 uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync --help
 uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync --version
+uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace validate
 ```
+
+`validate` checks every authored artifact in the catalog (missing `metadata.yaml`, missing body
+file, malformed fields) and exits non-zero on any error — no installs. Run it against your local
+edits with `uv run agents-marketplace validate` (or `uvx --from /path/to/ai-agents-marketplace
+agents-marketplace validate`) before pushing new or edited artifacts — the `git+https://...` form
+validates the last-pushed commit, not your working tree.
 
 
 ## What gets installed

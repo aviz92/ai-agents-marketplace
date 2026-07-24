@@ -9,6 +9,7 @@ from rich.console import Console
 from marketplace.cli.sync.render import print_results
 from marketplace.installer import (
     InstallResult,
+    command_targets,
     install_rules_to_target,
     install_skills_to_target,
     install_to_target,
@@ -21,6 +22,7 @@ from marketplace.kind_catalog.models import CatalogItem, Command, Rule, Skill, S
 TARGETS = targets()
 RULE_TARGETS = rule_targets()
 SUBAGENT_TARGETS = subagent_targets()
+COMMAND_TARGETS = command_targets()
 
 
 class TestInstallSkillsToTarget:
@@ -288,6 +290,12 @@ class TestTargetRegistries:
         assert (
             set(SUBAGENT_TARGETS) == expected
         ), f"Unexpected subagent targets: {set(SUBAGENT_TARGETS)}"
+
+    def test_command_targets_registry_covers_four_agents_excluding_codex(self) -> None:
+        expected = {"cursor", "copilot", "claude", "gemini"}
+        assert (
+            set(COMMAND_TARGETS) == expected
+        ), f"Unexpected command targets: {set(COMMAND_TARGETS)}"
 
 
 class TestForceFlag:

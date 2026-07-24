@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from marketplace.kind_catalog.loader import load_catalog
-from marketplace.kind_catalog.models import CatalogItem, Plugin, Rule, Skill, Subagent
+from marketplace.kind_catalog.models import CatalogItem, Command, Plugin, Rule, Skill, Subagent
 
 
 def _write_item(root: Path, kind_dir: str, item_id: str, metadata: str, body_file: str) -> None:
@@ -73,6 +73,13 @@ class TestLoadCatalog:
         assert item.globs == [], f"Default globs wrong: {item.globs}"
         assert item.always_apply is False, "Default always_apply must be False"
 
+    def test_load_catalog_minimal_command_applies_defaults(self, fake_root: Path) -> None:
+        _write_item(fake_root, "commands", "min", "name: Min\n", "command.md")
+        item = load_catalog()[0]
+        assert isinstance(item, Command), f"Expected a Command, got {type(item).__name__}"
+        assert item.version == "1.0.0", f"Default version wrong: {item.version}"
+        assert item.author == "unknown", f"Default author wrong: {item.author}"
+
     def test_load_catalog_minimal_subagent_applies_regular_strength_default(
         self, fake_root: Path
     ) -> None:
@@ -109,7 +116,7 @@ class TestLoadCatalog:
 class TestCatalogItemLabel:
     @pytest.mark.parametrize(
         ("cls", "icon"),
-        [(Skill, "🧠"), (Plugin, "🔌"), (Rule, "📏"), (Subagent, "🤖")],
+        [(Skill, "🧠"), (Plugin, "🔌"), (Rule, "📏"), (Command, "⚡"), (Subagent, "🤖")],
     )
     def test_label_per_kind_uses_matching_icon(self, cls: type[CatalogItem], icon: str) -> None:
         item = cls(id="x", name="X", description="")
