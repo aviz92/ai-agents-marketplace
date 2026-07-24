@@ -21,6 +21,7 @@ from marketplace.cli.status import (
 )
 from marketplace.cli.sync import run_sync
 from marketplace.cli.sync.prompts import prompt_sync_agents
+from marketplace.cli.validate import run_validate
 
 __all__ = [
     "build_item_choices",
@@ -34,4 +35,5 @@ __all__ = [
     "prompt_sync_agents",
     "run_generate",
     "run_sync",
+    "run_validate",
 ]

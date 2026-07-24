@@ -89,6 +89,8 @@ MSG_MISSING_REF_FMT = "[yellow]⚠ not in catalog: {reference}[/yellow]"
 MSG_MANIFEST_SAVED_FMT = "[green]Wrote {name} — commit it to sync your team.[/green]"
 PROMPT_SYNC_AGENTS = "Install for which agents? (space toggles, enter confirms):"
 MSG_NO_SYNC_AGENTS = "[yellow]No agents selected — exiting.[/yellow]"
+MSG_VALIDATE_CLEAN = "[green]✓ All artifacts valid.[/green]"
+MSG_VALIDATE_SUMMARY_FMT = "\n{errors} error(s), {warnings} warning(s)."
 
 _SEP_LEAD = "─" * 4
 _SEP_TOTAL = 65

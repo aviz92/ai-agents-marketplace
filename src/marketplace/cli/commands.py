@@ -11,6 +11,7 @@ from rich.console import Console
 
 from marketplace.cli.generate import run_generate
 from marketplace.cli.sync import run_sync
+from marketplace.cli.validate import run_validate
 
 try:
     _VERSION = _pkg_version("agents-marketplace")
@@ -55,9 +56,23 @@ class _SyncCommand(BaseCommand):
         run_sync(Console(quiet=verbosity == 0), Path.cwd(), install_all, force)
 
 
+class _ValidateCommand(BaseCommand):
+    help = (
+        "Validate every authored artifact in the catalog (metadata.yaml, body file, "
+        "required fields) without installing anything. Exits non-zero on any error."
+    )
+    version = _VERSION
+
+    def handle(self, **kwargs: object) -> None:
+        verbosity = int(str(kwargs.get("verbosity", 1)))
+        if exit_code := run_validate(Console(quiet=verbosity == 0)):
+            raise SystemExit(exit_code)
+
+
 _registry = CommandRegistry()
 _registry.add("generate", _GenerateCommand)
 _registry.add("sync", _SyncCommand)
+_registry.add("validate", _ValidateCommand)
 
 
 def main() -> None:
