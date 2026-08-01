@@ -39,16 +39,16 @@ def _install_per_target(
     return results
 
 
-def _load_manifest_or_exit(err: Console, project_dir: Path) -> Manifest:
+def _load_manifest_or_exit(err: Console, project_dir: Path, filename: str) -> Manifest:
     """Load the manifest, exiting with a message on a parse error or a missing file."""
     try:
-        manifest = load_manifest(project_dir)
+        manifest = load_manifest(project_dir, filename)
     except ManifestError as error:
-        err.print(display.MSG_INVALID_MANIFEST_FMT.format(manifest=MANIFEST_NAME, error=error))
+        err.print(display.MSG_INVALID_MANIFEST_FMT.format(manifest=filename, error=error))
         raise SystemExit(1) from error
     if manifest is None:
         err.print(
-            display.MSG_MANIFEST_MISSING_FMT.format(manifest=MANIFEST_NAME, project_dir=project_dir)
+            display.MSG_MANIFEST_MISSING_FMT.format(manifest=filename, project_dir=project_dir)
         )
         raise SystemExit(1)
     return manifest
@@ -93,7 +93,11 @@ def _install_external_items(
 
 
 def run_sync(
-    console: Console, project_dir: Path, install_all: bool = False, force: bool = False
+    console: Console,
+    project_dir: Path,
+    install_all: bool = False,
+    force: bool = False,
+    filename: str = MANIFEST_NAME,
 ) -> None:
     """Install artifacts declared in agents-marketplace.yaml.
 
@@ -101,7 +105,7 @@ def run_sync(
     Skips already-installed artifacts unless force is True.
     """
     err = Console(stderr=True)
-    manifest = _load_manifest_or_exit(err, project_dir)
+    manifest = _load_manifest_or_exit(err, project_dir, filename)
 
     with console.status(display.LOADING_CATALOG):
         catalog = load_catalog()
@@ -113,7 +117,7 @@ def run_sync(
 
     installable = {k: v for k, v in per_target.items() if v}
     if not installable and not external_items:
-        err.print(display.MSG_MANIFEST_EMPTY_FMT.format(manifest=MANIFEST_NAME))
+        err.print(display.MSG_MANIFEST_EMPTY_FMT.format(manifest=filename))
         raise SystemExit(1)
 
     if installable:

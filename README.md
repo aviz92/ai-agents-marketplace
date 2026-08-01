@@ -132,7 +132,7 @@ Review pre-checked targets (based on auto-detection) and adjust if needed.
 
 ### Step 10 — Save selection
 
-When prompted "Save installed state to `agents-marketplace.yaml`?", answer **yes** and commit the file so teammates get the same setup with one command.
+When prompted for a manifest filename, press enter to accept the default (`agents-marketplace.yaml`) or type a different name — commit the file so teammates get the same setup with one command.
 
 ---
 
@@ -152,6 +152,9 @@ uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-m
 
 # CI-friendly: install all agents and overwrite existing artifacts, no prompting
 uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync --all --force
+
+# Read a manifest with a non-default filename
+uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync --filename custom.yaml
 ```
 
 ```yaml
@@ -196,7 +199,7 @@ repos:
 
 `--all` skips the interactive prompt and `--force` overwrites artifacts already on disk, so the hook always installs exactly what `agents-marketplace.yaml` declares whenever that file changes.
 
-The easiest way to create this file: run `generate` once and answer **yes** to "Save installed state?" — the manifest snapshots everything currently installed (all targets), so re-saving never drops previously installed artifacts.
+The easiest way to create this file: run `generate` once and accept the default filename at the prompt — the manifest snapshots everything currently installed (all targets), so re-saving never drops previously installed artifacts.
 
 ---
 
@@ -323,6 +326,7 @@ uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-m
 uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace generate --version
 uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync
 uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync --all
+uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync --filename custom.yaml
 uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync --help
 uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace sync --version
 uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace validate

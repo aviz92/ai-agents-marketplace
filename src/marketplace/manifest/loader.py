@@ -18,8 +18,10 @@ from marketplace.kind_catalog.registry import flat_kinds, per_agent_kinds
 from marketplace.manifest.models import Manifest, ManifestError
 
 
-def manifest_path(project_dir: Path) -> Path:
-    return project_dir / MANIFEST_NAME
+def manifest_path(project_dir: Path, filename: str = MANIFEST_NAME) -> Path:
+    if filename in {".", ".."} or Path(filename).name != filename:
+        raise ManifestError(f"'{filename}' must be a plain filename, not a path.")
+    return project_dir / filename
 
 
 def _parse_kind(data: dict, key: str) -> list[str]:
@@ -105,9 +107,9 @@ def _parse_per_agent(data: dict, reserved_keys: set[str]) -> dict[str, dict[str,
     return per_agent
 
 
-def load_manifest(project_dir: Path) -> Manifest | None:
+def load_manifest(project_dir: Path, filename: str = MANIFEST_NAME) -> Manifest | None:
     """Parse the project manifest; None when the file doesn't exist."""
-    path = manifest_path(project_dir)
+    path = manifest_path(project_dir, filename)
     if not path.is_file():
         return None
     data = _read_manifest_data(path)
