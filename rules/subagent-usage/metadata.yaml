@@ -3,5 +3,6 @@ description: When and how to delegate work to subagents instead of doing it inli
 tags: [agent-behavior, orchestration]
 author: aviz92
 version: 2.0.0
+origin: aviz92/ai-agents-marketplace
 globs: []
 alwaysApply: true

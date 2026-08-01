@@ -38,6 +38,15 @@ Go to `https://github.com/aviz92/ai-agents-marketplace` and click **Fork**.
 
 > You now have your own copy at `https://github.com/<your-username>/ai-agents-marketplace`. This is your personal catalog — add your own skills, plugins, rules, commands, and sub-agents here.
 
+Forks can nest — a team can fork the root repo, and a sub-team can fork that
+team's fork. Tag provenance as you go:
+- Every artifact you author (not one you inherited from a fork) should set
+  `origin: org/repo` in its `metadata.yaml`, pointing at your own repo — see
+  `skills/create-skill/skill.md` for the full convention.
+- If your fork was forked from another team's fork rather than the root
+  repo, set `forked_from: org/repo` at the top of `agents-marketplace.yaml`
+  to record your immediate parent.
+
 ---
 
 ### Step 2 — Clone your fork locally

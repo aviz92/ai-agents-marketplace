@@ -3,3 +3,4 @@ description: Configure agents to use uv exclusively for Python dependency and en
 tags: [python, tooling, package-manager]
 author: aviz92
 version: 1.0.0
+origin: aviz92/ai-agents-marketplace

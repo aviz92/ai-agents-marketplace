@@ -28,11 +28,18 @@ description: One-line description shown in the marketplace picker
 tags: [optional, tags]
 author: your-name
 version: 1.0.0
+origin: org/repo
 ```
 
 - `description` must be a single line — it appears in the interactive picker.
 - `version` is semver. **Bump it on any change** to the skill's content or
   metadata — version changes are how installed copies detect updates.
+- `origin` is the `org/repo` slug of the repo this skill was authored in.
+  Set it once, when the skill is first created — run
+  `git remote get-url origin` in your checkout and translate the URL to
+  `org/repo`. Never overwrite an existing `origin` on a skill you didn't
+  author — that value is what lets downstream forks tell inherited skills
+  apart from ones added locally.
 
 ## skill.md
 

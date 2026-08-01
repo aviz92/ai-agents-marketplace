@@ -12,7 +12,7 @@ from marketplace.consts.agents import (
     VALID_SKILL_TARGET_IDS,
     VALID_SUBAGENT_TARGET_IDS,
 )
-from marketplace.consts.manifest import MANIFEST_NAME
+from marketplace.consts.manifest import MANIFEST_FORKED_FROM_KEY, MANIFEST_NAME
 from marketplace.kind_catalog.kinds import COMMAND, PLUGIN, RULE, SKILL, SUBAGENT
 from marketplace.kind_catalog.registry import flat_kinds, per_agent_kinds
 from marketplace.manifest.models import Manifest, ManifestError
@@ -74,7 +74,15 @@ def _parse_flat(data: dict) -> tuple[dict[str, list[str]], set[str]]:
     return flat, flat_keys
 
 
-def _parse_per_agent(data: dict, flat_keys: set[str]) -> dict[str, dict[str, list[str]]]:
+def _parse_forked_from(data: dict) -> str | None:
+    if (value := data.get(MANIFEST_FORKED_FROM_KEY)) is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise ManifestError(f"'{MANIFEST_FORKED_FROM_KEY}' must be a non-empty string")
+    return value
+
+
+def _parse_per_agent(data: dict, reserved_keys: set[str]) -> dict[str, dict[str, list[str]]]:
     valid_targets = (
         VALID_SKILL_TARGET_IDS
         | VALID_RULE_TARGET_IDS
@@ -83,7 +91,7 @@ def _parse_per_agent(data: dict, flat_keys: set[str]) -> dict[str, dict[str, lis
     )
     per_agent: dict[str, dict[str, list[str]]] = {}
     for target_id, entry in data.items():
-        if target_id in flat_keys:
+        if target_id in reserved_keys:
             continue
         if target_id not in valid_targets:
             raise ManifestError(f"Unknown target '{target_id}' — valid: {sorted(valid_targets)}")
@@ -104,6 +112,7 @@ def load_manifest(project_dir: Path) -> Manifest | None:
         return None
     data = _read_manifest_data(path)
     flat, flat_keys = _parse_flat(data)
-    per_agent = _parse_per_agent(data, flat_keys)
+    forked_from = _parse_forked_from(data)
+    per_agent = _parse_per_agent(data, flat_keys | {MANIFEST_FORKED_FROM_KEY})
     _validate_per_agent(per_agent)
-    return Manifest(per_agent=per_agent, flat=flat)
+    return Manifest(per_agent=per_agent, flat=flat, forked_from=forked_from)

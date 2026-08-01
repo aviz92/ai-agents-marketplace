@@ -26,12 +26,17 @@ class TestValidateCatalog:
         errors = [issue for issue in issues if issue.severity == "error"]
         assert errors == [], f"Repo's own catalog must be error-free: {errors}"
 
+    def test_validate_catalog_real_repo_has_no_missing_origin_warnings(self) -> None:
+        issues = validate_catalog(get_marketplace_root())
+        origin_warnings = [issue for issue in issues if "origin" in issue.message]
+        assert origin_warnings == [], f"Every authored artifact must set origin: {origin_warnings}"
+
     def test_validate_catalog_valid_item_produces_no_issues(self, tmp_path: Path) -> None:
         _write_item(
             tmp_path,
             "rules",
             "my-rule",
-            "name: My Rule\ndescription: desc\nauthor: avi\nversion: 1.0.0\n"
+            "name: My Rule\ndescription: desc\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n"
             'globs: ["**/*.py"]\nalwaysApply: false\n',
             "rule.md",
         )
@@ -87,7 +92,11 @@ class TestValidateCatalog:
         self, tmp_path: Path
     ) -> None:
         _write_item(
-            tmp_path, "skills", "no-desc", "name: X\nauthor: avi\nversion: 1.0.0\n", "skill.md"
+            tmp_path,
+            "skills",
+            "no-desc",
+            "name: X\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n",
+            "skill.md",
         )
         issues = validate_catalog(tmp_path)
         assert len(issues) == 1, f"Expected exactly one issue, got {issues}"
@@ -99,7 +108,7 @@ class TestValidateCatalog:
             tmp_path,
             "skills",
             "no-name",
-            "description: d\nauthor: avi\nversion: 1.0.0\n",
+            "description: d\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n",
             "skill.md",
         )
         issues = validate_catalog(tmp_path)
@@ -112,7 +121,7 @@ class TestValidateCatalog:
             tmp_path,
             "skills",
             "no-author",
-            "name: X\ndescription: d\nversion: 1.0.0\n",
+            "name: X\ndescription: d\nversion: 1.0.0\norigin: org/repo\n",
             "skill.md",
         )
         issues = validate_catalog(tmp_path)
@@ -122,12 +131,43 @@ class TestValidateCatalog:
 
     def test_validate_catalog_missing_version_reports_warning_only(self, tmp_path: Path) -> None:
         _write_item(
-            tmp_path, "skills", "no-version", "name: X\ndescription: d\nauthor: avi\n", "skill.md"
+            tmp_path,
+            "skills",
+            "no-version",
+            "name: X\ndescription: d\nauthor: avi\norigin: org/repo\n",
+            "skill.md",
         )
         issues = validate_catalog(tmp_path)
         assert len(issues) == 1, f"Expected exactly one issue, got {issues}"
         assert issues[0].severity == "warning", f"Wrong severity: {issues[0]}"
         assert "version" in issues[0].message, f"Wrong message: {issues[0].message}"
+
+    def test_validate_catalog_missing_origin_reports_warning_only(self, tmp_path: Path) -> None:
+        _write_item(
+            tmp_path,
+            "skills",
+            "no-origin",
+            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\n",
+            "skill.md",
+        )
+        issues = validate_catalog(tmp_path)
+        assert len(issues) == 1, f"Expected exactly one issue, got {issues}"
+        assert issues[0].severity == "warning", f"Wrong severity: {issues[0]}"
+        assert "origin" in issues[0].message, f"Wrong message: {issues[0].message}"
+
+    def test_validate_catalog_external_plugin_missing_origin_produces_no_issue(
+        self, tmp_path: Path
+    ) -> None:
+        item_dir = tmp_path / "external-plugins" / "no-origin"
+        item_dir.mkdir(parents=True)
+        (item_dir / "metadata.yaml").write_text(
+            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\n"
+            "source: some/repo\ninstall: 'curl foo'\n",
+            encoding="utf-8",
+        )
+        assert not validate_catalog(
+            tmp_path
+        ), "External plugins must not be checked for origin — they already have 'source'"
 
     def test_validate_catalog_rule_no_globs_no_always_apply_reports_warning(
         self, tmp_path: Path
@@ -136,7 +176,7 @@ class TestValidateCatalog:
             tmp_path,
             "rules",
             "dead-rule",
-            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\n",
+            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n",
             "rule.md",
         )
         issues = validate_catalog(tmp_path)
@@ -151,7 +191,8 @@ class TestValidateCatalog:
             tmp_path,
             "rules",
             "always-rule",
-            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\nalwaysApply: true\n",
+            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n"
+            "alwaysApply: true\n",
             "rule.md",
         )
         assert not validate_catalog(tmp_path), "alwaysApply=true rule needs no globs"
@@ -163,7 +204,8 @@ class TestValidateCatalog:
             tmp_path,
             "rules",
             "glob-rule",
-            'name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\nglobs: ["**/*.py"]\n',
+            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n"
+            'globs: ["**/*.py"]\n',
             "rule.md",
         )
         assert not validate_catalog(tmp_path), "Rule with globs needs no alwaysApply"
@@ -173,7 +215,7 @@ class TestValidateCatalog:
             tmp_path,
             "skills",
             "min",
-            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\n",
+            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n",
             "skill.md",
         )
         assert not validate_catalog(tmp_path), "Skills must not be checked for globs/alwaysApply"

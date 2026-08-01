@@ -2,6 +2,8 @@
 mode: 'agent'
 description: "{{ item.description }}"
 version: {{ item.version }}
+{% if item.origin %}origin: {{ item.origin }}
+{% endif %}
 ---
 
 {{ item.content }}

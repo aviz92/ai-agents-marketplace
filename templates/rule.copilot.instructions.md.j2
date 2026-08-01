@@ -1,6 +1,8 @@
 ---
 applyTo: "{{ item.globs | join(',') if item.globs else '**' }}"
 version: {{ item.version }}
+{% if item.origin %}origin: {{ item.origin }}
+{% endif %}
 ---
 
 {{ item.content }}

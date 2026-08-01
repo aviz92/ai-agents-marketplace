@@ -1,7 +1,8 @@
 ---
 description: "{{ item.description }}"
 version: {{ item.version }}
-{% if item.globs %}
+{% if item.origin %}origin: {{ item.origin }}
+{% endif %}{% if item.globs %}
 globs: {{ item.globs | tojson }}
 {% endif %}
 alwaysApply: {{ item.always_apply | lower }}

@@ -18,6 +18,7 @@ class CatalogItem(ABC):
     tags: list[str] = field(default_factory=list)
     author: str = DEFAULT_AUTHOR
     version: str = DEFAULT_VERSION
+    origin: str = ""
     content: str = ""
     path: Path | None = None
 
@@ -42,6 +43,7 @@ class CatalogItem(ABC):
             "tags": list(metadata.get("tags") or []),
             "author": str(metadata.get("author", DEFAULT_AUTHOR)),
             "version": str(metadata.get("version", DEFAULT_VERSION)),
+            "origin": str(metadata.get("origin", "")),
             "content": content,
             "path": path,
         }
