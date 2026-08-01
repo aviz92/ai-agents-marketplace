@@ -28,7 +28,7 @@ class TestLoadCatalog:
             "rules",
             "my-rule",
             "name: My Rule\ndescription: desc\ntags: [a, b]\nauthor: avi\n"
-            'version: 2.1.0\nglobs: ["**/*.py"]\nalwaysApply: true\n',
+            'version: 2.1.0\norigin: my-org/my-repo\nglobs: ["**/*.py"]\nalwaysApply: true\n',
             "rule.md",
         )
         items = load_catalog()
@@ -40,6 +40,7 @@ class TestLoadCatalog:
         assert item.tags == ["a", "b"], f"Wrong tags: {item.tags}"
         assert item.author == "avi", f"Wrong author: {item.author}"
         assert item.version == "2.1.0", f"Wrong version: {item.version}"
+        assert item.origin == "my-org/my-repo", f"Wrong origin: {item.origin}"
         assert item.globs == ["**/*.py"], f"Wrong globs: {item.globs}"
         assert item.always_apply is True, "alwaysApply should map to always_apply=True"
         assert item.content.startswith("# Body"), f"Wrong content: {item.content!r}"
@@ -65,6 +66,7 @@ class TestLoadCatalog:
         assert isinstance(item, Plugin), f"Expected a Plugin, got {type(item).__name__}"
         assert item.version == "1.0.0", f"Default version wrong: {item.version}"
         assert item.author == "unknown", f"Default author wrong: {item.author}"
+        assert item.origin == "", f"Default origin wrong: {item.origin!r}"
 
     def test_load_catalog_minimal_rule_applies_rule_field_defaults(self, fake_root: Path) -> None:
         _write_item(fake_root, "rules", "min", "name: Min\n", "rule.md")

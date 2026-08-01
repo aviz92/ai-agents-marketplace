@@ -14,7 +14,7 @@ from typing import Literal
 import yaml
 
 from marketplace.consts.authoring import METADATA_FILE
-from marketplace.kind_catalog.kinds import RULE, KindConfig
+from marketplace.kind_catalog.kinds import EXTERNAL_PLUGIN, RULE, KindConfig
 from marketplace.kind_catalog.models import KIND_CLASSES
 from marketplace.kind_catalog.registry import all_kinds
 
@@ -76,6 +76,15 @@ def _check_field_warnings(metadata: dict, cfg: KindConfig, item_dir: Path) -> li
     if not str(metadata.get("version", "")).strip():
         warnings.append(
             _issue(cfg, item_dir, "warning", "missing 'version' — falls back to '1.0.0'")
+        )
+    if cfg.kind_name != EXTERNAL_PLUGIN.kind_name and not str(metadata.get("origin", "")).strip():
+        warnings.append(
+            _issue(
+                cfg,
+                item_dir,
+                "warning",
+                "missing 'origin' — can't tell which fork this artifact was authored in",
+            )
         )
     if (
         cfg.kind_name == RULE.kind_name

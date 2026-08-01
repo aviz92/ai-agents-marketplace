@@ -103,6 +103,31 @@ class TestLoadManifest:
         with pytest.raises(ManifestError, match="must be a mapping"):
             load_manifest(project_dir)
 
+    def test_load_manifest_missing_forked_from_defaults_to_none(self, project_dir: Path) -> None:
+        _write_manifest(project_dir, "claude:\n  skills: [a]\n")
+        manifest = load_manifest(project_dir)
+        assert manifest is not None
+        assert manifest.forked_from is None, f"Expected None, got {manifest.forked_from!r}"
+
+    def test_load_manifest_parses_forked_from(self, project_dir: Path) -> None:
+        _write_manifest(
+            project_dir,
+            "forked_from: team-a/ai-agents-marketplace\nclaude:\n  skills: [a]\n",
+        )
+        manifest = load_manifest(project_dir)
+        assert manifest is not None
+        assert (
+            manifest.forked_from == "team-a/ai-agents-marketplace"
+        ), f"Wrong forked_from: {manifest.forked_from}"
+        assert manifest.per_agent == {
+            "claude": {"skills": ["a"]}
+        }, f"forked_from must not leak into per_agent: {manifest.per_agent}"
+
+    def test_load_manifest_empty_forked_from_raises_manifest_error(self, project_dir: Path) -> None:
+        _write_manifest(project_dir, "forked_from: ''\nclaude:\n  skills: [a]\n")
+        with pytest.raises(ManifestError, match="forked_from"):
+            load_manifest(project_dir)
+
 
 class TestResolvePerAgent:
     def test_resolve_per_agent_matches_items_per_target(
