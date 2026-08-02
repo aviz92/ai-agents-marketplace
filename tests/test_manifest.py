@@ -13,6 +13,7 @@ from marketplace.manifest import (
     MANIFEST_NAME,
     ManifestError,
     load_manifest,
+    manifest_path,
     resolve_per_agent,
     save_manifest,
 )
@@ -27,9 +28,54 @@ def _quiet_console() -> Console:
     return Console(file=io.StringIO(), force_terminal=False)
 
 
+class TestManifestPath:
+    def test_manifest_path_default_filename_uses_manifest_name(self, project_dir: Path) -> None:
+        assert (
+            manifest_path(project_dir) == project_dir / MANIFEST_NAME
+        ), f"Default manifest_path must use {MANIFEST_NAME}"
+
+    def test_manifest_path_custom_filename_uses_given_name(self, project_dir: Path) -> None:
+        assert (
+            manifest_path(project_dir, "custom.yaml") == project_dir / "custom.yaml"
+        ), "manifest_path must honor a custom filename"
+
+    @pytest.mark.parametrize(
+        "filename",
+        ["../custom.yaml", "../../etc/passwd", "/etc/passwd", "sub/dir.yaml", "..", "."],
+        ids=[
+            "parent_traversal",
+            "deep_traversal",
+            "absolute_path",
+            "subdirectory",
+            "dotdot_alone",
+            "dot_alone",
+        ],
+    )
+    def test_manifest_path_path_like_filename_raises_manifest_error(
+        self, project_dir: Path, filename: str
+    ) -> None:
+        with pytest.raises(ManifestError, match="plain filename"):
+            manifest_path(project_dir, filename)
+
+
 class TestLoadManifest:
     def test_load_manifest_missing_file_returns_none(self, project_dir: Path) -> None:
         assert load_manifest(project_dir) is None, "Missing manifest must return None"
+
+    def test_load_manifest_custom_filename_reads_named_file(self, project_dir: Path) -> None:
+        project_dir.mkdir(parents=True)
+        (project_dir / "custom.yaml").write_text("claude:\n  skills: [a]\n", encoding="utf-8")
+        manifest = load_manifest(project_dir, "custom.yaml")
+        assert manifest is not None
+        assert manifest.per_agent == {
+            "claude": {"skills": ["a"]}
+        }, f"Wrong per_agent from custom filename: {manifest.per_agent}"
+
+    def test_load_manifest_custom_filename_missing_returns_none(self, project_dir: Path) -> None:
+        _write_manifest(project_dir, "claude:\n  skills: [a]\n")
+        assert (
+            load_manifest(project_dir, "custom.yaml") is None
+        ), "A default-named manifest must not satisfy a custom filename lookup"
 
     def test_load_manifest_parses_per_agent_entries(self, project_dir: Path) -> None:
         _write_manifest(
@@ -206,6 +252,26 @@ class TestSaveManifest:
         assert "claude" not in manifest.per_agent, "Empty claude target must be omitted"
         assert "agents" not in manifest.per_agent, "Empty agents target must be omitted"
 
+    def test_save_manifest_custom_filename_writes_named_file(
+        self, sample_skill: CatalogItem, project_dir: Path
+    ) -> None:
+        project_dir.mkdir(parents=True)
+        path = save_manifest(project_dir, {"agents": [sample_skill]}, filename="custom.yaml")
+        assert path == project_dir / "custom.yaml", f"Wrote to wrong path: {path}"
+        assert not (
+            project_dir / MANIFEST_NAME
+        ).exists(), "Default-named manifest must not be created alongside a custom filename"
+
+    def test_save_manifest_path_traversal_filename_raises_manifest_error(
+        self, sample_skill: CatalogItem, project_dir: Path
+    ) -> None:
+        project_dir.mkdir(parents=True)
+        with pytest.raises(ManifestError, match="plain filename"):
+            save_manifest(project_dir, {"agents": [sample_skill]}, filename="../escaped.yaml")
+        assert not (
+            project_dir.parent / "escaped.yaml"
+        ).exists(), "Nothing must be written outside project_dir"
+
 
 class TestRunSync:
     def test_run_sync_installs_per_target_as_declared(self, project_dir: Path) -> None:
@@ -271,3 +337,18 @@ class TestRunSync:
         assert (
             "custom content" not in skill_file.read_text()
         ), "File not overwritten with install_all=True, force=True"
+
+    def test_run_sync_custom_filename_installs_from_named_file(self, project_dir: Path) -> None:
+        project_dir.mkdir(parents=True)
+        (project_dir / "custom.yaml").write_text(
+            "agents:\n  skills: [create-skill]\n", encoding="utf-8"
+        )
+        run_sync(_quiet_console(), project_dir, install_all=True, filename="custom.yaml")
+        assert (
+            project_dir / ".agents/skills/create-skill/SKILL.md"
+        ).is_file(), "Custom-named manifest must drive the install"
+
+    def test_run_sync_custom_filename_missing_exits_with_error(self, project_dir: Path) -> None:
+        _write_manifest(project_dir, "agents:\n  skills: [create-skill]\n")
+        with pytest.raises(SystemExit, match="1"):
+            run_sync(_quiet_console(), project_dir, install_all=True, filename="custom.yaml")

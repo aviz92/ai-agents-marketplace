@@ -12,6 +12,7 @@ from rich.console import Console
 from marketplace.cli.generate import run_generate
 from marketplace.cli.sync import run_sync
 from marketplace.cli.validate import run_validate
+from marketplace.consts.manifest import MANIFEST_NAME
 
 try:
     _VERSION = _pkg_version("agents-marketplace")
@@ -48,12 +49,19 @@ class _SyncCommand(BaseCommand):
             dest="force",
             help="Overwrite already-installed artifacts with the latest version.",
         )
+        parser.add_argument(
+            "--filename",
+            dest="filename",
+            default=MANIFEST_NAME,
+            help=f"Name of the manifest file to read (default: {MANIFEST_NAME}).",
+        )
 
     def handle(self, **kwargs: object) -> None:
         verbosity = int(str(kwargs.get("verbosity", 1)))
         install_all = bool(kwargs.get("install_all", False))
         force = bool(kwargs.get("force", False))
-        run_sync(Console(quiet=verbosity == 0), Path.cwd(), install_all, force)
+        filename = str(kwargs.get("filename", MANIFEST_NAME))
+        run_sync(Console(quiet=verbosity == 0), Path.cwd(), install_all, force, filename)
 
 
 class _ValidateCommand(BaseCommand):

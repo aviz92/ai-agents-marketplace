@@ -61,7 +61,9 @@ PROMPT_SKILL_TARGETS = "Add skills/plugins for:"
 PROMPT_RULE_TARGETS = "Add rules for (one native format per agent):"
 PROMPT_COMMAND_TARGETS = "Add commands for:"
 PROMPT_SUBAGENT_TARGETS = "Add sub-agents for:"
-PROMPT_CONFIRM_GENERATE = "Generate agents-marketplace.yaml?"
+PROMPT_MANIFEST_FILENAME = (
+    "What yaml filename do you want for the manifest (default: agents-marketplace.yaml)?"
+)
 SELECTED_COUNT_FMT = "{count} selected"
 
 # ── Messages ──────────────────────────────────────────────────────────────────
@@ -80,7 +82,6 @@ MSG_NO_SKILL_TARGETS = "[yellow]No skill/plugin target selected — skipping tho
 MSG_NO_RULE_TARGETS = "[yellow]No rule target selected — skipping rules.[/yellow]"
 MSG_NO_COMMAND_TARGETS = "[yellow]No command target selected — skipping commands.[/yellow]"
 MSG_NO_SUBAGENT_TARGETS = "[yellow]No sub-agent target selected — skipping sub-agents.[/yellow]"
-MSG_ABORTED = "[yellow]Aborted.[/yellow]"
 MSG_CANCELLED = "\n[yellow]Cancelled.[/yellow]"
 MSG_INVALID_MANIFEST_FMT = "[red]Invalid {manifest}: {error}[/red]"
 MSG_MANIFEST_MISSING_FMT = "[red]No {manifest} found in {project_dir}.[/red]"

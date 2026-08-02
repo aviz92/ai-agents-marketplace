@@ -18,6 +18,7 @@ from marketplace.consts.kinds import (
     SKILLS_TARGET_GROUPS,
     SUBAGENT_TARGET_GROUPS,
 )
+from marketplace.consts.manifest import MANIFEST_NAME
 from marketplace.installer import command_targets, rule_targets, subagent_targets, targets
 from marketplace.installer.models import CommandTargetInfo, RuleTargetInfo, SubagentTargetInfo
 from marketplace.kind_catalog.models import CatalogItem
@@ -134,5 +135,7 @@ def prompt_all_targets(
     return skill_targets, rule_target_ids, command_target_ids, subagent_target_ids
 
 
-def confirm_generate() -> bool:
-    return inquirer.confirm(message=display.PROMPT_CONFIRM_GENERATE, default=True).execute()
+def prompt_manifest_filename() -> str:
+    if not (filename := inquirer.text(message=display.PROMPT_MANIFEST_FILENAME).execute().strip()):
+        return MANIFEST_NAME
+    return filename if filename.endswith((".yaml", ".yml")) else f"{filename}.yaml"
