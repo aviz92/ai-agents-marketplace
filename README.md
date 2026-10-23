@@ -318,16 +318,15 @@ uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-m
 
 ### Step 13 — Send local edits back to the origin repo
 
-Edited an installed artifact in a project? Install the matching skill — `update-skill`,
-`update-plugin`, `update-rule`, `update-command` or `update-sub-agent` — and ask your agent
+Edited an installed artifact in a project? Install the `update-artifact` skill and ask your agent
 to publish the change. It reads the artifact's `origin` URL, shows you the diff, and — after
 you approve — opens a GitHub pull request or GitLab merge request on that repo with a bumped
 `version`.
 
 - `origin` must be a full repo URL (`https://github.com/org/repo`); the host decides GitHub vs GitLab.
-- Skills and plugins install to the same path, so you choose `update-skill` or `update-plugin` yourself.
+- Skills and plugins install to the same path, so the skill checks which one exists upstream (and asks if unclear).
 - Set `GITHUB_ACCESS_TOKEN` or `GITLAB_ACCESS_TOKEN` in a local `.env` (never committed) —
-  see `skills/update-skill/assets/.env.example`. Without a token, the skills fall back to an
+  see `skills/update-artifact/assets/.env.example`. Without a token, the skills fall back to an
   already-logged-in `gh` (GitHub) or `glab` (GitLab) CLI.
 
 ---
