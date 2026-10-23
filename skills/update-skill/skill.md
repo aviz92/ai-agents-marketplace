@@ -25,8 +25,12 @@ A plugin installs to the same path; use `update-plugin` for those.
 - [ ] `origin` is not a full `https://` URL (e.g. `org/repo`) -> stop and ask the user for the full URL.
 - [ ] Parse the URL into `host` and `repo_path` (`org/repo`, or `group/sub/repo` on GitLab).
 - [ ] Provider: `github.com` -> GitHub. Any other host -> GitLab with `gitlab_url=https://<host>`.
-- [ ] Check that `GITHUB_ACCESS_TOKEN` (GitHub) or `GITLAB_ACCESS_TOKEN` (GitLab) is set. Never print its value.
-      See [.env.example](assets/.env.example).
+- [ ] Choose the auth method. Never print a token value.
+      - `GITHUB_ACCESS_TOKEN` (GitHub) or `GITLAB_ACCESS_TOKEN` (GitLab) is set -> **library mode**.
+        See [.env.example](assets/.env.example).
+      - Token not set -> **CLI mode**: GitHub needs `gh auth status` to succeed;
+        GitLab needs `glab auth status --hostname <host>` to succeed.
+      - Neither works -> stop and tell the user to set the token in `.env` or run `gh auth login` / `glab auth login`.
 
 ### 3. Fetch upstream
 - [ ] Read `skills/<id>/skill.md` and `skills/<id>/metadata.yaml` from the origin repo's default branch.
@@ -55,7 +59,7 @@ Description: what changed and why.
 - [ ] Branch already exists -> reuse it; open a PR/MR only if none is open for it.
 - [ ] Never commit to the default branch.
 
-Run a temporary script with the libraries fetched on demand (no project dependency added),
+**Library mode.** Run a temporary script with the libraries fetched on demand (no project dependency added),
 letting uv load the environment so you never read `.env`:
 
 ```bash
@@ -92,13 +96,43 @@ mr = client.merge_request.create(title=title, from_branch=branch, target=default
 print(mr.web_url)
 ```
 
-Delete the temporary script when done.
+**CLI mode.** Same flow with `gh` / `glab`, which use their own stored login. Write file contents to
+temporary files first; delete them afterwards.
+
+GitHub:
+
+```bash
+default=$(gh repo view "$repo_path" --json defaultBranchRef -q .defaultBranchRef.name)
+base_sha=$(gh api "repos/$repo_path/git/ref/heads/$default" -q .object.sha)
+gh api "repos/$repo_path/git/refs" -f ref="refs/heads/$branch" -f sha="$base_sha"
+# per file: <path> is the origin path, <local_file> holds the new content
+sha=$(gh api "repos/$repo_path/contents/<path>?ref=$branch" -q .sha)
+gh api -X PUT "repos/$repo_path/contents/<path>" -f message="$commit_message" \
+  -f content="$(base64 < <local_file> | tr -d '\n')" -f sha="$sha" -f branch="$branch"
+gh pr create --repo "$repo_path" --base "$default" --head "$branch" --title "$title" --body "$description"
+```
+
+GitLab (one commit creates the branch and updates every file):
+
+```bash
+enc=$(printf '%s' "$repo_path" | sed 's#/#%2F#g')
+default=$(glab api --hostname "$host" "projects/$enc" | jq -r .default_branch)
+# commit.json: {"branch": "<branch>", "start_branch": "<default>", "commit_message": "...",
+#               "actions": [{"action": "update", "file_path": "<path>", "content": "<new content>"}]}
+glab api --hostname "$host" -X POST "projects/$enc/repository/commits" --input commit.json
+glab mr create --repo "$host/$repo_path" --source-branch "$branch" --target-branch "$default" \
+  --title "$title" --description "$description" --yes
+```
+
+Use `"action": "create"` for files that do not exist upstream yet.
+
+Delete temporary scripts and files when done.
 
 ### 7. Report
 - [ ] Give the user the PR/MR URL, the new version and the target repo.
 - [ ] Remind them the installed copy keeps its old `version` until they re-install after merge.
 
 ## Failure handling
-- Authentication error -> tell the user which env var to set; do not try other credentials.
+- Authentication error -> tell the user to set the token env var or log in with `gh` / `glab`; do not try other credentials.
 - Permission denied on push -> stop and report it. Do not redirect the change to another repo.
 - Never force-push or delete branches you did not create.
