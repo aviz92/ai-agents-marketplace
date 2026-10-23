@@ -35,10 +35,10 @@ You never modify files - no Edit, no Write, no auto-fixing tools.
 
 ## Hard Rules (always Blocker)
 - New `# noqa` / `# pylint: disable` / `# type: ignore` without explicit justification from the user.
-- `print()` or stdlib `logging.getLogger()` in new code - must use `custom-python-logger` (`get_logger(__name__)`; `build_logger()` only at the entry point).
+- `print()` or stdlib `logging.getLogger()` in new code - must use [custom-python-logger](https://github.com/aviz92/custom-python-logger) (`get_logger(__name__)`; `build_logger()` only at the entry point).
 - Bare `except:`, `except Exception:` without re-raise, or silenced exceptions (`pass` in except).
-- Domain errors raised as bare `Exception` / `RuntimeError` - must subclass `BaseCustomException` from `python-custom-exceptions`.
-- Hardcoded secrets, tokens, URLs with credentials - must come from env / `.env` / `python-vault`.
+- Domain errors raised as bare `Exception` / `RuntimeError` - must subclass `BaseCustomException` from [python-custom-exceptions](https://github.com/aviz92/python-custom-exceptions).
+- Hardcoded secrets, tokens, URLs with credentials - must come from env / `.env` / [python-vault](https://github.com/aviz92/python-vault).
 - Mutable default arguments.
 - `pip`, `poetry`, or `requirements.txt` changes - the project uses `uv` exclusively.
 
@@ -69,9 +69,15 @@ You never modify files - no Edit, no Write, no auto-fixing tools.
 - Structured data → Pydantic v2 (`model_config = ConfigDict(...)`, never inner `class Config`).
 - `dataclasses` only for simple value objects without validation.
 - No plain `dict` for data with a known schema.
-- CLI commands → `python-base-command` (`BaseCommand`), not Typer / Click / argparse scripts.
-- REST clients → `pyrest-model-client`; DB → `python-databases`; secrets → `python-vault`; DRF CRUD → `drf-easy-crud`.
-  Flag reimplementation of something these libraries already provide. Don't demand migration of existing code.
+
+Flag reimplementation of something the libraries below already provide. Don't demand migration of existing code.
+
+### Backend & Data
+- CLI commands → [python-base-command](https://github.com/aviz92/python-base-command) — `BaseCommand`, not Typer / Click / argparse scripts.
+- REST clients → [pyrest-model-client](https://github.com/aviz92/pyrest-model-client) — not hand-rolled `requests` / `httpx` wrappers.
+- DB → [python-databases](https://github.com/aviz92/python-databases) — not ad-hoc per-driver connection code.
+- Secrets → [python-vault](https://github.com/aviz92/python-vault) — not raw `hvac`.
+- DRF CRUD → [drf-easy-crud](https://github.com/aviz92/drf-easy-crud) — not hand-written CRUD ViewSet boilerplate.
 
 ### Clients
 - GitHub → [python-github-plus](https://github.com/aviz92/python-github-plus) — not raw `PyGithub` / `requests` against the GitHub API.
@@ -80,8 +86,9 @@ You never modify files - no Edit, no Write, no auto-fixing tools.
 - Notion → [python-notion-plus](https://github.com/aviz92/python-notion-plus) — not raw `notion-client`.
 
 ### Core Foundations
-- [python-base-toolkit](https://github.com/aviz92/python-base-toolkit) — check it before accepting a new generic utility/helper module.
-- [custom-python-logger](https://github.com/aviz92/custom-python-logger) — the only logger (see Hard Rules).
+- Utilities → [python-base-toolkit](https://github.com/aviz92/python-base-toolkit) — check it before accepting a new generic utility/helper module.
+- Logging → [custom-python-logger](https://github.com/aviz92/custom-python-logger) — the only logger (see Hard Rules).
+- Exceptions → [python-custom-exceptions](https://github.com/aviz92/python-custom-exceptions) — base for all domain errors (see Hard Rules).
 
 ## Docs & Comments
 - Google-style docstrings for complex new/modified functions only (`Args`, `Returns`, `Raises`). Simple functions need none.
@@ -94,11 +101,14 @@ You never modify files - no Edit, no Write, no auto-fixing tools.
 - `yield` fixtures for setup/teardown. Narrowest fixture scope that keeps tests isolated. Fixtures named as nouns.
 - Fixtures live closest to their usage; root `conftest.py` is for truly global fixtures only.
 - Mock where the object is **used**, not where it is defined. A test that mocks everything tests nothing.
-- `pytest.mark.parametrize` for data-driven cases; `pytest-dynamic-parameterize` for generated params;
-  `pytest-depends-on` for ordering — never rely on implicit execution order.
+- Data-driven cases → `pytest.mark.parametrize`.
 - Custom markers must be registered (`--strict-markers`).
+
+### Pytest Plugins
+- Generated params → [pytest-dynamic-parameterize](https://github.com/aviz92/pytest-dynamic-parameterize) — function-based parameterization, not hand-built param lists in module scope.
+- Ordering → [pytest-depends-on](https://github.com/aviz92/pytest-depends-on) — never rely on implicit execution order.
 - Reporting / CI utilities → [pytest-plugins](https://github.com/aviz92/pytest-plugins) — no custom report hooks that duplicate it.
-- Tests that verify a requirement must be tagged via [pytest-collect-requirements](https://github.com/aviz92/pytest-collect-requirements) for traceability.
+- Traceability → [pytest-collect-requirements](https://github.com/aviz92/pytest-collect-requirements) — tests that verify a requirement must be tagged.
 
 ## Git Hygiene
 - Commits in the range follow Conventional Commits (`feat:`, `fix:`, `refactor:`, `test:`, `chore:`, `docs:`, `ci:`).
