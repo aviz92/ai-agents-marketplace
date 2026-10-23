@@ -36,7 +36,7 @@ class TestValidateCatalog:
             tmp_path,
             "rules",
             "my-rule",
-            "name: My Rule\ndescription: desc\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n"
+            "name: My Rule\ndescription: desc\nauthor: avi\nversion: 1.0.0\norigin: https://github.com/org/repo\n"
             'globs: ["**/*.py"]\nalwaysApply: false\n',
             "rule.md",
         )
@@ -95,7 +95,7 @@ class TestValidateCatalog:
             tmp_path,
             "skills",
             "no-desc",
-            "name: X\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n",
+            "name: X\nauthor: avi\nversion: 1.0.0\norigin: https://github.com/org/repo\n",
             "skill.md",
         )
         issues = validate_catalog(tmp_path)
@@ -108,7 +108,7 @@ class TestValidateCatalog:
             tmp_path,
             "skills",
             "no-name",
-            "description: d\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n",
+            "description: d\nauthor: avi\nversion: 1.0.0\norigin: https://github.com/org/repo\n",
             "skill.md",
         )
         issues = validate_catalog(tmp_path)
@@ -121,7 +121,7 @@ class TestValidateCatalog:
             tmp_path,
             "skills",
             "no-author",
-            "name: X\ndescription: d\nversion: 1.0.0\norigin: org/repo\n",
+            "name: X\ndescription: d\nversion: 1.0.0\norigin: https://github.com/org/repo\n",
             "skill.md",
         )
         issues = validate_catalog(tmp_path)
@@ -134,7 +134,7 @@ class TestValidateCatalog:
             tmp_path,
             "skills",
             "no-version",
-            "name: X\ndescription: d\nauthor: avi\norigin: org/repo\n",
+            "name: X\ndescription: d\nauthor: avi\norigin: https://github.com/org/repo\n",
             "skill.md",
         )
         issues = validate_catalog(tmp_path)
@@ -154,6 +154,19 @@ class TestValidateCatalog:
         assert len(issues) == 1, f"Expected exactly one issue, got {issues}"
         assert issues[0].severity == "warning", f"Wrong severity: {issues[0]}"
         assert "origin" in issues[0].message, f"Wrong message: {issues[0].message}"
+
+    def test_validate_catalog_slug_origin_reports_warning_only(self, tmp_path: Path) -> None:
+        _write_item(
+            tmp_path,
+            "skills",
+            "slug-origin",
+            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n",
+            "skill.md",
+        )
+        issues = validate_catalog(tmp_path)
+        assert len(issues) == 1, f"Expected exactly one issue, got {issues}"
+        assert issues[0].severity == "warning", f"Wrong severity: {issues[0]}"
+        assert "full repo URL" in issues[0].message, f"Wrong message: {issues[0].message}"
 
     def test_validate_catalog_external_plugin_missing_origin_produces_no_issue(
         self, tmp_path: Path
@@ -176,7 +189,7 @@ class TestValidateCatalog:
             tmp_path,
             "rules",
             "dead-rule",
-            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n",
+            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\norigin: https://github.com/org/repo\n",
             "rule.md",
         )
         issues = validate_catalog(tmp_path)
@@ -191,7 +204,7 @@ class TestValidateCatalog:
             tmp_path,
             "rules",
             "always-rule",
-            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n"
+            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\norigin: https://github.com/org/repo\n"
             "alwaysApply: true\n",
             "rule.md",
         )
@@ -204,7 +217,7 @@ class TestValidateCatalog:
             tmp_path,
             "rules",
             "glob-rule",
-            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n"
+            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\norigin: https://github.com/org/repo\n"
             'globs: ["**/*.py"]\n',
             "rule.md",
         )
@@ -215,7 +228,7 @@ class TestValidateCatalog:
             tmp_path,
             "skills",
             "min",
-            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\norigin: org/repo\n",
+            "name: X\ndescription: d\nauthor: avi\nversion: 1.0.0\norigin: https://github.com/org/repo\n",
             "skill.md",
         )
         assert not validate_catalog(tmp_path), "Skills must not be checked for globs/alwaysApply"

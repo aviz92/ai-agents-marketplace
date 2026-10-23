@@ -1,0 +1,6 @@
+name: Update Plugin
+description: Send local edits of an installed plugin back to its origin repo as a GitHub PR or GitLab MR
+tags: [meta, git]
+author: aviz92
+version: 1.0.0
+origin: https://github.com/aviz92/ai-agents-marketplace
