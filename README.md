@@ -327,7 +327,8 @@ you approve — opens a GitHub pull request or GitLab merge request on that repo
 - `origin` must be a full repo URL (`https://github.com/org/repo`); the host decides GitHub vs GitLab.
 - Skills and plugins install to the same path, so you choose `update-skill` or `update-plugin` yourself.
 - Set `GITHUB_ACCESS_TOKEN` or `GITLAB_ACCESS_TOKEN` in a local `.env` (never committed) —
-  see `skills/update-skill/assets/.env.example`.
+  see `skills/update-skill/assets/.env.example`. Without a token, the skills fall back to an
+  already-logged-in `gh` (GitHub) or `glab` (GitLab) CLI.
 
 ---
 
