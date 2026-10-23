@@ -20,6 +20,8 @@ from marketplace.kind_catalog.registry import all_kinds
 
 Severity = Literal["error", "warning"]
 
+ORIGIN_URL_PREFIXES = ("https://", "http://")
+
 
 @dataclass(frozen=True)
 class ValidationIssue:
@@ -61,6 +63,28 @@ def _read_body(item_dir: Path, cfg: KindConfig) -> tuple[str, ValidationIssue | 
         return "", _issue(cfg, item_dir, "error", f"cannot read {cfg.body_filename}: {exc}")
 
 
+def _check_origin(metadata: dict, cfg: KindConfig, item_dir: Path) -> list[ValidationIssue]:
+    if not (origin := str(metadata.get("origin", "")).strip()):
+        return [
+            _issue(
+                cfg,
+                item_dir,
+                "warning",
+                "missing 'origin' — can't tell which fork this artifact was authored in",
+            )
+        ]
+    if not origin.startswith(ORIGIN_URL_PREFIXES):
+        return [
+            _issue(
+                cfg,
+                item_dir,
+                "warning",
+                f"'origin' must be a full repo URL (https://host/org/repo), got {origin!r}",
+            )
+        ]
+    return []
+
+
 def _check_field_warnings(metadata: dict, cfg: KindConfig, item_dir: Path) -> list[ValidationIssue]:
     warnings: list[ValidationIssue] = []
     if not str(metadata.get("name", "")).strip():
@@ -77,15 +101,8 @@ def _check_field_warnings(metadata: dict, cfg: KindConfig, item_dir: Path) -> li
         warnings.append(
             _issue(cfg, item_dir, "warning", "missing 'version' — falls back to '1.0.0'")
         )
-    if cfg.kind_name != EXTERNAL_PLUGIN.kind_name and not str(metadata.get("origin", "")).strip():
-        warnings.append(
-            _issue(
-                cfg,
-                item_dir,
-                "warning",
-                "missing 'origin' — can't tell which fork this artifact was authored in",
-            )
-        )
+    if cfg.kind_name != EXTERNAL_PLUGIN.kind_name:
+        warnings.extend(_check_origin(metadata, cfg, item_dir))
     if (
         cfg.kind_name == RULE.kind_name
         and not metadata.get("globs")

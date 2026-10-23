@@ -2,7 +2,7 @@ name: No Debug Code
 description: Forbid debug artifacts (print, breakpoint, pdb) from reaching production
 tags: [quality, python]
 author: aviz92
-version: 1.0.0
-origin: aviz92/ai-agents-marketplace
+version: 1.0.1
+origin: https://github.com/aviz92/ai-agents-marketplace
 globs: ["src/**/*.py"]
 alwaysApply: true

@@ -28,16 +28,18 @@ description: One-line description shown in the marketplace picker
 tags: [optional, tags]
 author: your-name
 version: 1.0.0
-origin: org/repo
+origin: https://github.com/org/repo
 ```
 
 - `description` must be a single line — it appears in the interactive picker.
 - `version` is semver. **Bump it on any change** to the skill's content or
   metadata — version changes are how installed copies detect updates.
-- `origin` is the `org/repo` slug of the repo this skill was authored in.
+- `origin` is the full `https://` URL of the repo this skill was authored in.
   Set it once, when the skill is first created — run
-  `git remote get-url origin` in your checkout and translate the URL to
-  `org/repo`. Never overwrite an existing `origin` on a skill you didn't
+  `git remote get-url origin` in your checkout and normalize it: convert
+  SSH form (`git@host:org/repo.git`) to `https://host/org/repo` and drop any
+  trailing `.git`. The host is what lets the `publish-artifact` skill pick
+  GitHub vs GitLab when sending changes back. Never overwrite an existing `origin` on a skill you didn't
   author — that value is what lets downstream forks tell inherited skills
   apart from ones added locally.
 

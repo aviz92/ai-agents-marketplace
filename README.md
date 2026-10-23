@@ -41,7 +41,8 @@ Go to `https://github.com/aviz92/ai-agents-marketplace` and click **Fork**.
 Forks can nest — a team can fork the root repo, and a sub-team can fork that
 team's fork. Tag provenance as you go:
 - Every artifact you author (not one you inherited from a fork) should set
-  `origin: org/repo` in its `metadata.yaml`, pointing at your own repo — see
+  `origin: https://github.com/org/repo` (full repo URL) in its `metadata.yaml`,
+  pointing at your own repo — see
   `skills/create-skill/skill.md` for the full convention.
 - If your fork was forked from another team's fork rather than the root
   repo, set `forked_from: org/repo` at the top of `agents-marketplace.yaml`
@@ -311,6 +312,19 @@ Push to your fork, then run `generate` in any target project — the new artifac
 ```bash
 uvx --from git+https://github.com/<your-username>/ai-agents-marketplace agents-marketplace generate
 ```
+
+### Step 13 — Send local edits back to the origin repo
+
+Edited an installed artifact in a project? Install the matching skill — `update-skill`,
+`update-plugin`, `update-rule`, `update-command` or `update-sub-agent` — and ask your agent
+to publish the change. It reads the artifact's `origin` URL, shows you the diff, and — after
+you approve — opens a GitHub pull request or GitLab merge request on that repo with a bumped
+`version`.
+
+- `origin` must be a full repo URL (`https://github.com/org/repo`); the host decides GitHub vs GitLab.
+- Skills and plugins install to the same path, so you choose `update-skill` or `update-plugin` yourself.
+- Set `GITHUB_ACCESS_TOKEN` or `GITLAB_ACCESS_TOKEN` in a local `.env` (never committed) —
+  see `skills/update-skill/assets/.env.example`.
 
 ---
 
