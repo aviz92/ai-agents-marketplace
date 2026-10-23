@@ -1,0 +1,7 @@
+name: python-code-reviewer
+description: Reviews Python code changes against Avi's workspace conventions
+tags: [code, review, python]
+author: aviz92
+version: 1.0.0
+origin: https://github.com/aviz92/ai-agents-marketplace
+model_strength: strong
