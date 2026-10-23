@@ -1,27 +1,41 @@
-# Update an installed sub-agent in its origin repo
+# Update an installed artifact in its origin repo
 
-Send changes you made to an installed sub-agent back to the repo it was authored in, as a
-GitHub pull request or GitLab merge request.
+Send changes you made to an installed artifact (skill, plugin, rule, command or sub-agent) back to the
+repo it was authored in, as a GitHub pull request or GitLab merge request.
 
+Never modify the installed file, or any local file, directly. Propose the change as a diff first;
+only after the user approves it, submit the PR/MR (steps 5-6). Never apply changes outside that flow.
 Never write to the origin repo before the user approves the diff (step 5).
 Never read, print or log `.env` or any token value.
 
 ## Where things live
 
-- Installed file: `<agent dir>/agents/<id>.md`
-- Origin repo directory: `subagents/<id>/`, holding `subagent.md` and `metadata.yaml`.
+Each artifact kind installs to one place and lives in one origin directory:
 
-The installed `model` field is derived from `model_strength`; never write it upstream.
+| Kind | Installed file | Origin directory | Body file |
+|------|----------------|------------------|-----------|
+| skill | `<agent dir>/skills/<id>/SKILL.md` | `skills/<id>/` | `skill.md` |
+| plugin | `<agent dir>/skills/<id>/SKILL.md` | `plugins/<id>/` | `plugin.md` |
+| rule | `<agent dir>/rules/<id>.md` (extension varies by agent, e.g. `.mdc`) | `rules/<id>/` | `rule.md` |
+| command | `<agent dir>/commands/<id>.md` | `commands/<id>/` | `command.md` |
+| sub-agent | `<agent dir>/agents/<id>.md` | `subagents/<id>/` | `subagent.md` |
+
+Every origin directory also holds `metadata.yaml`. Below, `<kind dir>` and `<body file>` come from this table.
+
+Sub-agents: the installed `model` field is derived from `model_strength`; never write it upstream.
 
 ## Checklist
 
-### 1. Identify the sub-agent
+### 1. Identify the artifact and its kind
 - [ ] Take the id from the installed path (the directory name or file stem).
-- [ ] If the user did not name one, ask which installed sub-agent to publish.
+- [ ] If the user did not name one, ask which installed artifact to publish.
+- [ ] Derive the kind from the installed path: `rules/` -> rule, `commands/` -> command, `agents/` -> sub-agent.
+- [ ] `skills/<id>/SKILL.md` is shared by skills and plugins. Decide in step 3: whichever of `skills/<id>/` or
+      `plugins/<id>/` exists upstream is the kind. Both or neither exist -> ask the user.
 
 ### 2. Resolve the target repo
 - [ ] Read `origin` and `version` from the installed file's frontmatter.
-- [ ] No `origin` -> stop and tell the user the sub-agent has no recorded origin. Do not guess a repo.
+- [ ] No `origin` -> stop and tell the user the artifact has no recorded origin. Do not guess a repo.
 - [ ] `origin` is not a full `https://` URL (e.g. `org/repo`) -> stop and ask the user for the full URL.
 - [ ] Parse the URL into `host` and `repo_path` (`org/repo`, or `group/sub/repo` on GitLab).
 - [ ] Provider: `github.com` -> GitHub. Any other host -> GitLab with `gitlab_url=https://<host>`.
@@ -33,13 +47,16 @@ The installed `model` field is derived from `model_strength`; never write it ups
       - Neither works -> stop and tell the user to set the token in `.env` or run `gh auth login` / `glab auth login`.
 
 ### 3. Fetch upstream
-- [ ] Read `subagents/<id>/subagent.md` and `subagents/<id>/metadata.yaml` from the origin repo's default branch.
-- [ ] Upstream directory missing -> stop and report it. Do not create a new sub-agent upstream.
+- [ ] Read `<kind dir>/<id>/<body file>` and `<kind dir>/<id>/metadata.yaml` from the origin repo's default branch.
+- [ ] Upstream directory missing -> stop and report it. Do not create a new artifact upstream.
 
 ### 4. Reverse-render and diff
 - [ ] Strip the installed file's frontmatter (the leading `---` ... `---` block and the blank line after it).
       What remains is the new body.
 - [ ] Compare it with the upstream body. No difference -> stop: nothing to publish.
+- [ ] Skills and plugins only: also diff every other file under the installed directory against upstream
+      `<kind dir>/<id>/assets/`; include changed or new files in the commit
+      (path `<kind dir>/<id>/assets/<relative path>`; use create for new files).
 - [ ] In upstream `metadata.yaml`, change only `version` (ask the user: patch / minor / major) and
       `description` if the installed one differs. Leave every other field untouched; the installed file
       does not carry them.
@@ -51,7 +68,7 @@ The installed `model` field is derived from `model_strength`; never write it ups
 - [ ] Wait for an explicit yes. No approval -> stop without writing anything.
 
 ### 6. Publish
-Branch: `update/sub-agent-<id>-<new-version>`. Commit message and PR/MR title: `feat(<id>): <short summary>`.
+Branch: `update/<kind>-<id>-<new-version>`. Commit message and PR/MR title: `feat(<id>): <short summary>`.
 Description: what changed and why.
 
 - [ ] Branch already exists -> reuse it; open a PR/MR only if none is open for it.
@@ -73,7 +90,7 @@ client = GitHubClient(repo_full_name=repo_path)  # token from GITHUB_ACCESS_TOKE
 repo = client.github.get_repo(repo_path)
 default_branch = repo.default_branch
 client.branch.create(branch_name=branch, from_branch=default_branch)
-for path, content in files.items():  # {"subagents/<id>/subagent.md": ..., "subagents/<id>/metadata.yaml": ...}
+for path, content in files.items():  # {"<kind dir>/<id>/<body file>": ..., "<kind dir>/<id>/metadata.yaml": ...}
     current = repo.get_contents(path, ref=branch)
     repo.update_file(path, commit_message, content, current.sha, branch=branch)
 pr = repo.create_pull(base=default_branch, head=branch, title=title, body=description)
